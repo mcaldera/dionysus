@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { DAY } from './hours'
 import type { Constraints } from './recommend'
-import { proposeTours, solve, swapOptions, tourCost, type SolveOptions } from './solver'
+import { BACKTRACK_PENALTY, completeTour, proposeTours, slotOptions, solve, swapOptions, tourCost, type SolveOptions } from './solver'
 import type { Matrices } from './travel'
 import { VENUE_TYPES, type Bar } from './types'
 
@@ -163,5 +163,48 @@ describe('swapOptions', () => {
     // The solver's choice is optimal, so no swap improves the tour.
     expect(opts[0].delta).toBeGreaterThanOrEqual(0)
     expect(opts.map((x) => x.delta)).toEqual([...opts.map((x) => x.delta)].sort((a, b) => a - b))
+  })
+})
+
+describe('completeTour', () => {
+  it('keeps slot order, fills empty slots and appends missing districts', () => {
+    const { bars, m } = world(8, 5, 12)
+    const slots = [
+      { district: 5, bar: bars[22] }, { district: 2, bar: null }, { district: 7, bar: bars[31] }, { district: 1, bar: null },
+    ]
+    const s = completeTour(bars, m, options(8, { endDistrict: 3 }), slots)!
+    expect(s.stops.slice(0, 4).map((b) => b.district)).toEqual([5, 2, 7, 1])
+    expect(s.stops[0]).toBe(bars[22])
+    expect(s.stops[2]).toBe(bars[31])
+    expect(s.stops).toHaveLength(8)
+    expect(s.stops[7].district).toBe(3)
+  })
+})
+
+describe('slotOptions', () => {
+  it('ranks bars for an empty slot by the time they add', () => {
+    const { bars, m } = world(3, 4, 3)
+    const slots = [{ district: 1, bar: bars[0] }, { district: 2, bar: null }, { district: 3, bar: bars[8] }]
+    const opts = slotOptions(slots, 1, bars, m, options(3))
+    expect(opts.map((o) => o.bar.district)).toEqual([2, 2, 2, 2])
+    expect(opts[0].delta).toBeLessThanOrEqual(opts[3].delta)
+  })
+})
+
+describe('no backtracking', () => {
+  it('penalises a transit leg straight back the way the previous one came', () => {
+    // Three bars on a line: 0 at x=0, 1 at x=10, 2 at x=1. All legs by transit.
+    const mk = (i: number, lon: number, d: number) => ({
+      id: `own:t${i}`, matrixIndex: i, name: `T${i}`, district: d, lat: 48.2, lon, venueType: 'pub_bar' as const,
+      weeklyOpen: null, official: [], tags: [], unreviewedTags: [],
+    })
+    const bars = [mk(0, 16.30, 1), mk(1, 16.40, 2), mk(2, 16.31, 3)]
+    const m: Matrices = { n: 3, walk: new Uint8Array(9).fill(60), transitP50: new Uint8Array(9).fill(10) }
+    const o = options(3)
+    const plain = tourCost(bars, m, o).cost
+    expect(tourCost(bars, m, { ...o, noBacktrack: true }).cost).toBe(plain + BACKTRACK_PENALTY)
+    // The solver then prefers an order without the reversal.
+    const s = solve(bars, m, { ...o, noBacktrack: true, restarts: 3 })!
+    expect(tourCost(s.stops, m, { ...o, noBacktrack: true }).cost).toBeLessThan(plain + BACKTRACK_PENALTY)
   })
 })

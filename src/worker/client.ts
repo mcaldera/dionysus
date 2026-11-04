@@ -8,6 +8,7 @@ import type { JobResult, SolveRequest, TourResult, WorkerRequest } from './proto
 type Job =
   | { type: 'propose'; options: SolveRequest; count: number }
   | { type: 'solve'; options: SolveRequest }
+  | { type: 'complete'; options: SolveRequest; slots: { district: number; barId: string | null }[] }
   | { type: 'tourFit'; options: SolveRequest; candidates: string[] }
 
 export interface JobHandlers {

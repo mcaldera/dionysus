@@ -38,35 +38,65 @@ test('attribution is visible', async ({ page }) => {
   await expect(page.getByText('Kein offizielles Angebot der Ottakringer Brauerei.')).toBeVisible()
 })
 
-test('taste quiz sets preferences', async ({ page }) => {
-  await page.getByRole('button', { name: '✨ Geschmackstest' }).click()
+test('taste quiz in the plan dialog sets preferences', async ({ page }) => {
+  await page.locator('.topbar').getByRole('button', { name: '🗺 Tour planen' }).click()
+  const plan = page.getByRole('dialog', { name: 'Tour planen' })
+  await plan.getByRole('button', { name: '✨ Geschmackstest' }).click()
   const dialog = page.getByRole('dialog', { name: 'Geschmackstest' })
   await dialog.getByRole('button', { name: /Altes Beisl/ }).click()
   for (let i = 0; i < 6; i++) await dialog.getByRole('button', { name: 'Egal' }).click()
   await dialog.getByRole('button', { name: /Tschocherl/ }).click()
   await dialog.getByRole('button', { name: 'Weiter' }).click()
-  await expect(dialog.getByText('♥ Urig')).toBeVisible()
   await dialog.getByRole('button', { name: 'Übernehmen' }).click()
   await expect(dialog).toBeHidden()
-  await expect(page.getByText('♥ Vorlieben (2)')).toBeVisible()
+  await expect(plan.locator('.chip.pref-like', { hasText: 'Urig' })).toBeVisible()
 })
 
-test('a click on empty map closes the bar and open popovers', async ({ page }) => {
+test('a click on empty map closes the bar and the filter menu', async ({ page }) => {
   await pick(page, 'Blunzenstricker')
   await expect(page.getByRole('heading', { name: 'Blunzenstricker', level: 2 })).toBeVisible()
-  await page.getByText(/♥ Vorlieben/).click()
-  await expect(page.getByText('Klicken: mag → lieber nicht → egal')).toBeVisible()
+  await page.getByText('⚲ Filter').click()
+  const hint = page.getByText(/Filtert, was ihr auf der Karte/)
+  await expect(hint).toBeVisible()
   await page.keyboard.press('Escape')
-  await expect(page.getByText('Klicken: mag → lieber nicht → egal')).toBeHidden()
-  await page.getByText(/♥ Vorlieben/).click()
-  // Zoom out until the map's top-left corner is outside Vienna, then click there.
+  await expect(hint).toBeHidden()
+  // Zoom out until the map's top-left area is outside Vienna, then click there.
   for (let i = 0; i < 4; i++) await page.getByRole('button', { name: 'Zoom out' }).click()
   await page.waitForTimeout(600)
-  await page.getByTestId('map').click({ position: { x: 30, y: 30 } })
-  await expect(page.getByText('Klicken: mag → lieber nicht → egal')).toBeHidden()
+  await page.getByText('⚲ Filter').click()
+  await expect(hint).toBeVisible()
+  await page.getByTestId('map').click({ position: { x: 40, y: 400 } })
+  await expect(hint).toBeHidden()
   await expect(page.getByRole('heading', { name: 'Blunzenstricker', level: 2 })).toBeHidden()
 })
 
+test('the map filter narrows what is shown', async ({ page }) => {
+  await page.getByText('⚲ Filter').click()
+  const count = page.getByText(/· \d+ von \d+ Lokalen/)
+  const before = await count.textContent()
+  await page.getByRole('button', { name: /Fachpresse/ }).click()
+  await expect(count).not.toHaveText(before ?? '')
+  await expect(page.locator('.badge-count')).toHaveText('1')
+})
+
+test('empty template: fill one slot, clear one, then plan the rest', async ({ page }) => {
+  await page.getByRole('button', { name: /Leere Vorlage/ }).click()
+  await expect(page.locator('.timeline > li')).toHaveCount(23)
+  await expect(page.locator('.timeline .empty-slot')).toHaveCount(23)
+  await pick(page, 'Blunzenstricker')
+  await page.getByRole('button', { name: 'In den offenen Platz setzen' }).click()
+  await expect(page.locator('.timeline > li')).toHaveCount(23)
+  await expect(page.locator('.timeline .empty-slot')).toHaveCount(22)
+  await page.getByRole('button', { name: '✨ Tour fertig planen' }).click()
+  await expect(page.locator('.timeline .empty-slot')).toHaveCount(0, { timeout: 30_000 })
+  await expect(page.locator('.timeline .stop-name', { hasText: 'Blunzenstricker' })).toBeVisible()
+  // Clearing keeps the place; deleting removes it.
+  await page.locator('.timeline > li').nth(4).getByRole('button', { name: /leeren$/ }).click()
+  await expect(page.locator('.timeline .empty-slot')).toHaveCount(1)
+  await expect(page.locator('.timeline > li').nth(4)).toHaveClass(/empty-slot/)
+  await page.getByRole('button', { name: 'Platz 5 löschen' }).click()
+  await expect(page.locator('.timeline > li')).toHaveCount(22)
+})
 test('"Tour fertig planen" covers all included districts', async ({ page }) => {
   await pick(page, 'Blunzenstricker')
   await page.getByRole('button', { name: 'Zur Tour hinzufügen' }).click()
@@ -88,4 +118,16 @@ test('proposals can be applied and a stop swapped', async ({ page }) => {
   await page.locator('.swap-list .rec').first().click()
   await expect(page.locator('.timeline .stop-name').nth(1)).not.toHaveText(second ?? '')
   await expect(page.locator('.timeline > li').nth(1).getByRole('button', { name: /fixieren$/ })).toHaveAttribute('aria-pressed', 'true')
+  // With a tour and nothing selected, the side panel shows statistics.
+  await expect(page.getByRole('heading', { name: 'Eure Tour in Zahlen' })).toBeVisible()
+})
+
+test('stops can be reordered by drag and drop', async ({ page }) => {
+  await page.getByRole('button', { name: /Komplette Tour vorschlagen/ }).click()
+  await expect(page.locator('.proposal')).toHaveCount(3, { timeout: 60_000 })
+  await page.locator('.proposal').first().getByRole('button', { name: 'Übernehmen' }).click()
+  const names = page.locator('.timeline .stop-name')
+  const second = await names.nth(1).textContent()
+  await page.locator('.timeline > li').nth(1).dragTo(page.locator('.timeline > li').nth(3))
+  await expect(names.nth(3)).toHaveText(second ?? '')
 })

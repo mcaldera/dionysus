@@ -23,8 +23,9 @@ export interface MapBar {
 export interface Leg {
   coords: [number, number][]
   /** walk: a walking leg; ride: on a vehicle; transfer: walking within a transit leg;
-   *  pending: a transit leg whose route isn't known (yet), drawn as a dashed arc. */
-  mode: 'walk' | 'ride' | 'transfer' | 'pending'
+   *  pending: a transit leg whose route isn't known (yet), drawn as a dashed arc;
+   *  gap: to or from an empty slot of the tour. */
+  mode: 'walk' | 'ride' | 'transfer' | 'pending' | 'gap'
   color?: string
   line?: string
 }
@@ -43,6 +44,8 @@ interface Props {
   tourLegs: Leg[]
   recLines: [number, number][][]
   preview: Leg[]
+  /** Empty tour slots, drawn as hollow numbered markers at the district centre. */
+  ghosts: { lon: number; lat: number; label: number }[]
   highlightId: string | null
   focus: { lat: number; lon: number; key: number } | null
   onSelect: (id: string) => void
@@ -115,6 +118,10 @@ export default function MapView(props: Props) {
     ;(m.getSource('tour') as GeoJSONSource).setData(lines(p.tourLegs))
     ;(m.getSource('rec-lines') as GeoJSONSource).setData(lines(p.recLines.map((coords) => ({ coords }))))
     ;(m.getSource('preview') as GeoJSONSource).setData(lines(p.preview))
+    ;(m.getSource('ghosts') as GeoJSONSource).setData({
+      type: 'FeatureCollection',
+      features: p.ghosts.map((g) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [g.lon, g.lat] }, properties: { label: String(g.label) } })),
+    })
     m.setFilter('bars-highlight', ['==', ['get', 'id'], p.highlightId ?? ''])
   }
 
@@ -147,6 +154,7 @@ export default function MapView(props: Props) {
       m.addSource('rec-lines', { type: 'geojson', data: empty })
       m.addSource('preview', { type: 'geojson', data: empty })
       m.addSource('bars', { type: 'geojson', data: empty })
+      m.addSource('ghosts', { type: 'geojson', data: empty })
 
       m.addLayer({
         id: 'districts-fill', type: 'fill', source: 'districts',
@@ -215,6 +223,11 @@ export default function MapView(props: Props) {
           paint: { 'line-color': '#dc2626', 'line-width': 3, 'line-dasharray': [1, 1.6], 'line-opacity': 0.7 * opacity },
         })
         m.addLayer({
+          id: `${source}-gap`, type: 'line', source, filter: ['==', ['get', 'mode'], 'gap'],
+          layout: { 'line-cap': 'round' },
+          paint: { 'line-color': '#7a6a5c', 'line-width': 2.5, 'line-dasharray': [1.5, 2], 'line-opacity': opacity },
+        })
+        m.addLayer({
           id: `${source}-lines`, type: 'symbol', source, filter: ['==', ['get', 'mode'], 'ride'],
           layout: {
             'symbol-placement': 'line-center', 'text-field': ['get', 'line'], 'text-font': FONT, 'text-size': 12,
@@ -230,6 +243,15 @@ export default function MapView(props: Props) {
       })
       legLayers('preview', 0.85)
 
+      m.addLayer({
+        id: 'ghosts', type: 'circle', source: 'ghosts',
+        paint: { 'circle-radius': 12, 'circle-color': '#ffffff', 'circle-opacity': 0.85, 'circle-stroke-color': '#7a6a5c', 'circle-stroke-width': 2.5 },
+      })
+      m.addLayer({
+        id: 'ghost-labels', type: 'symbol', source: 'ghosts',
+        layout: { 'text-field': ['get', 'label'], 'text-font': FONT, 'text-size': 12, 'text-allow-overlap': true },
+        paint: { 'text-color': '#7a6a5c' },
+      })
       const hollow = (color: string) => ['case', ['==', ['get', 'closed'], 1], '#ffffff', color] as unknown as string
       m.addLayer({
         id: 'bars-other', type: 'circle', source: 'bars', filter: ['==', ['get', 'role'], 'other'],
@@ -327,7 +349,7 @@ export default function MapView(props: Props) {
   }, [])
 
   useEffect(update, [props.bars, props.districts, props.districtLabels, props.visitedDistricts, props.tourLegs,
-    props.recLines, props.preview, props.highlightId])
+    props.recLines, props.preview, props.ghosts, props.highlightId])
 
   useEffect(() => {
     if (props.focus && map.current) {

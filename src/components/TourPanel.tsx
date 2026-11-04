@@ -1,28 +1,35 @@
+import { useEffect, useRef, useState } from 'react'
 import { clock, duration } from '../domain/hours'
 import type { SwapOption } from '../domain/solver'
-import type { TimelineStop } from '../domain/tour'
+import type { SlotView } from '../domain/tour'
 import { googleMapsDirections, legLabel } from '../domain/travel'
 import type { TransitRoute } from '../routes'
 import { TYPE_COLOR, TYPE_ICON } from '../theme'
 import { TypePill } from './BarFacts'
 
 interface Props {
-  stops: TimelineStop[]
+  slots: SlotView[]
   districtCount: number
+  districtName: (d: number) => string
   pinned: Set<string>
-  /** Transit route per stop index (the leg into that stop), when known. */
+  /** Transit route per slot (the leg into it), when known. */
   routes: (TransitRoute | null | undefined)[]
   swap: { index: number; options: SwapOption[] } | null
+  selectedId: string | null
   busy: string | null
   onSelect: (id: string) => void
-  onRemove: (id: string) => void
+  /** Delete the slot; later stops move up. */
+  onRemove: (index: number) => void
+  /** Empty the slot but keep its place. */
+  onClear: (index: number) => void
   onTogglePin: (id: string) => void
   onSwap: (index: number | null) => void
   onPickSwap: (id: string) => void
   onHoverSwap: (id: string | null) => void
+  onMove: (from: number, to: number) => void
   onFinish: () => void
   onOptimize: () => void
-  onClear: () => void
+  onClearAll: () => void
 }
 
 function minutes(d: number): string {
@@ -30,26 +37,47 @@ function minutes(d: number): string {
   return r === 0 ? '±0 Min.' : `${r > 0 ? '+' : '−'}${Math.abs(r)} Min.`
 }
 
+function rides(r: TransitRoute | null | undefined) {
+  return r ? r.segments.filter((s) => s.kind === 'ride') : []
+}
+
 export default function TourPanel(p: Props) {
-  const { stops, districtCount } = p
-  const total = stops.length ? stops[stops.length - 1].departure - stops[0].arrival : 0
-  const pct = Math.round((stops.length / districtCount) * 100)
-  const pinnedCount = stops.filter((s) => p.pinned.has(s.bar.id)).length
+  const { slots, districtCount } = p
+  const filled = slots.filter((s) => s.stop)
+  const empty = slots.length - filled.length
+  const first = filled[0]?.stop
+  const last = filled[filled.length - 1]?.stop
+  const total = first && last ? last.departure - first.arrival : 0
+  const pct = Math.round((filled.length / districtCount) * 100)
+  const pinnedCount = filled.filter((s) => p.pinned.has(s.stop!.bar.id)).length
+  const [drag, setDrag] = useState<number | null>(null)
+  const [over, setOver] = useState<number | null>(null)
+  const selectedRow = useRef<HTMLLIElement>(null)
+
+  // A bar picked on the map: bring its row into view.
+  useEffect(() => {
+    selectedRow.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }, [p.selectedId])
+
   return (
     <section className="card" aria-label="Eure Tour">
       <div className="card-head">
         <h3>Eure Tour</h3>
-        {stops.length > 0 && <span className="totals">{stops.length} von {districtCount} Bezirken · {duration(total)}</span>}
+        {slots.length > 0 && (
+          <span className="totals">
+            {filled.length} von {districtCount} Bezirken{empty ? ` · ${empty} offen` : ''} · {empty ? '≈ ' : ''}{duration(total)}
+          </span>
+        )}
       </div>
       <div className="progress" aria-hidden="true"><span style={{ width: `${pct}%` }} /></div>
-      {stops.length === 0 ? (
-        <p className="hint">Noch keine Lokale. Wählt eines aus und klickt „Zur Tour hinzufügen“, oder lasst euch eine Tour vorschlagen.</p>
+      {slots.length === 0 ? (
+        <p className="hint">Noch keine Lokale. Wählt eines aus und klickt „Zur Tour hinzufügen“, oder plant oben mit „🗺 Tour planen“.</p>
       ) : (
         <>
           <div className="tour-actions">
-            {stops.length < districtCount && (
+            {(filled.length < districtCount || empty > 0) && (
               <button type="button" className="primary small-btn" disabled={!!p.busy} onClick={p.onFinish}
-                title="Behält eure Lokale in dieser Reihenfolge und plant die restlichen Bezirke dazu">
+                title="Behält die Reihenfolge, füllt leere Plätze und plant fehlende Bezirke dazu">
                 ✨ Tour fertig planen
               </button>
             )}
@@ -57,17 +85,37 @@ export default function TourPanel(p: Props) {
               title="Fixierte Lokale (📌) bleiben, alle anderen und die Reihenfolge werden neu gewählt. Ein fixiertes erstes Lokal bleibt der Start.">
               ↻ Optimieren{pinnedCount ? ` (${pinnedCount} 📌)` : ''}
             </button>
-            <button type="button" className="ghost small" disabled={!!p.busy} onClick={p.onClear}>Leeren</button>
+            <button type="button" className="ghost small" disabled={!!p.busy} onClick={p.onClearAll}>Alles löschen</button>
           </div>
           {p.busy && <p className="hint"><span className="spinner small-spin" /> {p.busy}</p>}
+          <p className="hint small drag-hint">Zeilen mit ⠿ ziehen, um die Reihenfolge zu ändern.</p>
           <ol className="timeline">
-            {stops.map((s, i) => {
+            {slots.map((sl, i) => {
+              const s = sl.stop
               const route = p.routes[i]
               const swapping = p.swap?.index === i
-              const isPinned = p.pinned.has(s.bar.id)
+              const isPinned = !!s && p.pinned.has(s.bar.id)
+              const selected = !!s && s.bar.id === p.selectedId
+              // Real line data: the same line out of this stop as into it.
+              const back = s && rides(route).length && rides(p.routes[i + 1]).length
+                && rides(route).at(-1)!.line === rides(p.routes[i + 1])[0].line
+              const cls = [swapping && 'swapping', selected && 'selected', drag === i && 'dragging',
+                over === i && drag !== null && drag !== i && (drag < i ? 'drop-after' : 'drop-before'), !s && 'empty-slot']
+                .filter(Boolean).join(' ')
               return (
-                <li key={s.bar.id} className={swapping ? 'swapping' : undefined}>
-                  {s.legIn && (
+                <li key={s ? s.bar.id : `empty-${sl.district}`} className={cls || undefined} ref={selected ? selectedRow : undefined}
+                  draggable onDragStart={(e) => { setDrag(i); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(i)) }}
+                  onDragOver={(e) => { e.preventDefault(); setOver(i) }}
+                  onDragLeave={() => setOver((o) => (o === i ? null : o))}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    const from = drag ?? Number(e.dataTransfer.getData('text/plain'))
+                    if (!Number.isNaN(from) && from !== i) p.onMove(from, i)
+                    setDrag(null)
+                    setOver(null)
+                  }}
+                  onDragEnd={() => { setDrag(null); setOver(null) }}>
+                  {s && s.legIn && !sl.afterGap && (
                     <div className={`leg ${s.legIn.mode}`}>
                       <span>
                         {s.legIn.mode === 'walk' ? '🚶' : '🚋'}{' '}
@@ -79,30 +127,47 @@ export default function TourPanel(p: Props) {
                           </span>
                         ) : null}
                       </span>
-                      <a href={googleMapsDirections(stops[i - 1].bar, s.bar, s.legIn)} target="_blank" rel="noreferrer">Route ↗</a>
+                      <a href={googleMapsDirections(slots[i - 1].stop!.bar, s.bar, s.legIn)} target="_blank" rel="noreferrer">Route ↗</a>
                     </div>
                   )}
+                  {i > 0 && s && sl.afterGap && <div className="leg gap"><span>┊ Weg hängt vom offenen Bezirk ab</span></div>}
                   <div className="stop">
-                    <span className="time">{clock(s.arrival)}</span>
-                    <span className="stop-dot" style={{ background: TYPE_COLOR[s.bar.venueType] }}>{i + 1}</span>
-                    <button type="button" className="link stop-name" onClick={() => p.onSelect(s.bar.id)}>
-                      {s.bar.name} <span className="muted">{TYPE_ICON[s.bar.venueType]} {s.bar.district}.</span>
-                    </button>
-                    <button type="button" className={`icon-btn pin${isPinned ? ' on' : ''}`} aria-pressed={isPinned}
-                      aria-label={`${s.bar.name} fixieren`} title={isPinned ? 'Fixiert: bleibt beim Optimieren' : 'Fixieren: bleibt beim Optimieren'}
-                      onClick={() => p.onTogglePin(s.bar.id)}>📌</button>
-                    <button type="button" className={`icon-btn${swapping ? ' on' : ''}`} aria-label={`${s.bar.name} tauschen`}
-                      title="Anderes Lokal in diesem Bezirk" onClick={() => p.onSwap(swapping ? null : i)}>⇄</button>
-                    <button type="button" className="icon-btn" aria-label={`${s.bar.name} entfernen`} onClick={() => p.onRemove(s.bar.id)}>×</button>
+                    <span className="grip" aria-hidden="true" title="Ziehen zum Verschieben">⠿</span>
+                    <span className="time">{s ? `${sl.approx ? '≈' : ''}${clock(s.arrival)}` : '–'}</span>
+                    {s ? (
+                      <>
+                        <span className="stop-dot" style={{ background: TYPE_COLOR[s.bar.venueType] }}>{i + 1}</span>
+                        <button type="button" className="link stop-name" onClick={() => p.onSelect(s.bar.id)}>
+                          {s.bar.name} <span className="muted">{TYPE_ICON[s.bar.venueType]} {s.bar.district}.</span>
+                        </button>
+                        <button type="button" className={`icon-btn pin${isPinned ? ' on' : ''}`} aria-pressed={isPinned}
+                          aria-label={`${s.bar.name} fixieren`} title={isPinned ? 'Fixiert: bleibt beim Optimieren' : 'Fixieren: bleibt beim Optimieren'}
+                          onClick={() => p.onTogglePin(s.bar.id)}>📌</button>
+                        <button type="button" className={`icon-btn${swapping ? ' on' : ''}`} aria-label={`${s.bar.name} tauschen`}
+                          title="Anderes Lokal in diesem Bezirk" onClick={() => p.onSwap(swapping ? null : i)}>⇄</button>
+                        <button type="button" className="icon-btn" aria-label={`${s.bar.name} leeren`}
+                          title="Lokal entfernen, Platz behalten" onClick={() => p.onClear(i)}>⌫</button>
+                      </>
+                    ) : (
+                      <>
+                        <span className="stop-dot hollow">{i + 1}</span>
+                        <span className="stop-name empty">{p.districtName(sl.district)} <span className="muted">· offen</span></span>
+                        <button type="button" className={`icon-btn${swapping ? ' on' : ''}`} aria-label={`Vorschläge für ${sl.district}. Bezirk`}
+                          title="Passende Lokale für diesen Platz" onClick={() => p.onSwap(swapping ? null : i)}>⇄</button>
+                      </>
+                    )}
+                    <button type="button" className="icon-btn" aria-label={`Platz ${i + 1} löschen`}
+                      title="Platz löschen; die folgenden rücken nach" onClick={() => p.onRemove(i)}>×</button>
                   </div>
-                  {s.closedOnArrival && <div className="warn small stop-note">⚠ Bei Ankunft geschlossen</div>}
+                  {s?.closedOnArrival && <div className="warn small stop-note">⚠ Bei Ankunft geschlossen</div>}
+                  {back ? <div className="warn small stop-note">↩ Gleiche Linie hin und zurück ({rides(route).at(-1)!.line})</div> : null}
                   {swapping && p.swap && (
                     <div className="swap-list">
                       <p className="hint small">
-                        Statt {s.bar.name}: andere Lokale im {s.bar.district}. Bezirk, nach Weg
-                        {i > 0 ? ` von ${stops[i - 1].bar.name}` : ''}{i < stops.length - 1 ? ` und zu ${stops[i + 1].bar.name}` : ''}.
+                        {s ? `Statt ${s.bar.name}: andere` : 'Passende'} Lokale im {sl.district}. Bezirk, nach Weg zwischen den Nachbarn.
+                        Auf der Karte zeigt jeder Punkt im Bezirk beim Drüberfahren die Zeit.
                       </p>
-                      {p.swap.options.length === 0 && <p className="hint">Keine anderen passenden Lokale.</p>}
+                      {p.swap.options.length === 0 && <p className="hint">Keine passenden Lokale. Filter lockern?</p>}
                       <ol className="recs">
                         {p.swap.options.map((o, k) => (
                           <li key={o.bar.id}>
@@ -116,7 +181,8 @@ export default function TourPanel(p: Props) {
                                   {o.closed && <span className="status closed">bei Ankunft zu</span>}
                                 </span>
                               </span>
-                              <span className={`leg-pill ${o.travelDelta <= 0 ? 'better' : ''}`} title="Wegzeit im Vergleich zum jetzigen Lokal">
+                              <span className={`leg-pill ${s && o.travelDelta <= 0 ? 'better' : ''}`}
+                                title={s ? 'Wegzeit im Vergleich zum jetzigen Lokal' : 'So viel Wegzeit kommt dazu'}>
                                 {minutes(o.travelDelta)}
                               </span>
                             </button>
@@ -136,10 +202,9 @@ export default function TourPanel(p: Props) {
 }
 
 function LineBadges({ route }: { route: TransitRoute }) {
-  const rides = route.segments.filter((s) => s.kind === 'ride')
   return (
     <>
-      {rides.map((r, i) => (
+      {rides(route).map((r, i) => (
         <span key={`${r.line}${i}`}>{i > 0 && ' → '}<span className="line-badge" style={{ background: r.color }}>{r.line}</span></span>
       ))}
     </>

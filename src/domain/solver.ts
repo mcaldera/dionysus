@@ -10,6 +10,10 @@ import type { Bar, Participant } from './types'
 
 /** Minutes added per stop known to be closed on arrival (starting value). */
 export const CLOSED_PENALTY = 90
+/** Minutes added when a transit leg heads straight back the way the previous transit leg came. */
+export const BACKTRACK_PENALTY = 30
+/** Cosine of the turn between two legs below which it counts as going back (about 135°). */
+const REVERSAL = -0.7
 /** Minutes added per bar already used by an earlier proposal, so alternatives differ. */
 const DIVERSITY_PENALTY = 3
 
@@ -31,6 +35,8 @@ export interface SolveOptions {
   /** District of the first stop; only used without a prefix. */
   startDistrict: number | null
   endDistrict: number | null
+  /** Penalise riding out and straight back, e.g. U1 out, one bar, U1 back. */
+  noBacktrack?: boolean
   /** Candidates per district (SPEC: default 15, maximum 30). */
   k?: number
   restarts?: number
@@ -56,23 +62,50 @@ export function legCost(m: Matrices, u: number, v: number, tolerance: number): n
   return t
 }
 
+/** Unit vector from a to b (x scaled for latitude), or [0, 0] if they coincide. */
+function unit(a: { lat: number; lon: number }, b: { lat: number; lon: number }): [number, number] {
+  const x = (b.lon - a.lon) * Math.cos((a.lat * Math.PI) / 180)
+  const y = b.lat - a.lat
+  const n = Math.hypot(x, y)
+  return n ? [x / n, y / n] : [0, 0]
+}
+
+/** Direction of the leg if it is ridden by transit, else [0, 0], so dot products with it are 0. */
+function transitDir(m: Matrices, a: Bar, b: Bar, tolerance: number): [number, number] {
+  const i = a.matrixIndex * m.n + b.matrixIndex
+  const w = m.walk[i]
+  const t = m.transitP50[i]
+  return t !== 255 && w > t + tolerance ? unit(a, b) : [0, 0]
+}
+
+export type TourCostOptions = Omit<SolveOptions, 'districts' | 'prefix' | 'pinned' | 'startDistrict' | 'endDistrict'>
+
 /** The objective for a fixed list of stops; the same numbers the timeline shows. */
-export function tourCost(stops: Bar[], m: Matrices, o: Omit<SolveOptions, 'districts' | 'prefix' | 'pinned' | 'startDistrict' | 'endDistrict'>): Solution {
+export function tourCost(stops: Bar[], m: Matrices, o: TourCostOptions): Solution {
   let t = o.weekday * DAY + o.startMinutes
   let travel = 0
   let closed = 0
   let matchSum = 0
+  let backtracks = 0
+  let dir: [number, number] = [0, 0]
   stops.forEach((b, i) => {
     if (i > 0) {
-      const l = legCost(m, stops[i - 1].matrixIndex, b.matrixIndex, o.filters.walkToleranceMinutes)
+      const tol = o.filters.walkToleranceMinutes
+      const l = legCost(m, stops[i - 1].matrixIndex, b.matrixIndex, tol)
       travel += l
       t += l
+      const next = transitDir(m, stops[i - 1], b, tol)
+      if (o.noBacktrack && dir[0] * next[0] + dir[1] * next[1] < REVERSAL) backtracks++
+      dir = next
     }
     if (isOpenAt(b.weeklyOpen, t) === false) closed++
     matchSum += match(b, o.participants)
     t += o.stopMinutes
   })
-  return { stops, cost: travel + closed * CLOSED_PENALTY - o.lambda * matchSum, travelMinutes: travel, closedStops: closed, missing: [] }
+  return {
+    stops, cost: travel + closed * CLOSED_PENALTY + backtracks * BACKTRACK_PENALTY - o.lambda * matchSum,
+    travelMinutes: travel, closedStops: closed, missing: [],
+  }
 }
 
 /** false if the hours are known and the bar isn't open at any time in [from, to). */
@@ -191,6 +224,14 @@ export function candidates(bars: Bar[], m: Matrices, o: SolveOptions, districts:
   return out
 }
 
+interface Layer {
+  cost: Float64Array
+  time: Float64Array
+  /** Direction of the incoming leg if it was transit, else 0. */
+  dx: Float32Array
+  dy: Float32Array
+}
+
 /** Candidates and leg tables for one solve; the local search only touches district order. */
 class Model {
   readonly D: number
@@ -199,15 +240,21 @@ class Model {
   readonly legs: Uint8Array[][]
   /** Minutes from the last prefix stop to each candidate of district b. */
   readonly startLegs: Uint8Array[] | null
+  /** ux/uy[a][b][p * K_b + q]: unit direction of that leg if ridden by transit, else 0. */
+  private readonly ux: Float32Array[][]
+  private readonly uy: Float32Array[][]
+  private readonly startUx: Float32Array[] | null
+  private readonly startUy: Float32Array[] | null
+  /** Direction of the last prefix leg if it was transit. */
+  private readonly prefixDir: [number, number]
+  private readonly backtrack: boolean
   readonly t0: number
   readonly weights: Float64Array[]
   /** closedAt[d][c][t - dayStart] = 1 if candidate c is known to be closed at minute t; null = unknown hours. */
   private readonly closedAt: (Uint8Array | null)[][]
   private readonly dayStart: number
-  private readonly cost: Float64Array[]
-  private readonly time: Float64Array[]
-  private readonly scratchCost: Float64Array[]
-  private readonly scratchTime: Float64Array[]
+  private readonly cache: Layer[]
+  private readonly scratch: Layer[]
 
   readonly o: SolveOptions
 
@@ -216,23 +263,35 @@ class Model {
     this.D = districts.length
     this.cands = districts.map((d) => cands.get(d)!)
     const tol = o.filters.walkToleranceMinutes
+    this.backtrack = !!o.noBacktrack
     this.legs = this.cands.map((from) => this.cands.map((to) => {
       const t = new Uint8Array(from.length * to.length)
       from.forEach((p, i) => to.forEach((q, j) => { t[i * to.length + j] = legCost(m, p.matrixIndex, q.matrixIndex, tol) }))
       return t
     }))
+    const dirs = (from: Bar[], to: Bar[], k: 0 | 1) => {
+      const t = new Float32Array(from.length * to.length)
+      if (this.backtrack) from.forEach((p, i) => to.forEach((q, j) => { t[i * to.length + j] = transitDir(m, p, q, tol)[k] }))
+      return t
+    }
+    this.ux = this.cands.map((from) => this.cands.map((to) => dirs(from, to, 0)))
+    this.uy = this.cands.map((from) => this.cands.map((to) => dirs(from, to, 1)))
     const last = o.prefix[o.prefix.length - 1]
     this.startLegs = last ? this.cands.map((to) => Uint8Array.from(to, (q) => legCost(m, last.matrixIndex, q.matrixIndex, tol))) : null
+    this.startUx = last ? this.cands.map((to) => dirs([last], to, 0)) : null
+    this.startUy = last ? this.cands.map((to) => dirs([last], to, 1)) : null
+    const beforeLast = o.prefix[o.prefix.length - 2]
+    this.prefixDir = beforeLast && this.backtrack ? transitDir(m, beforeLast, last, tol) : [0, 0]
     this.t0 = last ? tourEnd(o.prefix, m, o) : o.weekday * DAY + o.startMinutes
     this.weights = this.cands.map((list) => Float64Array.from(list, (b) => -o.lambda * match(b, o.participants) + (penalty.get(b.id) ?? 0)))
     this.dayStart = o.weekday * DAY
     this.closedAt = this.cands.map((list) => list.map((b) => closedTable(b.weeklyOpen, this.dayStart)))
     const K = Math.max(1, ...this.cands.map((c) => c.length))
-    const buf = () => Array.from({ length: this.D }, () => new Float64Array(K))
-    this.cost = buf()
-    this.time = buf()
-    this.scratchCost = buf()
-    this.scratchTime = buf()
+    const buf = (): Layer[] => Array.from({ length: this.D }, () => ({
+      cost: new Float64Array(K), time: new Float64Array(K), dx: new Float32Array(K), dy: new Float32Array(K),
+    }))
+    this.cache = buf()
+    this.scratch = buf()
   }
 
   private penalty(d: number, c: number, t: number): number {
@@ -243,36 +302,49 @@ class Model {
     return isOpenAt(this.cands[d][c].weeklyOpen, t) === false ? CLOSED_PENALTY : 0
   }
 
-  /** One DP layer: best cost and arrival for each candidate of district order[pos]. */
-  private layer(order: number[], pos: number, prevCost: Float64Array | null, prevTime: Float64Array | null,
-    outCost: Float64Array, outTime: Float64Array, back?: Int32Array) {
+  /** One DP layer: best cost, arrival and incoming transit direction for each candidate of order[pos]. */
+  private layer(order: number[], pos: number, prev: Layer | null, out: Layer, back?: Int32Array) {
     const d = order[pos]
     const list = this.cands[d]
     const w = this.weights[d]
     const K = list.length
     const stop = this.o.stopMinutes
-    if (pos === 0 || !prevCost || !prevTime) {
+    if (pos === 0 || !prev) {
+      const [px, py] = this.prefixDir
       for (let c = 0; c < K; c++) {
         const l = this.startLegs ? this.startLegs[d][c] : 0
         const t = this.t0 + l
-        outCost[c] = l + w[c] + this.penalty(d, c, t)
-        outTime[c] = t
+        const ux = this.startUx ? this.startUx[d][c] : 0
+        const uy = this.startUy ? this.startUy[d][c] : 0
+        const bt = px * ux + py * uy < REVERSAL ? BACKTRACK_PENALTY : 0
+        out.cost[c] = l + bt + w[c] + this.penalty(d, c, t)
+        out.time[c] = t
+        out.dx[c] = ux
+        out.dy[c] = uy
       }
       return
     }
     const pd = order[pos - 1]
     const table = this.legs[pd][d]
+    const ux = this.ux[pd][d]
+    const uy = this.uy[pd][d]
     const Kp = this.cands[pd].length
+    const bt = this.backtrack
     for (let c = 0; c < K; c++) {
       let best = Infinity
       let bq = 0
       for (let q = 0; q < Kp; q++) {
-        const v = prevCost[q] + table[q * K + c]
+        const i = q * K + c
+        let v = prev.cost[q] + table[i]
+        if (bt && prev.dx[q] * ux[i] + prev.dy[q] * uy[i] < REVERSAL) v += BACKTRACK_PENALTY
         if (v < best) { best = v; bq = q }
       }
-      const t = prevTime[bq] + stop + table[bq * K + c]
-      outCost[c] = best + w[c] + this.penalty(d, c, t)
-      outTime[c] = t
+      const i = bq * K + c
+      const t = prev.time[bq] + stop + table[i]
+      out.cost[c] = best + w[c] + this.penalty(d, c, t)
+      out.time[c] = t
+      out.dx[c] = ux[i]
+      out.dy[c] = uy[i]
       if (back) back[c] = bq
     }
   }
@@ -285,38 +357,37 @@ class Model {
 
   /** Full evaluation of `order`; fills the cache that `tryFrom` builds on. */
   evaluate(order: number[]): number {
-    for (let p = 0; p < this.D; p++) {
-      this.layer(order, p, p ? this.cost[p - 1] : null, p ? this.time[p - 1] : null, this.cost[p], this.time[p])
-    }
-    return Model.min(this.cost[this.D - 1], this.cands[order[this.D - 1]].length)
+    for (let p = 0; p < this.D; p++) this.layer(order, p, p ? this.cache[p - 1] : null, this.cache[p])
+    return Model.min(this.cache[this.D - 1].cost, this.cands[order[this.D - 1]].length)
   }
 
   /** Cost of `order`, which equals the cached order before position `from`. Doesn't touch the cache. */
   tryFrom(order: number[], from: number): number {
     for (let p = from; p < this.D; p++) {
-      const pc = p === from ? (p ? this.cost[p - 1] : null) : this.scratchCost[p - 1]
-      const pt = p === from ? (p ? this.time[p - 1] : null) : this.scratchTime[p - 1]
-      this.layer(order, p, pc, pt, this.scratchCost[p], this.scratchTime[p])
+      const prev = p === from ? (p ? this.cache[p - 1] : null) : this.scratch[p - 1]
+      this.layer(order, p, prev, this.scratch[p])
     }
-    return Model.min(this.scratchCost[this.D - 1], this.cands[order[this.D - 1]].length)
+    return Model.min(this.scratch[this.D - 1].cost, this.cands[order[this.D - 1]].length)
   }
 
   /** Make the last `tryFrom` the cached state. */
   accept(from: number) {
     for (let p = from; p < this.D; p++) {
-      this.cost[p].set(this.scratchCost[p])
-      this.time[p].set(this.scratchTime[p])
+      const a = this.cache[p]
+      const b = this.scratch[p]
+      a.cost.set(b.cost)
+      a.time.set(b.time)
+      a.dx.set(b.dx)
+      a.dy.set(b.dy)
     }
   }
 
   /** The chosen bar per district, in order. */
   path(order: number[]): Bar[] {
     const backs = order.map((d) => new Int32Array(this.cands[d].length))
-    for (let p = 0; p < this.D; p++) {
-      this.layer(order, p, p ? this.cost[p - 1] : null, p ? this.time[p - 1] : null, this.cost[p], this.time[p], backs[p])
-    }
+    for (let p = 0; p < this.D; p++) this.layer(order, p, p ? this.cache[p - 1] : null, this.cache[p], backs[p])
     let c = 0
-    const last = this.cost[this.D - 1]
+    const last = this.cache[this.D - 1].cost
     for (let i = 1; i < this.cands[order[this.D - 1]].length; i++) if (last[i] < last[c]) c = i
     const out: Bar[] = []
     for (let p = this.D - 1; p >= 0; p--) {
@@ -565,6 +636,55 @@ export function proposeTours(
   return out.sort((a, b) => a.cost - b.cost)
 }
 
+/** A place in the tour: a district, with a bar or still empty. */
+export interface Slot {
+  district: number
+  bar: Bar | null
+}
+
+/**
+ * Complete a tour while keeping its slots in their order: empty slots get the best bar
+ * between their neighbours, filled ones stay, and districts without a slot are added after
+ * the last one in the best order (respecting a last district). Used for the empty template
+ * and "Tour fertig planen".
+ */
+export function completeTour(bars: Bar[], m: Matrices, o: SolveOptions, slots: Slot[]): Solution | null {
+  const filled = slots.flatMap((sl) => (sl.bar ? [sl.bar] : []))
+  const opts: SolveOptions = { ...o, prefix: [], pinned: filled, startDistrict: null }
+  const inSlots = slots.map((sl) => sl.district)
+  const extra = [...new Set(o.districts)].filter((d) => !inSlots.includes(d))
+  const cands = candidates(bars, m, opts, [...inSlots, ...extra])
+  const fixed = inSlots.filter((d) => cands.has(d))
+  const tail = extra.filter((d) => cands.has(d))
+  const districts = [...fixed, ...tail]
+  if (!districts.length) return null
+  const model = new Model(districts, cands, m, opts, new Map())
+  const order = districts.map((_, i) => i)
+  const L = fixed.length
+  const D = districts.length
+  // Tail: nearest neighbour from the last slot, with the last district (if any) at the end.
+  const endIdx = o.endDistrict !== null ? districts.indexOf(o.endDistrict) : -1
+  const fixedLast = endIdx >= L ? endIdx : null
+  if (D > L) {
+    const gap = model.districtGap()
+    const left = new Set(order.slice(L).filter((i) => i !== fixedLast))
+    const tailOrder: number[] = []
+    let cur = L > 0 ? L - 1 : -1
+    while (left.size) {
+      const next = cur < 0 ? [...left][0] : [...left].sort((a, b) => gap[cur][a] - gap[cur][b])[0]
+      tailOrder.push(next)
+      left.delete(next)
+      cur = next
+    }
+    if (fixedLast !== null) tailOrder.push(fixedLast)
+    order.splice(L, D - L, ...tailOrder)
+    localSearch(model, order, L, fixedLast !== null ? D - 1 : D)
+  }
+  model.evaluate(order)
+  const stops = polish(model.path(order), bars, m, opts)
+  return { ...tourCost(stops, m, o), missing: extra.filter((d) => !cands.has(d)) }
+}
+
 export interface SwapOption {
   bar: Bar
   /** Change of the objective in minutes against the current stop; negative is better. */
@@ -575,12 +695,51 @@ export interface SwapOption {
 }
 
 /**
+ * Bars for slot `index`, ranked by how well they fit between the filled slots before and
+ * after it (including later opening-hour effects). For a filled slot, delta is against its
+ * current bar; for an empty one, it is what the stop adds to the tour.
+ */
+export function slotOptions(
+  slots: Slot[], index: number, bars: Bar[], m: Matrices, o: TourCostOptions, limit = 8,
+): SwapOption[] {
+  const before = slots.slice(0, index).flatMap((sl) => (sl.bar ? [sl.bar] : []))
+  const after = slots.slice(index + 1).flatMap((sl) => (sl.bar ? [sl.bar] : []))
+  const cur = slots[index].bar
+  const stops = [...before, ...(cur ? [cur] : []), ...after]
+  if (cur) return swapOptions(stops, before.length, bars, m, o, limit)
+  const base = tourCost(stops, m, o)
+  const filters: Constraints = { ...o.filters, blockedDistricts: new Set(), includedDistricts: null }
+  const closedBefore = tourCost(before, m, o).closedStops
+  const out: SwapOption[] = []
+  for (const b of bars) {
+    if (b.district !== slots[index].district || !passesFilters(b, filters)) continue
+    const trial = [...before, b, ...after]
+    const s = tourCost(trial, m, o)
+    out.push({
+      bar: b, delta: s.cost - base.cost, travelDelta: s.travelMinutes - base.travelMinutes,
+      closed: tourCost([...before, b], m, o).closedStops > closedBefore,
+    })
+  }
+  out.sort((a, b) => a.delta - b.delta || richness(b.bar) - richness(a.bar))
+  return out.slice(0, limit)
+}
+
+/** The same numbers as `slotOptions` for one bar, e.g. the one under the mouse. */
+export function slotDelta(slots: Slot[], index: number, bar: Bar, m: Matrices, o: TourCostOptions): { delta: number; travelDelta: number } {
+  const before = slots.slice(0, index).flatMap((sl) => (sl.bar ? [sl.bar] : []))
+  const after = slots.slice(index + 1).flatMap((sl) => (sl.bar ? [sl.bar] : []))
+  const cur = slots[index].bar
+  const base = tourCost([...before, ...(cur ? [cur] : []), ...after], m, o)
+  const s = tourCost([...before, bar, ...after], m, o)
+  return { delta: s.cost - base.cost, travelDelta: s.travelMinutes - base.travelMinutes }
+}
+
+/**
  * Other bars for stop `index` in the same district, ranked by how well they fit between
  * the stops before and after it (including later opening-hour effects).
  */
 export function swapOptions(
-  stops: Bar[], index: number, bars: Bar[], m: Matrices,
-  o: Omit<SolveOptions, 'districts' | 'prefix' | 'pinned' | 'startDistrict' | 'endDistrict'>, limit = 8,
+  stops: Bar[], index: number, bars: Bar[], m: Matrices, o: TourCostOptions, limit = 8,
 ): SwapOption[] {
   const cur = stops[index]
   const base = tourCost(stops, m, o)

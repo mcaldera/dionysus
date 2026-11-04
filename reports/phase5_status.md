@@ -162,3 +162,15 @@ Essen and Gastgarten are low-risk. These are the opinion tags from batches 3-8:
 ## Next
 
 Phase 6: saving and share link, participants with their own likes, per-person match counts, and splitting into days.
+
+## Update 2026-11-04 (afternoon): your second list
+
+1. **Filter vs. planning split.** Top left, **⚲ Filter** changes only what you see on the map and what recommendation and swap lists offer: venue types, "must have" features (Essen, Gastgarten, Urig …), recommended by, and "not known to be closed at day/time". **🗺 Tour planen** (top right) holds everything the planner uses: day, start, stay, districts, first and last district, walking preference (Lieber zu Fuß / Ausgewogen / Am schnellsten), venue types for planning, preferences and the taste quiz. Filtering for Essen in one district no longer changes the whole tour.
+2. **Leere Vorlage**: one open place per planned district, ordered by district centres. Fill the ones you know (a bar in a district with an open place goes into that place), then **✨ Tour fertig planen** fills the rest in that order and adds any missing districts at the end. **↻ Optimieren** works as before.
+3. **Drag and drop**: drag rows by ⠿ to change the order.
+4. **Statistics**: with a tour and nothing selected, the panel shows "Eure Tour in Zahlen": times, travel time by mode (walking, bus, U-Bahn, tram, S-Bahn, from the drawn routes), venue types, features and warnings. The start card only shows while nothing is planned.
+5. **Sources filter**: Fachpresse (Falter, 11 bars), Stadtmagazine & Blogs (1000things, offbeat, 9), Foren (Reddit, none yet) and Seidlwandertage-Partner (59). Paste Reddit threads into `data/own/tips/` and they'll show up under Foren.
+6. **Click on the map → row in the tour** is highlighted and scrolled into view.
+7. **⌫ leeren** empties a place and keeps it (hollow marker at the district centre, dashed lines to its neighbours); **×** deletes the place and later stops move up. ⇄ on an open place suggests bars by the time they add.
+8. **Swap mode on the map**: hovering any bar in that district shows "+N Min. Weg" against the current one; a click takes it.
+9. **No straight back** (on by default, in the plan dialog): two transit legs in a row that reverse direction cost 30 extra minutes, so the solver avoids them. On the real data the best tour went from 1 reversal to 0 and got 2 minutes shorter; proposals take about 8 s instead of 5 s. When the drawn routes show the same line both ways, the timeline warns "↩ Gleiche Linie hin und zurück".

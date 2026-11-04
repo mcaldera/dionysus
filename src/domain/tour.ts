@@ -28,3 +28,30 @@ export function timeline(
   })
   return out
 }
+
+export interface SlotView {
+  district: number
+  /** null for an empty slot. */
+  stop: TimelineStop | null
+  /** An empty slot comes earlier, so this time leaves out at least one stop. */
+  approx: boolean
+  /** The slot before is empty: legIn skips it and isn't shown. */
+  afterGap: boolean
+}
+
+/** Timeline over the filled slots, mapped back onto all slots (empty ones keep their place). */
+export function slotTimeline(
+  slots: { district: number; bar: Bar | null }[], matrices: Matrices, weekday: number, startMinutes: number,
+  stopMinutes: number, tolerance: number,
+): SlotView[] {
+  const filled = slots.flatMap((s) => (s.bar ? [s.bar] : []))
+  const tl = timeline(filled, matrices, weekday, startMinutes, stopMinutes, tolerance)
+  let k = 0
+  let gapSeen = false
+  return slots.map((s, i) => {
+    const stop = s.bar ? tl[k++] : null
+    const view = { district: s.district, stop, approx: gapSeen && !!stop, afterGap: i > 0 && !slots[i - 1].bar }
+    if (!s.bar) gapSeen = true
+    return view
+  })
+}

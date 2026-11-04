@@ -2,7 +2,7 @@
 // worker, see client.ts, because the solve loops are synchronous.
 
 /// <reference lib="webworker" />
-import { proposeTours, solve, type Solution } from '../domain/solver'
+import { completeTour, proposeTours, solve, type Solution } from '../domain/solver'
 import type { Matrices } from '../domain/travel'
 import type { Bar } from '../domain/types'
 import type { JobResult, WorkerRequest } from './protocol'
@@ -42,6 +42,10 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
     post({ type: 'tours', id: msg.id, tours: tours.map(ids) })
   } else if (msg.type === 'solve') {
     const s = solve(bars, m, o)
+    post({ type: 'tours', id: msg.id, tours: s ? [ids(s)] : [] })
+  } else if (msg.type === 'complete') {
+    const slots = msg.slots.map((sl) => ({ district: sl.district, bar: sl.barId ? byId.get(sl.barId) ?? null : null }))
+    const s = completeTour(bars, m, o, slots)
     post({ type: 'tours', id: msg.id, tours: s ? [ids(s)] : [] })
   } else if (msg.type === 'tourFit') {
     // extra = best remaining tour via v − best remaining tour overall (SPEC 8.2).

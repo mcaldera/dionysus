@@ -10,6 +10,7 @@ export type WorkerRequest =
   | { type: 'init'; bars: Bar[]; matrices: Matrices }
   | { type: 'propose'; id: number; options: SolveRequest; count: number }
   | { type: 'solve'; id: number; options: SolveRequest }
+  | { type: 'complete'; id: number; options: SolveRequest; slots: { district: number; barId: string | null }[] }
   | { type: 'tourFit'; id: number; options: SolveRequest; candidates: string[] }
 
 export interface TourResult {

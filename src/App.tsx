@@ -1,23 +1,27 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { OpenStatus, TagChips, TipBadge, TypePill } from './components/BarFacts'
 import BarPanel from './components/BarPanel'
-import FilterBar, { type Settings } from './components/FilterBar'
+import FilterMenu from './components/FilterMenu'
 import Footer from './components/Footer'
 import MapView, { type HoverInfo, type Leg, type MapBar } from './components/MapView'
+import PlanDialog, { type PlanSettings } from './components/PlanDialog'
 import Proposals, { type ProposalState } from './components/Proposals'
 import Recommendations from './components/Recommendations'
 import TasteFinder from './components/TasteFinder'
 import TourPanel from './components/TourPanel'
+import TourStats from './components/TourStats'
 import { loadSiteData, loadTransitRange, type SiteData } from './data'
+import { matchesFilter, type MapFilter } from './domain/filter'
 import { arc } from './domain/geo'
-import { DAY } from './domain/hours'
-import { passesFilters, recommend, refine, type Constraints, type Preferences } from './domain/recommend'
-import { swapOptions } from './domain/solver'
+import { DAY, WEEKDAYS, clock } from './domain/hours'
+import { recommend, refine, type Constraints, type Preferences } from './domain/recommend'
+import { slotDelta, slotOptions, type Slot } from './domain/solver'
 import { applyTagRows, type TagRow } from './domain/tagRows'
-import { timeline, type TimelineStop } from './domain/tour'
+import { slotTimeline, timeline, type TimelineStop } from './domain/tour'
 import { leg, legLabel, legMinutes } from './domain/travel'
 import { ALL_DISTRICTS, VENUE_TYPES, type Bar, type Participant } from './domain/types'
 import { transitPath, walkingPath, type TransitRoute } from './routes'
+import { TYPE_COLOR, TYPE_SHORT } from './theme'
 import { CancelledError, SolverChannel } from './worker/client'
 import type { SolveRequest, TourResult } from './worker/protocol'
 import './styles.css'
@@ -32,17 +36,20 @@ function transitKey(a: Bar, b: Bar, departure: number): string {
 }
 
 type Pair = { a: Bar; b: Bar; mode: 'walk' | 'transit'; departure: number }
+/** A tour place: a district with a chosen bar, or still open. */
+type SlotIds = { district: number; barId: string | null }
 
 export default function App() {
   const [data, setData] = useState<SiteData | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [settings, setSettings] = useState<Settings>({
-    weekday: 5, startMinutes: 11 * 60, stopMinutes: 20, walkToleranceMinutes: 5,
-    venueTypes: new Set(VENUE_TYPES), officialOnly: false, districts: ALL_DISTRICTS, endDistrict: null,
+  const [plan, setPlan] = useState<PlanSettings>({
+    weekday: 5, startMinutes: 11 * 60, stopMinutes: 20, walkToleranceMinutes: 5, districts: ALL_DISTRICTS,
+    startDistrict: null, endDistrict: null, venueTypes: new Set(VENUE_TYPES), officialOnly: false, noBacktrack: true,
   })
+  const [filter, setFilter] = useState<MapFilter>({ venueTypes: new Set(VENUE_TYPES), tags: new Set(), sources: new Set(), openAt: null })
   const [group, setGroup] = useState<Participant>({ name: 'Wir', likes: [], avoids: [] })
   const [prefs, setPrefs] = useState<Omit<Preferences, 'participants'>>({ similarity: 'similar', speedVsMatch: 0.5 })
-  const [stopIds, setStopIds] = useState<string[]>([])
+  const [slotIds, setSlotIds] = useState<SlotIds[]>([])
   const [pinned, setPinned] = useState<Set<string>>(new Set())
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [focus, setFocus] = useState<{ lat: number; lon: number; key: number } | null>(null)
@@ -52,6 +59,7 @@ export default function App() {
   const [paths, setPaths] = useState<Record<string, [number, number][]>>({})
   const [transit, setTransit] = useState<Record<string, TransitRoute | null>>({})
   const [tasteOpen, setTasteOpen] = useState(false)
+  const [planOpen, setPlanOpen] = useState(false)
   const [proposals, setProposals] = useState<ProposalState | null>(null)
   const [activeProposal, setActiveProposal] = useState(0)
   const [busy, setBusy] = useState<string | null>(null)
@@ -87,19 +95,26 @@ export default function App() {
   useEffect(() => () => { channels?.plan.dispose(); channels?.refine.dispose() }, [channels])
 
   const byId = useMemo(() => new Map(data?.bars.map((b) => [b.id, b]) ?? []), [data])
-  const stops = useMemo(() => stopIds.map((id) => byId.get(id)).filter((b): b is Bar => !!b), [stopIds, byId])
+  const slots: Slot[] = useMemo(
+    () => slotIds.map((s) => ({ district: s.district, bar: s.barId ? byId.get(s.barId) ?? null : null })), [slotIds, byId])
+  const stops = useMemo(() => slots.flatMap((s) => (s.bar ? [s.bar] : [])), [slots])
+  const stopIds = useMemo(() => stops.map((b) => b.id), [stops])
   const selected = selectedId ? byId.get(selectedId) ?? null : null
-  const districtNames = useMemo(() => new Map(data?.districtLabels.features.map((f) =>
-    [Number(f.properties?.district), { name: String(f.properties?.name), count: Number(f.properties?.count) }]) ?? []), [data])
-  const districtName = useCallback((d: number) => `${d}. ${districtNames.get(d)?.name ?? 'Bezirk'}`, [districtNames])
-  const included = useMemo(() => new Set(settings.districts), [settings.districts])
+  const districtInfo = useMemo(() => new Map(data?.districtLabels.features.map((f) => {
+    const [lon, lat] = (f.geometry as GeoJSON.Point).coordinates
+    return [Number(f.properties?.district), { name: String(f.properties?.name), count: Number(f.properties?.count), lon, lat }]
+  }) ?? []), [data])
+  const districtName = useCallback((d: number) => `${d}. ${districtInfo.get(d)?.name ?? 'Bezirk'}`, [districtInfo])
+  const included = useMemo(() => new Set(plan.districts), [plan.districts])
 
   const makeTimeline = useCallback(
-    (list: Bar[]) => data ? timeline(list, data.matrices, settings.weekday, settings.startMinutes, settings.stopMinutes,
-      settings.walkToleranceMinutes) : [],
-    [data, settings],
+    (list: Bar[]) => data ? timeline(list, data.matrices, plan.weekday, plan.startMinutes, plan.stopMinutes,
+      plan.walkToleranceMinutes) : [],
+    [data, plan],
   )
-  const tl = useMemo(() => makeTimeline(stops), [makeTimeline, stops])
+  const slotViews = useMemo(() => data ? slotTimeline(slots, data.matrices, plan.weekday, plan.startMinutes,
+    plan.stopMinutes, plan.walkToleranceMinutes) : [], [data, slots, plan])
+  const tl = useMemo(() => slotViews.flatMap((v) => (v.stop ? [v.stop] : [])), [slotViews])
 
   // When would the group arrive at, and leave, the selected bar?
   const selectedTimes = useMemo(() => {
@@ -108,43 +123,50 @@ export default function App() {
     if (inTour) return { arrival: inTour.arrival, departure: inTour.departure }
     const last = tl[tl.length - 1]
     const arrival = last
-      ? last.departure + legMinutes(leg(data.matrices, last.bar.matrixIndex, selected.matrixIndex, settings.walkToleranceMinutes))
-      : settings.weekday * DAY + settings.startMinutes
-    return { arrival, departure: arrival + settings.stopMinutes }
-  }, [data, selected, tl, settings])
+      ? last.departure + legMinutes(leg(data.matrices, last.bar.matrixIndex, selected.matrixIndex, plan.walkToleranceMinutes))
+      : plan.weekday * DAY + plan.startMinutes
+    return { arrival, departure: arrival + plan.stopMinutes }
+  }, [data, selected, tl, plan])
 
   const preferences: Preferences = useMemo(() => {
     const has = group.likes.length + group.avoids.length + (group.likedTypes?.length ?? 0) + (group.avoidedTypes?.length ?? 0)
     return { ...prefs, participants: has ? [group] : [] }
   }, [prefs, group])
 
-  const baseConstraints: Constraints = useMemo(() => ({
+  // The planner's own constraints (plan dialog), independent of the map filter.
+  const planConstraints: Constraints = useMemo(() => ({
     blockedDistricts: new Set<number>(),
     includedDistricts: null,
-    venueTypes: settings.venueTypes,
-    officialEdition: settings.officialOnly ? data?.manifest.newestOfficialEdition ?? null : null,
+    venueTypes: plan.venueTypes,
+    officialEdition: plan.officialOnly ? data?.manifest.newestOfficialEdition ?? null : null,
     excludedBars: new Set<string>(),
     departureMinuteOfWeek: null,
-    walkToleranceMinutes: settings.walkToleranceMinutes,
-  }), [settings, data])
+    walkToleranceMinutes: plan.walkToleranceMinutes,
+  }), [plan, data])
 
   const solveBase = useMemo(() => ({
-    districts: settings.districts, filters: baseConstraints, participants: preferences.participants,
+    districts: plan.districts, filters: planConstraints, participants: preferences.participants,
     // λ: minutes of extra travel worth 1.0 of match; 5 at the slider's middle (SPEC 9).
     lambda: 10 * preferences.speedVsMatch,
-    weekday: settings.weekday, startMinutes: settings.startMinutes, stopMinutes: settings.stopMinutes,
-    startDistrict: null, endDistrict: settings.endDistrict, restarts: 3, seed: 1,
-  }), [settings, baseConstraints, preferences])
+    weekday: plan.weekday, startMinutes: plan.startMinutes, stopMinutes: plan.stopMinutes,
+    startDistrict: null, endDistrict: plan.endDistrict, noBacktrack: plan.noBacktrack, restarts: 3, seed: 1,
+  }), [plan, planConstraints, preferences])
+
+  // What you see on the map is also what recommendation and swap lists offer.
+  const visibleBars = useMemo(() => data?.bars.filter((b) => matchesFilter(b, filter)) ?? [], [data, filter])
+  const listOptions = useMemo(() => ({
+    ...solveBase, filters: { ...planConstraints, venueTypes: new Set(VENUE_TYPES), officialEdition: null },
+  }), [solveBase, planConstraints])
 
   const recs = useMemo(() => {
     if (!data || !selected || !selectedTimes || swapIndex !== null) return []
     const blocked = new Set(stops.map((b) => b.district))
     blocked.add(selected.district)
-    if (settings.districts.every((d) => blocked.has(d))) return []
-    return recommend(selected, data.bars, data.matrices,
-      { ...baseConstraints, includedDistricts: included, blockedDistricts: blocked, departureMinuteOfWeek: selectedTimes.departure },
+    if (plan.districts.every((d) => blocked.has(d))) return []
+    return recommend(selected, visibleBars, data.matrices,
+      { ...listOptions.filters, includedDistricts: included, blockedDistricts: blocked, departureMinuteOfWeek: selectedTimes.departure },
       preferences)
-  }, [data, selected, selectedTimes, stops, baseConstraints, included, preferences, settings.districts, swapIndex])
+  }, [data, selected, selectedTimes, stops, visibleBars, listOptions, included, preferences, plan.districts, swapIndex])
 
   // Refine stage (SPEC 8.3): how much longer the best remaining tour gets through each candidate.
   // Only from the end of the tour; from a stop in the middle the question doesn't apply.
@@ -155,7 +177,8 @@ export default function App() {
     return idx >= 0 ? stopIds : [...stopIds, selected.id]
   }, [selected, stopIds])
   const fitKey = useMemo(() => fitPrefix && recs.length
-    ? JSON.stringify([fitPrefix, recs.map((r) => r.bar.id), solveBase.lambda, settings]) : null, [fitPrefix, recs, solveBase, settings])
+    ? JSON.stringify([fitPrefix, recs.map((r) => r.bar.id), solveBase.lambda, plan.weekday, plan.startMinutes,
+      plan.stopMinutes, plan.walkToleranceMinutes, plan.districts, plan.noBacktrack]) : null, [fitPrefix, recs, solveBase, plan])
 
   useEffect(() => {
     if (!channels || !fitKey || !fitPrefix) {
@@ -181,11 +204,12 @@ export default function App() {
   )
   const refining = !!fitKey && !(fit?.key === fitKey && fit.done)
 
-  // Swapping a stop: other bars of its district, ranked by fit between its neighbours.
+  // Swapping or filling a slot: bars of its district, ranked by fit between its neighbours.
   const swap = useMemo(() => {
-    if (!data || swapIndex === null || swapIndex >= stops.length) return null
-    return { index: swapIndex, options: swapOptions(stops, swapIndex, data.bars, data.matrices, solveBase) }
-  }, [data, swapIndex, stops, solveBase])
+    if (!data || swapIndex === null || swapIndex >= slots.length) return null
+    return { index: swapIndex, options: slotOptions(slots, swapIndex, visibleBars, data.matrices, listOptions) }
+  }, [data, swapIndex, slots, visibleBars, listOptions])
+  const swapSlot = swap ? slots[swap.index] : null
 
   const proposalTimelines = useMemo(() => proposals?.tours ?? [], [proposals])
   const previewTl: TimelineStop[] | null = proposals && proposalTimelines.length
@@ -195,49 +219,52 @@ export default function App() {
   const mapBars: MapBar[] = useMemo(() => {
     if (!data) return []
     const rank = new Map((swap ? swap.options.map((o) => o.bar) : refinedRecs.map((r) => r.bar)).map((b, i) => [b.id, i]))
-    const stopIndex = new Map(mapTl.map((s, i) => [s.bar.id, i]))
-    const swapped = swap ? stops[swap.index]?.id : null
-    const focusId = swapped ?? selected?.id
+    const stopIndex = new Map(previewTl ? previewTl.map((s, i) => [s.bar.id, i]) : slots.flatMap((s, i) => (s.bar ? [[s.bar.id, i] as const] : [])))
+    const closed = new Set(mapTl.filter((s) => s.closedOnArrival).map((s) => s.bar.id))
+    const focusId = swapSlot?.bar?.id ?? selected?.id
     const out: MapBar[] = []
     for (const bar of data.bars) {
       const si = stopIndex.get(bar.id)
       const r = rank.get(bar.id)
-      if (si === undefined && bar.id !== focusId && !passesFilters(bar, baseConstraints)) continue
+      const inSwapDistrict = !!swapSlot && bar.district === swapSlot.district
+      if (si === undefined && bar.id !== focusId && r === undefined && !matchesFilter(bar, filter)) continue
       if (bar.id === focusId) {
         out.push({ bar, role: 'selected', label: si !== undefined ? si + 1 : undefined })
       } else if (si !== undefined) {
-        out.push({ bar, role: 'stop', label: si + 1, closed: mapTl[si].closedOnArrival })
+        out.push({ bar, role: 'stop', label: si + 1, closed: closed.has(bar.id) })
       } else if (r !== undefined) {
         out.push({ bar, role: r < 5 ? 'top' : 'next', label: r < 5 ? r + 1 : undefined })
       } else {
         // Fade bars you can't pick next, and districts outside the plan.
-        const blocked = !included.has(bar.district) || (!!selected && !swap
+        const blocked = swapSlot ? !inSwapDistrict : !included.has(bar.district) || (!!selected
           && (bar.district === selected.district || stops.some((s) => s.district === bar.district)))
         out.push({ bar, role: 'other', dim: blocked })
       }
     }
     return out
-  }, [data, refinedRecs, swap, mapTl, selected, stops, baseConstraints, included])
+  }, [data, refinedRecs, swap, swapSlot, mapTl, previewTl, slots, selected, stops, filter, included])
 
   const highlighted = highlightId ? byId.get(highlightId) ?? null : null
   // The bar a highlighted recommendation or swap option is reached from.
-  const previewFrom = swap ? stops[swap.index - 1] ?? null : selected
+  const previewFrom = swap ? slots.slice(0, swap.index).reverse().find((s) => s.bar)?.bar ?? null : selected
 
   // Legs we want real paths for: the tour itself and the previewed leg. Proposal previews stay schematic.
   const wanted = useMemo(() => {
     const pairs: Pair[] = []
     if (!data) return pairs
-    for (let i = 1; i < tl.length; i++) {
-      const l = tl[i].legIn
-      if (l && l.mode !== 'unreachable') pairs.push({ a: tl[i - 1].bar, b: tl[i].bar, mode: l.mode, departure: tl[i - 1].departure })
-    }
+    slotViews.forEach((v, i) => {
+      const l = v.stop?.legIn
+      if (l && l.mode !== 'unreachable' && !v.afterGap) {
+        pairs.push({ a: slotViews[i - 1].stop!.bar, b: v.stop!.bar, mode: l.mode, departure: slotViews[i - 1].stop!.departure })
+      }
+    })
     if (previewFrom && highlighted) {
-      const l = leg(data.matrices, previewFrom.matrixIndex, highlighted.matrixIndex, settings.walkToleranceMinutes)
+      const l = leg(data.matrices, previewFrom.matrixIndex, highlighted.matrixIndex, plan.walkToleranceMinutes)
       const departure = tl.find((s) => s.bar.id === previewFrom.id)?.departure ?? selectedTimes?.departure
       if (l.mode !== 'unreachable' && departure !== undefined) pairs.push({ a: previewFrom, b: highlighted, mode: l.mode, departure })
     }
     return pairs
-  }, [data, tl, previewFrom, highlighted, selectedTimes, settings.walkToleranceMinutes])
+  }, [data, slotViews, tl, previewFrom, highlighted, selectedTimes, plan.walkToleranceMinutes])
 
   useEffect(() => {
     const missing: Pair[] = []
@@ -276,24 +303,52 @@ export default function App() {
     return route.segments.map((s) => ({ coords: s.coords, mode: s.kind === 'ride' ? 'ride' : 'transfer', color: s.color, line: s.line }))
   }, [paths, transit])
 
-  const tourLegs: Leg[] = useMemo(() => mapTl.slice(1).flatMap((s, i) => {
-    const l = s.legIn
-    if (!l || l.mode === 'unreachable') return []
-    return drawLeg(mapTl[i].bar, s.bar, l.mode, mapTl[i].departure, !previewTl)
-  }), [mapTl, previewTl, drawLeg])
+  // Tour legs; an empty slot is a hollow marker at its district centre with dashed lines to its neighbours.
+  const { tourLegs, ghosts } = useMemo(() => {
+    if (previewTl) {
+      return {
+        ghosts: [],
+        tourLegs: previewTl.slice(1).flatMap((s, i) => s.legIn && s.legIn.mode !== 'unreachable'
+          ? drawLeg(previewTl[i].bar, s.bar, s.legIn.mode, previewTl[i].departure, false) : []),
+      }
+    }
+    const point = (v: (typeof slotViews)[number]): [number, number] | null => {
+      if (v.stop) return [v.stop.bar.lon, v.stop.bar.lat]
+      const c = districtInfo.get(v.district)
+      return c ? [c.lon, c.lat] : null
+    }
+    const legs: Leg[] = []
+    slotViews.forEach((v, i) => {
+      if (i === 0) return
+      const prev = slotViews[i - 1]
+      if (v.stop && prev.stop) {
+        const l = v.stop.legIn
+        if (l && l.mode !== 'unreachable') legs.push(...drawLeg(prev.stop.bar, v.stop.bar, l.mode, prev.stop.departure, true))
+        return
+      }
+      const a = point(prev)
+      const b = point(v)
+      if (a && b) legs.push({ coords: [a, b], mode: 'gap' })
+    })
+    const gh = slotViews.flatMap((v, i) => {
+      const c = !v.stop ? districtInfo.get(v.district) : null
+      return c ? [{ lon: c.lon, lat: c.lat, label: i + 1 }] : []
+    })
+    return { tourLegs: legs, ghosts: gh }
+  }, [previewTl, slotViews, districtInfo, drawLeg])
 
   const preview: Leg[] = useMemo(() => {
     if (!data || !previewFrom || !highlighted) return []
-    const l = leg(data.matrices, previewFrom.matrixIndex, highlighted.matrixIndex, settings.walkToleranceMinutes)
+    const l = leg(data.matrices, previewFrom.matrixIndex, highlighted.matrixIndex, plan.walkToleranceMinutes)
     if (l.mode === 'unreachable') return []
     const departure = tl.find((s) => s.bar.id === previewFrom.id)?.departure ?? selectedTimes?.departure ?? null
     return drawLeg(previewFrom, highlighted, l.mode, departure, true)
-  }, [data, previewFrom, highlighted, tl, selectedTimes, settings.walkToleranceMinutes, drawLeg])
+  }, [data, previewFrom, highlighted, tl, selectedTimes, plan.walkToleranceMinutes, drawLeg])
 
-  const tourRoutes = useMemo(() => tl.map((s, i) => i > 0 && s.legIn?.mode === 'transit'
-    ? transit[transitKey(tl[i - 1].bar, s.bar, tl[i - 1].departure)] : undefined), [tl, transit])
+  const slotRoutes = useMemo(() => slotViews.map((v, i) => i > 0 && !v.afterGap && v.stop?.legIn?.mode === 'transit'
+    ? transit[transitKey(slotViews[i - 1].stop!.bar, v.stop.bar, slotViews[i - 1].stop!.departure)] : undefined), [slotViews, transit])
 
-  const visited = useMemo(() => new Set(mapTl.map((s) => s.bar.district)), [mapTl])
+  const visited = useMemo(() => new Set(previewTl ? previewTl.map((s) => s.bar.district) : slots.map((s) => s.district)), [previewTl, slots])
   const recLines = useMemo(
     () => selected && !swap ? refinedRecs.slice(0, 5).filter((r) => r.bar.id !== highlightId)
       .map((r) => [[selected.lon, selected.lat], [r.bar.lon, r.bar.lat]] as [number, number][]) : [],
@@ -301,10 +356,15 @@ export default function App() {
   )
 
   function pick(id: string, fly: boolean) {
+    const b = byId.get(id)
+    // While swapping, a click on a bar of that slot's district takes it.
+    if (swap && swapSlot && b && b.district === swapSlot.district && b.id !== swapSlot.bar?.id) {
+      setSlotBar(swap.index, b.id)
+      return
+    }
     setSelectedId(id)
     setHighlightId(null)
     setSwapIndex(null)
-    const b = byId.get(id)
     if (fly && b) setFocus({ lat: b.lat, lon: b.lon, key: Date.now() })
   }
 
@@ -314,58 +374,110 @@ export default function App() {
     setSwapIndex(null)
   }
 
-  const toBars = useCallback((r: TourResult) => r.stops.map((id) => byId.get(id)).filter((b): b is Bar => !!b), [byId])
+  const toSlots = useCallback((r: TourResult): SlotIds[] => r.stops.flatMap((id) => {
+    const b = byId.get(id)
+    return b ? [{ district: b.district, barId: b.id }] : []
+  }), [byId])
 
   function propose(from: Bar | null) {
     if (!channels) return
+    setPlanOpen(false)
     setActiveProposal(0)
     setProposals({ title: from ? `Touren ab ${from.name}` : 'Tourvorschläge', running: true, progress: 0, tours: [] })
     setSelectedId(null)
-    const options: SolveRequest = { ...solveBase, prefix: from ? [from.id] : [], pinned: [] }
+    const options: SolveRequest = { ...solveBase, startDistrict: from ? null : plan.startDistrict, prefix: from ? [from.id] : [], pinned: [] }
     channels.plan.run({ type: 'propose', options, count: 3 }, {
       onProgress: (done, total) => setProposals((p) => p && { ...p, progress: done / total }),
     }).then((tours) => {
-      setProposals((p) => p && { ...p, running: false, progress: 1, tours: tours.map((t) => makeTimeline(toBars(t))) })
+      setProposals((p) => p && {
+        ...p, running: false, progress: 1,
+        tours: tours.map((t) => makeTimeline(t.stops.map((id) => byId.get(id)).filter((b): b is Bar => !!b))),
+      })
     }, (e) => { if (!(e instanceof CancelledError)) setProposals((p) => p && { ...p, running: false }) })
   }
 
   function applyProposal(i: number) {
     const t = proposalTimelines[i]
     if (!t) return
-    setStopIds(t.map((s) => s.bar.id))
+    setSlotIds(t.map((s) => ({ district: s.bar.district, barId: s.bar.id })))
     setPinned((cur) => new Set(t.filter((s) => cur.has(s.bar.id)).map((s) => s.bar.id)))
     setProposals(null)
     channels?.plan.cancel()
   }
 
-  function solveInto(label: string, options: SolveRequest) {
+  /** One open place per planned district, in a walkable order of district centres. */
+  function makeTemplate() {
+    const left = new Set(plan.districts)
+    const end = plan.endDistrict
+    if (end !== null) left.delete(end)
+    const centre = (d: number) => districtInfo.get(d) ?? { lon: 16.37, lat: 48.21 }
+    let cur = plan.startDistrict ?? [...left].sort((a, b) => a - b)[0]
+    const order: number[] = []
+    while (cur !== undefined && left.size) {
+      order.push(cur)
+      left.delete(cur)
+      const c = centre(cur)
+      cur = [...left].sort((a, b) => {
+        const da = (centre(a).lon - c.lon) ** 2 * 0.44 + (centre(a).lat - c.lat) ** 2
+        const db = (centre(b).lon - c.lon) ** 2 * 0.44 + (centre(b).lat - c.lat) ** 2
+        return da - db
+      })[0]
+    }
+    if (end !== null) order.push(end)
+    setSlotIds(order.map((d) => ({ district: d, barId: null })))
+    setPinned(new Set())
+    setPlanOpen(false)
+    setSelectedId(null)
+  }
+
+  function runPlanJob(label: string, job: Parameters<SolverChannel['run']>[0]) {
     if (!channels) return
     setBusy(label)
     setSwapIndex(null)
-    channels.plan.run({ type: 'solve', options }).then((tours) => {
+    channels.plan.run(job).then((tours) => {
       setBusy(null)
-      if (tours[0]) setStopIds(tours[0].stops)
+      if (tours[0]) setSlotIds(toSlots(tours[0]))
     }, (e) => { if (!(e instanceof CancelledError)) setBusy(null) })
   }
 
-  /** "Tour für mich fertig planen": keep the stops so far, in order, and plan the rest. */
+  /** Keep the slots in their order, fill open ones, add missing districts after them. */
   function finishTour() {
-    solveInto('Plane die restlichen Bezirke …', { ...solveBase, prefix: stopIds, pinned: [] })
+    runPlanJob('Plane die offenen Bezirke …', { type: 'complete', options: { ...solveBase, prefix: [], pinned: [] }, slots: slotIds })
   }
 
   /** Keep pinned bars (a pinned first stop stays the start), choose everything else anew. */
   function optimizeTour() {
-    const first = stopIds[0] && pinned.has(stopIds[0]) ? [stopIds[0]] : []
+    const first = slotIds[0]?.barId && pinned.has(slotIds[0].barId) ? [slotIds[0].barId] : []
     const keep = stopIds.filter((id) => pinned.has(id) && id !== first[0])
-    const districts = [...new Set([...settings.districts, ...stopIds.filter((id) => pinned.has(id)).map((id) => byId.get(id)!.district)])]
-    solveInto('Optimiere die Tour …', { ...solveBase, districts, prefix: first, pinned: keep })
+    const districts = [...new Set([...plan.districts, ...stops.filter((b) => pinned.has(b.id)).map((b) => b.district)])]
+    runPlanJob('Optimiere die Tour …', { type: 'solve', options: { ...solveBase, districts, prefix: first, pinned: keep } })
   }
 
-  function replaceStop(index: number, id: string) {
-    setStopIds((ids) => ids.map((x, i) => (i === index ? id : x)))
+  function setSlotBar(index: number, id: string) {
+    setSlotIds((cur) => cur.map((s, i) => (i === index ? { ...s, barId: id } : s)))
     setPinned((cur) => new Set([...cur, id]))
     setSwapIndex(null)
     setHighlightId(null)
+  }
+
+  function addSelected() {
+    if (!selected) return
+    const i = slotIds.findIndex((s) => s.district === selected.district)
+    if (i >= 0) setSlotBar(i, selected.id)
+    else {
+      setSlotIds((cur) => [...cur, { district: selected.district, barId: selected.id }])
+      setPinned((cur) => new Set([...cur, selected.id]))
+    }
+  }
+
+  function moveSlot(from: number, to: number) {
+    setSlotIds((cur) => {
+      const next = cur.slice()
+      const [x] = next.splice(from, 1)
+      next.splice(to, 0, x)
+      return next
+    })
+    setSwapIndex(null)
   }
 
   // Local tag edit mode exists on the dev server only (SPEC 5.5); the build drops this branch.
@@ -380,42 +492,58 @@ export default function App() {
 
   // Escape leaves the current selection or swap, like a click on empty map.
   const escRef = useRef(clearSelection)
-  escRef.current = clearSelection
+  useEffect(() => { escRef.current = clearSelection })
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !tasteOpen) escRef.current() }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !tasteOpen && !planOpen) escRef.current() }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [tasteOpen])
+  }, [tasteOpen, planOpen])
 
   if (error) return <main className="loading">Daten konnten nicht geladen werden: {error}</main>
   if (!data) return <main className="loading"><span className="spinner" /> Lade Lokale und Fahrzeiten …</main>
 
   const blockedBy = selected && !stopIds.includes(selected.id) ? stops.find((b) => b.district === selected.district) ?? null : null
+  const emptySlot = !!selected && slotIds.some((s) => s.district === selected.district && !s.barId)
   const hovered = hoverBar ? byId.get(hoverBar.id) : null
-  const hoverFrom = swap ? stops[swap.index - 1] ?? null : selected
+  const hoverFrom = previewFrom
   const hoverLeg = hovered && hoverFrom && hovered.id !== hoverFrom.id
-    ? leg(data.matrices, hoverFrom.matrixIndex, hovered.matrixIndex, settings.walkToleranceMinutes) : null
+    ? leg(data.matrices, hoverFrom.matrixIndex, hovered.matrixIndex, plan.walkToleranceMinutes) : null
   const hoverDeparture = hoverFrom ? tl.find((s) => s.bar.id === hoverFrom.id)?.departure ?? selectedTimes?.departure ?? null : null
   const hoverArrival = hoverLeg && hoverDeparture !== null && hoverLeg.mode !== 'unreachable' ? hoverDeparture + hoverLeg.minutes : null
-  const hd = hoverDistrict && !hoverBar ? districtNames.get(hoverDistrict.district) : null
+  // In swap mode: what taking the hovered bar would change.
+  const hoverSwap = swap && swapSlot && hovered && hovered.district === swapSlot.district && hovered.id !== swapSlot.bar?.id
+    ? slotDelta(slots, swap.index, hovered, data.matrices, listOptions) : null
+  const hd = hoverDistrict && !hoverBar ? districtInfo.get(hoverDistrict.district) : null
+  const showWelcome = !selected && slotIds.length === 0 && !proposals
+  const planSummary = `${WEEKDAYS[plan.weekday].slice(0, 2)} ${clock(plan.startMinutes)} · ${plan.districts.length} Bezirke`
 
   return (
     <div className="app">
       <header className="topbar">
-        <FilterBar bars={data.bars} settings={settings} onSettings={setSettings} group={group} onGroup={setGroup}
-          onPick={(id) => pick(id, true)} onTaste={() => setTasteOpen(true)} />
+        <FilterMenu bars={data.bars} filter={filter} onFilter={setFilter} planMinuteOfWeek={plan.weekday * DAY + plan.startMinutes}
+          onPick={(id) => pick(id, true)} onPlan={() => setPlanOpen(true)} planSummary={planSummary} />
       </header>
       <main className="planner">
         <div className="map-wrap">
           <MapView bars={mapBars} districts={data.districts} districtLabels={data.districtLabels} visitedDistricts={visited}
-            tourLegs={tourLegs} recLines={recLines} preview={preview} highlightId={highlightId} focus={focus}
+            tourLegs={tourLegs} recLines={recLines} preview={preview} ghosts={ghosts} highlightId={highlightId} focus={focus}
             onSelect={(id) => pick(id, false)} onBackgroundClick={clearSelection}
             onHoverBar={setHoverBar} onHoverDistrict={setHoverDistrict} />
           {hovered && hoverBar && (
             <div className="hover-card" style={{ left: hoverBar.x + 16, top: hoverBar.y + 12 }}>
               <strong>{hovered.name}</strong> <TipBadge bar={hovered} />
               <div className="rec-meta"><TypePill bar={hovered} /> <span>{hovered.district}. Bezirk</span></div>
-              {hoverLeg && <div className="hover-leg">{hoverLeg.mode === 'walk' ? '🚶' : '🚋'} {legLabel(hoverLeg)} von {hoverFrom?.name}</div>}
+              {hoverSwap ? (
+                <div className="hover-leg">
+                  {swapSlot?.bar ? `Statt ${swapSlot.bar.name}: ` : 'Für den offenen Platz: '}
+                  <span className={hoverSwap.travelDelta <= 0 && swapSlot?.bar ? 'good' : ''}>
+                    {hoverSwap.travelDelta >= 0 ? '+' : '−'}{Math.abs(Math.round(hoverSwap.travelDelta))} Min. Weg
+                  </span>
+                  <span className="muted small"> · Klick übernimmt</span>
+                </div>
+              ) : hoverLeg && (
+                <div className="hover-leg">{hoverLeg.mode === 'walk' ? '🚶' : '🚋'} {legLabel(hoverLeg)} von {hoverFrom?.name}</div>
+              )}
               <div className="chips"><TagChips bar={hovered} max={4} /> <OpenStatus bar={hovered} at={hoverArrival} /></div>
             </div>
           )}
@@ -426,10 +554,16 @@ export default function App() {
                 {!included.has(hoverDistrict.district) ? ' · nicht in der Planung' : ''}</span>
             </div>
           )}
-          <div className="map-legend" aria-label="Legende Wege">
-            <span><i className="lg walk" /> zu Fuß</span>
-            <span><i className="lg ride" /> Öffi-Linie (schnellste Verbindung)</span>
-            <span><i className="lg pending" /> Öffis, Strecke wird geladen</span>
+          <div className="map-legend" aria-label="Legende">
+            <div>
+              {VENUE_TYPES.map((t) => <span key={t}><i className="type-dot" style={{ background: TYPE_COLOR[t] }} /> {TYPE_SHORT[t]}</span>)}
+            </div>
+            <div>
+              <span><i className="lg walk" /> zu Fuß</span>
+              <span><i className="lg ride" /> Öffi-Linie</span>
+              <span><i className="lg pending" /> Öffis, lädt</span>
+              <span><i className="lg gap" /> offener Bezirk</span>
+            </div>
           </div>
         </div>
         <aside className="panel">
@@ -438,26 +572,29 @@ export default function App() {
               active={activeProposal} onHover={setActiveProposal} onApply={applyProposal}
               onClose={() => { setProposals(null); channels?.plan.cancel() }} />
           )}
-          {(selected || !proposals) && <BarPanel bar={selected} arrival={selectedTimes?.arrival ?? null} blockedBy={blockedBy}
-            inTour={!!selected && stopIds.includes(selected.id)} newestEdition={data.manifest.newestOfficialEdition}
-            tourEmpty={stopIds.length === 0} busy={!!busy || !!proposals?.running}
-            onAdd={() => {
-              if (!selected) return
-              setStopIds((ids) => [...ids, selected.id])
-              setPinned((cur) => new Set([...cur, selected.id]))
-            }}
-            onReplace={() => selected && blockedBy && replaceStop(stopIds.indexOf(blockedBy.id), selected.id)}
-            onPropose={() => propose(selected)}
-            onClose={clearSelection} onTagChange={changeTag} />}
+          {(selected || showWelcome) && (
+            <BarPanel bar={selected} arrival={selectedTimes?.arrival ?? null} blockedBy={blockedBy}
+              inTour={!!selected && stopIds.includes(selected.id)} newestEdition={data.manifest.newestOfficialEdition}
+              tourEmpty={slotIds.length === 0} busy={!!busy || !!proposals?.running} emptySlot={emptySlot}
+              onAdd={addSelected}
+              onReplace={() => selected && blockedBy && setSlotBar(slotIds.findIndex((s) => s.barId === blockedBy.id), selected.id)}
+              onPropose={() => propose(selected)} onTemplate={makeTemplate} onPlan={() => setPlanOpen(true)}
+              onClose={clearSelection} onTagChange={changeTag} />
+          )}
+          {!selected && !proposals && slotIds.length > 0 && (
+            <TourStats slots={slotViews} routes={slotRoutes} stopMinutes={plan.stopMinutes} />
+          )}
           {selected && !swap && (
             <Recommendations recs={refinedRecs} preferences={preferences} departure={selectedTimes?.departure ?? null}
               refining={refining}
               onPreferences={(p) => setPrefs({ similarity: p.similarity, speedVsMatch: p.speedVsMatch })}
               onPreview={(id) => pick(id, true)} onHover={setHighlightId} />
           )}
-          <TourPanel stops={tl} districtCount={settings.districts.length} pinned={pinned} routes={tourRoutes} swap={swap}
-            busy={busy} onSelect={(id) => pick(id, true)}
-            onRemove={(id) => { setStopIds((ids) => ids.filter((x) => x !== id)); setSwapIndex(null) }}
+          <TourPanel slots={slotViews} districtCount={plan.districts.length} districtName={districtName} pinned={pinned}
+            routes={slotRoutes} swap={swap} selectedId={selectedId} busy={busy}
+            onSelect={(id) => pick(id, true)}
+            onRemove={(i) => { setSlotIds((cur) => cur.filter((_, k) => k !== i)); setSwapIndex(null) }}
+            onClear={(i) => { setSlotIds((cur) => cur.map((s, k) => (k === i ? { ...s, barId: null } : s))); setSwapIndex(null) }}
             onTogglePin={(id) => setPinned((cur) => {
               const next = new Set(cur)
               if (next.has(id)) next.delete(id)
@@ -468,16 +605,24 @@ export default function App() {
               setSwapIndex(i)
               setSelectedId(null)
               setHighlightId(null)
-              const b = i !== null ? stops[i] : null
-              if (b) setFocus({ lat: b.lat, lon: b.lon, key: Date.now() })
+              const s = i !== null ? slots[i] : null
+              const at = s?.bar ?? (s ? districtInfo.get(s.district) : null)
+              if (at) setFocus({ lat: at.lat, lon: at.lon, key: Date.now() })
             }}
-            onPickSwap={(id) => swap && replaceStop(swap.index, id)}
+            onPickSwap={(id) => swap && setSlotBar(swap.index, id)}
             onHoverSwap={setHighlightId}
+            onMove={moveSlot}
             onFinish={finishTour} onOptimize={optimizeTour}
-            onClear={() => { setStopIds([]); setPinned(new Set()); setSwapIndex(null) }} />
+            onClearAll={() => { setSlotIds([]); setPinned(new Set()); setSwapIndex(null) }} />
         </aside>
       </main>
       <Footer />
+      {planOpen && (
+        <PlanDialog plan={plan} onPlan={setPlan} group={group} onGroup={setGroup} districtName={districtName}
+          tourEmpty={slotIds.length === 0} busy={!!busy || !!proposals?.running}
+          onTaste={() => setTasteOpen(true)} onPropose={() => propose(null)} onTemplate={makeTemplate}
+          onClose={() => setPlanOpen(false)} />
+      )}
       {tasteOpen && (
         <TasteFinder onClose={() => setTasteOpen(false)}
           onDone={(p) => { setGroup(p); setTasteOpen(false); setPrefs((cur) => ({ ...cur, speedVsMatch: Math.max(cur.speedVsMatch, 0.6) })) }} />

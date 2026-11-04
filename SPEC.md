@@ -431,7 +431,8 @@ objective = Σ leg minutes + Σ closedPenalty(v, arrival) − λ × Σ match(v)
 1. **Candidates:** for each district, apply the filters and keep `K` bars (default 15, maximum 30). Take half by `match`, and the other half spread across the district so the choice isn't clustered. *Tuned 2026-11-04:* without preferences, a quarter by richness (tips, official, tags), a quarter by connectivity (sum of the two shortest legs to other districts), the rest spread. Bars known to be closed for the whole day window are dropped. This cut a 23-district tour from 234 to 203 travel minutes at K = 15.
 2. **Inner step:** for a fixed district order, a layered dynamic programme picks the best bar per district. Track the arrival time along the best path to each bar, for opening hours. This makes it a heuristic, which is fine here.
 3. **Outer step:** multi-start local search over the district order, using Or-opt and 2-opt moves with first improvement. Use a seeded random generator so tests are repeatable.
-4. **Polish** *(added 2026-11-04)*: try every eligible bar of each free stop's district in place and keep improvements, since the search only sees K candidates.
+4. **No straight back** *(added 2026-11-04, on by default, switch in the plan dialog)*: two transit legs in a row that turn by more than about 135° add 30 minutes, so tours don't ride out one line for a single stop and straight back. The matrices have no line names, so this is geometric; the timeline also warns when Transitous shows the same line both ways.
+5. **Polish** *(added 2026-11-04)*: try every eligible bar of each free stop's district in place and keep improvements, since the search only sees K candidates.
 
 Measured on the real data (2,140 bars, 23 districts, Node 22): one solve 0.6-0.8 s, three proposals without a start 3.5-4.7 s, refining 20 recommendations 2.3 s.
 
@@ -478,6 +479,8 @@ Settings, all with defaults so people can start immediately:
 - Bezirke (alle 23), Startbezirk (Vorschlagen), Letzter Bezirk (Egal)
 - Lokaltypen (alle), Nur offizielle Partnerlokale (aus)
 - Teilnehmer:innen: name plus "mag" and "lieber nicht" per tag (optional)
+
+*Changed 2026-11-04 (owner):* the map filter (top left: venue types, "must have" tags, recommendation sources, open at a time) only changes what is shown and what recommendation and swap lists offer. Everything the planner uses (day, start, stay, districts, first and last district, walking preference, venue types for planning, preferences, taste quiz) lives in the "Tour planen" dialog. A tour is a list of slots, one per district, which may be empty ("Leere Vorlage"); slots can be reordered by drag and drop, cleared (place kept) or deleted.
 
 ### 10.2 Planner
 

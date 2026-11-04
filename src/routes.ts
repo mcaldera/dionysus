@@ -38,6 +38,8 @@ export interface TransitRoute {
   lines: string[]
   /** Other line sequences of similar duration, depending on when you leave. */
   alternatives: string[][]
+  /** Minutes per MOTIS mode (WALK, SUBWAY, TRAM, BUS, ...), in order, for statistics. */
+  parts: { mode: string; minutes: number }[]
 }
 
 // Wiener Linien colours when the feed has none (buses and trams usually don't).
@@ -132,6 +134,7 @@ export function chooseRoute(itineraries: MotisItinerary[], slackSeconds = 5 * 60
   return {
     lines: chosen,
     alternatives: alternatives.slice(0, 2),
+    parts: best.legs.map((l) => ({ mode: l.mode, minutes: l.duration / 60 })),
     segments: best.legs.map((l) => {
       const coords = decodePolyline(l.legGeometry.points, l.legGeometry.precision)
       if (l.mode === 'WALK') return { coords, kind: 'walk' as const }

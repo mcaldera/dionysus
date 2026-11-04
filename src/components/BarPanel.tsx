@@ -20,6 +20,10 @@ interface Props {
   onReplace: () => void
   /** Propose complete tours, from this bar or (without a bar) from anywhere. */
   onPropose: () => void
+  onTemplate: () => void
+  onPlan: () => void
+  /** The tour has an empty slot for this bar's district. */
+  emptySlot: boolean
   onClose: () => void
   onTagChange?: (bar: Bar, tag: string, value: 0 | 1) => void
 }
@@ -30,32 +34,27 @@ function editionLabel(e: string): string {
 }
 
 export default function BarPanel(props: Props) {
-  const { bar, arrival, blockedBy, inTour, newestEdition, tourEmpty, busy, onAdd, onReplace, onPropose, onClose, onTagChange } = props
+  const { bar, arrival, blockedBy, inTour, newestEdition, tourEmpty, busy, onAdd, onReplace, onPropose, onTemplate, onPlan, emptySlot, onClose, onTagChange } = props
   if (!bar) {
     return (
       <section className="card welcome" aria-label="Ausgewähltes Lokal">
         <h2>Prost! 🍻</h2>
-        {tourEmpty ? (
-          <>
-            <p>Wie möchtet ihr planen?</p>
-            <div className="plan-modes">
-              <button type="button" className="plan-mode" disabled={busy} onClick={onPropose}>
-                <strong>✨ Komplette Tour vorschlagen</strong>
-                <span>Ihr bekommt sofort drei ganze Routen und tauscht dann einzelne Lokale.</span>
-              </button>
-              <div className="plan-mode static">
-                <strong>👣 Schritt für Schritt</strong>
-                <span>Klickt ein Lokal auf der Karte an oder sucht oben nach einem Namen. Dann zeigen wir die besten nächsten Lokale.</span>
-              </div>
-            </div>
-            <p className="hint">Bezirke, Startzeit und Aufenthalt stellt ihr oben bei 🕒 ein, euren Geschmack bei ✨ Geschmackstest.</p>
-          </>
-        ) : (
-          <>
-            <p>Klickt ein Lokal auf der Karte an oder sucht oben nach einem Namen. Die Farben zeigen die Art des Lokals, größere Punkte haben mehr Infos.</p>
-            <p className="hint">In der Tour unten könnt ihr jedes Lokal tauschen (⇄) oder fixieren (📌).</p>
-          </>
-        )}
+        <p>Wie möchtet ihr planen?</p>
+        <div className="plan-modes">
+          <button type="button" className="plan-mode" disabled={busy} onClick={onPropose}>
+            <strong>✨ Komplette Tour vorschlagen</strong>
+            <span>Ihr bekommt sofort drei ganze Routen und tauscht dann einzelne Lokale.</span>
+          </button>
+          <button type="button" className="plan-mode" onClick={onTemplate}>
+            <strong>📋 Leere Vorlage</strong>
+            <span>Ein Platz pro Bezirk. Füllt die Lokale, die ihr kennt, und lasst den Rest planen.</span>
+          </button>
+          <div className="plan-mode static">
+            <strong>👣 Schritt für Schritt</strong>
+            <span>Klickt ein Lokal auf der Karte an oder sucht oben nach einem Namen. Dann zeigen wir die besten nächsten Lokale.</span>
+          </div>
+        </div>
+        <p className="hint">Startzeit, Bezirke, Wege und Vorlieben: <button type="button" className="link inline" onClick={onPlan}>🗺 Tour planen</button>. Was ihr auf der Karte seht, steuert oben links der Filter.</p>
       </section>
     )
   }
@@ -101,7 +100,7 @@ export default function BarPanel(props: Props) {
             blockedBy ? (
               <button type="button" className="primary" onClick={onReplace}>Statt {blockedBy.name} nehmen</button>
             ) : (
-              <button type="button" className="primary" onClick={onAdd}>Zur Tour hinzufügen</button>
+              <button type="button" className="primary" onClick={onAdd}>{emptySlot ? 'In den offenen Platz setzen' : 'Zur Tour hinzufügen'}</button>
             )
           )}
           {tourEmpty && !inTour && (
