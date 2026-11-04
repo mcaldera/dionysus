@@ -22,20 +22,23 @@ export interface SiteData {
   bars: Bar[]
   districts: GeoJSON.FeatureCollection
   districtLabels: GeoJSON.FeatureCollection
+  /** Everything outside Vienna, greyed out on the map. */
+  viennaMask: GeoJSON.FeatureCollection
   matrices: Matrices
 }
 
 /** The solver only needs walk and transit_p50; p25 and p75 are for display (SPEC 5.7). */
 export async function loadSiteData(): Promise<SiteData> {
-  const [manifest, bars, districts, districtLabels, walk, transitP50] = await Promise.all([
+  const [manifest, bars, districts, districtLabels, viennaMask, walk, transitP50] = await Promise.all([
     json<Manifest>('manifest.json'),
     json<Bar[]>('bars.json'),
     json<GeoJSON.FeatureCollection>('districts.geojson'),
     json<GeoJSON.FeatureCollection>('district_labels.geojson'),
+    json<GeoJSON.FeatureCollection>('vienna_mask.geojson'),
     bin('walk'),
     bin('transit_p50'),
   ])
-  return { manifest, bars, districts, districtLabels, matrices: { n: manifest.n, walk, transitP50 } }
+  return { manifest, bars, districts, districtLabels, viennaMask, matrices: { n: manifest.n, walk, transitP50 } }
 }
 
 export async function loadTransitRange(): Promise<[Uint8Array, Uint8Array]> {

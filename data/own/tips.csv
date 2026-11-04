@@ -1,49 +1,262 @@
-name,district,street,source,kind,url
-Pizza Pub,23,,owner,tour idea,
-Wilde Hilde,12,,owner,tour idea,
-Schaumweinhäuschen,13,,owner,tour idea,
-Espresso Flamingo,15,,owner,tour idea,
-Holzis,14,,owner,tour idea,
-Wunderlampe,16,,owner,tour idea,
-Pezzl,17,,owner,tour idea,
-Espresso Babsi,18,,owner,tour idea,
-Unders,19,,owner,tour idea,
-Cafe Haller,20,,owner,tour idea,
-Likörstube Sveceny,21,Brünner Straße 26,owner,tour idea,
-Kagraner Kistl,22,,owner,tour idea,
-Marktstüberl,2,,owner,tour idea,
-Schweden Espresso,1,,owner,tour idea,
-Moped,3,,owner,tour idea,
-Cafe Zipp,11,,owner,tour idea,
-Cafe Impuls,10,,owner,tour idea,
-Cafe U1,4,,owner,tour idea,
-Cafe UKO,5,,owner,tour idea,
-Cafe Habakuk,6,,owner,tour idea,
-Kreisky,7,,owner,tour idea,
-Debakel,8,,owner,tour idea,
-Glashütte,9,,owner,tour idea,
-Cafe Anno,8,,owner,good example,
-Cafe Carina,8,,owner,good example,
-Tee- und Likörstube,22,,Falter 2016 Tschocherl-Report,tschocherl,https://www.falter.at/zeitung/20160608/die-feuchtfroehliche-alkoase
-Aufzug Café,4,Wiedner Gürtel 4,Falter Lokalführer: Wiens neue Tschocherln,tschocherl,https://www.falter.at/lokalfuehrer/wiens-neue-tschocherln
-Klein aber fein,6,Hornbostelgasse 3,Falter Lokalführer: Wiens neue Tschocherln,tschocherl,https://www.falter.at/lokalfuehrer/wiens-neue-tschocherln
-Café Inges Eck,,,Falter Lokalführer: Wiens neue Tschocherln,tschocherl,https://www.falter.at/lokalfuehrer/wiens-neue-tschocherln
-Lindwurmstüberl,,,Falter Lokalführer: Wiens neue Tschocherln,tschocherl,https://www.falter.at/lokalfuehrer/wiens-neue-tschocherln
-Stuwer,2,Stuwerstraße 47,Falter Lokalführer: Wiens neue Tschocherln,tschocherl,https://www.falter.at/lokalfuehrer/wiens-neue-tschocherln
-Krah Krah,1,Rabensteig 8,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien
-Hopferl,1,Naglergasse 13,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien
-Hawidere,15,Ullmannstraße 31,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien
-Fischerbräu,19,Billrothstraße 17,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien
-1516 Brewing Company,1,Schwarzenbergstraße 2,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien
-Känguruh Pub,6,Bürgerspitalgasse 20,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien
-Schnauzer & Beagle Brewery,10,Hasengasse 56,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien
-Wiener Stadtbräu,1,Graben 29a,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien
-Schmauswaberl,6,Linke Wienzeile 64,1000things: 9 Wiener Beisln,beisl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/
-Café Anzengruber,4,Schleifmühlgasse 19,1000things: 9 Wiener Beisln,beisl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/
-Café Else,2,Heinestraße 36,1000things: 9 Wiener Beisln,beisl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/
-Café Monic,6,Gumpendorfer Straße 69,1000things: 9 Wiener Beisln,tschocherl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/
-Café Weidinger,16,Lerchenfelder Gürtel 1,1000things: 9 Wiener Beisln,beisl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/
-Wunder-Bar,1,Schönlaterngasse 8,1000things: 9 Wiener Beisln,beisl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/
-Café Stadtbahn,18,Gersthofer Straße 47,1000things: 9 Wiener Beisln,beisl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/
-Café Malipop,3,Ungargasse 10,1000things: 9 Wiener Beisln,beisl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/
-Café Bendl,1,,offbeatbudapest.com: bars in Vienna,kultig,https://www.offbeatbudapest.com/vienna-city-guide/where-to-drink-with-the-locals-best-bars-in-vienna/
+name,district,street,source,kind,url,weight,threads,strength
+Pizza Pub,23,,owner,tour idea,,,,
+Wilde Hilde,12,,owner,tour idea,,,,
+Schaumweinhäuschen,13,,owner,tour idea,,,,
+Espresso Flamingo,15,,owner,tour idea,,,,
+Holzis,14,,owner,tour idea,,,,
+Wunderlampe,16,,owner,tour idea,,,,
+Pezzl,17,,owner,tour idea,,,,
+Espresso Babsi,18,,owner,tour idea,,,,
+Unders,19,,owner,tour idea,,,,
+Cafe Haller,20,,owner,tour idea,,,,
+Likörstube Sveceny,21,Brünner Straße 26,owner,tour idea,,,,
+Kagraner Kistl,22,,owner,tour idea,,,,
+Marktstüberl,2,,owner,tour idea,,,,
+Schweden Espresso,1,,owner,tour idea,,,,
+Moped,3,,owner,tour idea,,,,
+Cafe Zipp,11,,owner,tour idea,,,,
+Cafe Impuls,10,,owner,tour idea,,,,
+Cafe U1,4,,owner,tour idea,,,,
+Cafe UKO,5,,owner,tour idea,,,,
+Cafe Habakuk,6,,owner,tour idea,,,,
+Kreisky,7,,owner,tour idea,,,,
+Debakel,8,,owner,tour idea,,,,
+Glashütte,9,,owner,tour idea,,,,
+Cafe Anno,8,,owner,good example,,,,
+Cafe Carina,8,,owner,good example,,,,
+Tee- und Likörstube,22,,Falter 2016 Tschocherl-Report,tschocherl,https://www.falter.at/zeitung/20160608/die-feuchtfroehliche-alkoase,,,
+Aufzug Café,4,Wiedner Gürtel 4,Falter Lokalführer: Wiens neue Tschocherln,tschocherl,https://www.falter.at/lokalfuehrer/wiens-neue-tschocherln,,,
+Klein aber fein,6,Hornbostelgasse 3,Falter Lokalführer: Wiens neue Tschocherln,tschocherl,https://www.falter.at/lokalfuehrer/wiens-neue-tschocherln,,,
+Café Inges Eck,,,Falter Lokalführer: Wiens neue Tschocherln,tschocherl,https://www.falter.at/lokalfuehrer/wiens-neue-tschocherln,,,
+Lindwurmstüberl,,,Falter Lokalführer: Wiens neue Tschocherln,tschocherl,https://www.falter.at/lokalfuehrer/wiens-neue-tschocherln,,,
+Stuwer,2,Stuwerstraße 47,Falter Lokalführer: Wiens neue Tschocherln,tschocherl,https://www.falter.at/lokalfuehrer/wiens-neue-tschocherln,,,
+Krah Krah,1,Rabensteig 8,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien,,,
+Hopferl,1,Naglergasse 13,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien,,,
+Hawidere,15,Ullmannstraße 31,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien,,,
+Fischerbräu,19,Billrothstraße 17,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien,,,
+1516 Brewing Company,1,Schwarzenbergstraße 2,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien,,,
+Känguruh Pub,6,Bürgerspitalgasse 20,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien,,,
+Schnauzer & Beagle Brewery,10,Hasengasse 56,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien,,,
+Wiener Stadtbräu,1,Graben 29a,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien,,,
+Schmauswaberl,6,Linke Wienzeile 64,1000things: 9 Wiener Beisln,beisl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/,,,
+Café Anzengruber,4,Schleifmühlgasse 19,1000things: 9 Wiener Beisln,beisl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/,,,
+Café Else,2,Heinestraße 36,1000things: 9 Wiener Beisln,beisl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/,,,
+Café Monic,6,Gumpendorfer Straße 69,1000things: 9 Wiener Beisln,tschocherl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/,,,
+Café Weidinger,16,Lerchenfelder Gürtel 1,1000things: 9 Wiener Beisln,beisl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/,,,
+Wunder-Bar,1,Schönlaterngasse 8,1000things: 9 Wiener Beisln,beisl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/,,,
+Café Stadtbahn,18,Gersthofer Straße 47,1000things: 9 Wiener Beisln,beisl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/,,,
+Café Malipop,3,Ungargasse 10,1000things: 9 Wiener Beisln,beisl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/,,,
+Café Bendl,1,,offbeatbudapest.com: bars in Vienna,kultig,https://www.offbeatbudapest.com/vienna-city-guide/where-to-drink-with-the-locals-best-bars-in-vienna/,,,
+Cafe defizit,17,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,140.5,6,stark
+"Stehbuffet ""am Franz-Jonas-Platz""",21,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,112.1,5,stark
+Café Bendl,1,,r/wien,rau,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,99.2,7,stark
+Glashütte,9,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,82.0,6,stark
+Café Zwutschkerl,12,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,79.7,6,stark
+Cafe Siebenbrunnen,5,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,71.0,3,stark
+Cafe Treff,5,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,43.7,4,stark
+Cafe Speising,13,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,42.2,2,stark
+Gastwirtschaft Steman,6,,r/wien,urig,https://www.reddit.com/r/wien/comments/1wizfii/sterben_die_klassischen_wiener_beisln_wirklich/,39.5,2,stark
+Kagraner Kistl,22,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,35.1,3,stark
+Zur Kopfwehinsel,20,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,32.7,4,stark
+Cafe Dialog,3,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,30.7,5,stark
+"Unbedingt zur ""Gerti""",9,,r/wien,urig,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,30.4,2,stark
+Gerüchteküche,17,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,29.5,1,stark
+Schmauswaberl,6,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,26.2,7,stark
+Zum Lercherl von Hernals,17,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,28.5,1,stark
+Zum Schlauch,2,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,25.1,2,stark
+Schlupfwinkel,4,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,13.0,3,stark
+Schlupfwinkel,4,,r/wien,rau,https://www.reddit.com/r/wien/comments/9hkloq/lokale_zum_versumpern_grindig_aber_mit_charme/,8.4,3,stark
+Cafe Klim Bim,21,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,18.5,2,stark
+Käuzchen,7,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,18.0,2,stark
+Jedermann,22,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,18.5,1,erwähnt
+Café Einhorn,6,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,10.3,4,stark
+Café Einhorn,6,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,7.1,4,stark
+Cafe Stadtbahn,18,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,9.0,5,stark
+Black Jack,3,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,16.1,3,stark
+Clash,9,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,16.0,1,erwähnt
+klein Steiermark,3,,r/wien,urig,https://www.reddit.com/r/wien/comments/1kg0xtp/empfehlung_f%C3%BCr_ein_typisches_wiener_lokal_n%C3%A4he/,16.0,1,erwähnt
+Café Voodoo,7,,r/wien,rau,https://www.reddit.com/r/wien/comments/9hkloq/lokale_zum_versumpern_grindig_aber_mit_charme/,8.7,4,stark
+Café Voodoo,7,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,7.0,4,stark
+Ringsmuth,10,,r/wien,urig,https://www.reddit.com/r/wien/comments/1kg0xtp/empfehlung_f%C3%BCr_ein_typisches_wiener_lokal_n%C3%A4he/,14.0,1,erwähnt
+Cafe Happy,18,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,13.2,2,stark
+Johnny's Pub,4,,r/wien,guenstig,https://www.reddit.com/r/wien/comments/1mqbfjc/gibt_es_noch_g%C3%BCnstige_bierbeislnurige_cafes_oder/,13.0,1,erwähnt
+Schweden Espresso,1,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,6.6,6,stark
+Stöckl im Park,3,,r/wien,urig,https://www.reddit.com/r/wien/comments/1kg0xtp/empfehlung_f%C3%BCr_ein_typisches_wiener_lokal_n%C3%A4he/,11.0,1,erwähnt
+Raven's Pub,3,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,10.8,2,stark
+Schnauzer & Beagle Brewery,10,,r/wien,bier,https://www.reddit.com/r/wien/comments/16xs4kx/interessante_bars_in_wien_mit_gutem_bier/,10.6,2,stark
+Bräuhaus Ten.Fifty,10,,r/wien,bier,https://www.reddit.com/r/wien/comments/16xs4kx/interessante_bars_in_wien_mit_gutem_bier/,10.5,1,erwähnt
+Cafe Monic,6,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,10.3,2,stark
+habakuk,6,,r/wien,urig,https://www.reddit.com/r/wien/comments/1mqbfjc/gibt_es_noch_g%C3%BCnstige_bierbeislnurige_cafes_oder/,10.0,2,stark
+Exil in der Märzstraße,15,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,10.3,1,erwähnt
+Cafe Zipp,11,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,9.6,5,stark
+Kreisky,7,,r/wien,urig,https://www.reddit.com/r/wien/comments/1ec164c/was_sind_eure_lieblings_ranz_kneipen_in_der_stadt/,8.1,3,stark
+Café Gitarre,4,,r/wien,urig,https://www.reddit.com/r/wien/comments/9hkloq/lokale_zum_versumpern_grindig_aber_mit_charme/,9.0,1,erwähnt
+Taxi Treff,3,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,8.7,3,stark
+Cafe Carina,8,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,5.7,3,stark
+Cafe Carina,8,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,3.0,3,stark
+Café Anno,8,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,5.0,4,stark
+Bernard Stüberl,7,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,8.0,2,stark
+Lindenstüberl,7,,r/wien,urig,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,7.0,3,stark
+Buffalos Saloon,7,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,7.0,2,erwähnt
+Cafe Liquid,5,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,7.0,2,erwähnt
+Das Jetzt,17,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,5.0,2,erwähnt
+1516 Brewing Company,1,,r/wien,bier,https://www.reddit.com/r/wien/comments/16xs4kx/interessante_bars_in_wien_mit_gutem_bier/,7.0,1,erwähnt
+Pink Pepper,20,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,6.9,2,erwähnt
+Loco Bar,9,,r/wien,atzig,https://www.reddit.com/r/wien/comments/16xs4kx/interessante_bars_in_wien_mit_gutem_bier/,6.0,3,stark
+Brauhund,15,,r/wien,bier,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,6.0,2,erwähnt
+Cafe Bistro Nadine,20,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,5.7,3,stark
+Cafe Baby,20,,r/wien,rau,https://www.reddit.com/r/wien/comments/1ec164c/was_sind_eure_lieblings_ranz_kneipen_in_der_stadt/,5.4,3,stark
+Cafe Happy Day,2,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,5.4,3,stark
+Weinhaus Sittl,16,,r/wien,urig,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,5.0,2,erwähnt
+Wunderbar,1,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,5.0,1,erwähnt
+Lukas,1,,r/wien,rau,https://www.reddit.com/r/wien/comments/1ec164c/was_sind_eure_lieblings_ranz_kneipen_in_der_stadt/,4.5,4,stark
+Arena Beisl,3,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,4.5,1,erwähnt
+Cafe U1,4,,r/wien,urig,https://www.reddit.com/r/wien/comments/9hkloq/lokale_zum_versumpern_grindig_aber_mit_charme/,2.1,4,stark
+Cafe U1,4,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,2.0,4,stark
+Schwarzer Rabe,16,,r/wien,rau,https://www.reddit.com/r/wien/comments/1ec164c/was_sind_eure_lieblings_ranz_kneipen_in_der_stadt/,3.0,2,erwähnt
+Stehbeisl,6,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,3.3,2,erwähnt
+Café Mailibu,2,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,3.6,2,erwähnt
+Zum Alten Beisl,10,,r/wien,urig,https://www.reddit.com/r/wien/comments/1kg0xtp/empfehlung_f%C3%BCr_ein_typisches_wiener_lokal_n%C3%A4he/,3.5,1,erwähnt
+Restaurant Böhmerwald,4,,r/wien,urig,https://www.reddit.com/r/wien/comments/1kg0xtp/empfehlung_f%C3%BCr_ein_typisches_wiener_lokal_n%C3%A4he/,3.5,1,erwähnt
+Einfach So,18,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,3.3,1,erwähnt
+Zum Schwarzen Flamingo,15,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,3.3,1,erwähnt
+futuregarden,6,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,3.3,1,erwähnt
+New Bar,2,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,3.3,1,erwähnt
+Hawidere,15,,r/wien,bier,https://www.reddit.com/r/wien/comments/16xs4kx/interessante_bars_in_wien_mit_gutem_bier/,3.2,2,erwähnt
+Cafe Susi und Strolch(i),10,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,3.1,2,erwähnt
+Debakel,8,,r/wien,rau,https://www.reddit.com/r/wien/comments/1ec164c/was_sind_eure_lieblings_ranz_kneipen_in_der_stadt/,3.0,1,erwähnt
+Känguruh,6,,r/wien,bier,https://www.reddit.com/r/wien/comments/16xs4kx/interessante_bars_in_wien_mit_gutem_bier/,2.8,1,erwähnt
+Hera,9,,r/wien,rau,https://www.reddit.com/r/wien/comments/1wizfii/sterben_die_klassischen_wiener_beisln_wirklich/,2.6,4,stark
+Gastwirtschaft Blauensteiner,8,,r/wien,urig,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,2.6,2,erwähnt
+dEZENTRAl,2,,r/wien,rau,https://www.reddit.com/r/wien/comments/1ec164c/was_sind_eure_lieblings_ranz_kneipen_in_der_stadt/,1.7,3,stark
+Gasthaus Pezzl,17,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,2.3,2,erwähnt
+DaCapo,10,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,2.2,3,stark
+Cafe Weidinger,16,,r/wien,urig,https://www.reddit.com/r/wien/comments/1mqbfjc/gibt_es_noch_g%C3%BCnstige_bierbeislnurige_cafes_oder/,2.0,2,erwähnt
+Marktbeisl,15,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,2.1,2,erwähnt
+Servus Du,10,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,2.0,1,erwähnt
+Cafe Zeit,8,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,2.0,1,erwähnt
+Retro,2,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,2.0,1,erwähnt
+Xeno,4,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,2.0,1,erwähnt
+Schikaneder,4,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,2.0,1,erwähnt
+Cafe Kriemhild,15,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,2.0,1,erwähnt
+Rupps,5,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,2.0,1,erwähnt
+Gasthaus Hansy,2,,r/wien,urig,https://www.reddit.com/r/wien/comments/1obf978/hilfe_gutes_uriges_barrierefreies_wirtshaus/,2.0,1,erwähnt
+Café Rumpelstilzchen,23,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,1.9,4,stark
+Tommy's Stüberl,16,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,1.9,2,erwähnt
+Cafe Concerto,16,,r/wien,rau,https://www.reddit.com/r/wien/comments/9hkloq/lokale_zum_versumpern_grindig_aber_mit_charme/,1.2,4,stark
+Café Wunderlampe,16,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,1.7,2,erwähnt
+Ottakrügerl,16,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,1.6,1,erwähnt
+Familienstüberl,16,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,1.6,1,erwähnt
+Zur Wienerin,12,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,1.5,2,erwähnt
+Espresso MMM,8,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,1.5,1,erwähnt
+Schilling,7,,r/wien,urig,https://www.reddit.com/r/wien/comments/1obf978/hilfe_gutes_uriges_barrierefreies_wirtshaus/,1.5,1,erwähnt
+Mitzi's Treff,5,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,1.5,2,erwähnt
+6er Haus,2,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,1.2,1,erwähnt
+Check In by Lesya,4,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,1.2,1,erwähnt
+Cafe Caro,6,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,1.2,1,erwähnt
+Papa Freddy's Wiener Beisl,7,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,1.2,1,erwähnt
+Matzi Katzi,16,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,1.2,1,erwähnt
+'s Beisl am Eck,17,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,1.2,1,erwähnt
+Donaubeisl,2,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,1.2,2,erwähnt
+Bukowski the Pub,7,,r/wien,rau,https://www.reddit.com/r/wien/comments/9hkloq/lokale_zum_versumpern_grindig_aber_mit_charme/,1.2,2,erwähnt
+'s Stammbeisl,3,,r/wien,urig,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,1.2,1,erwähnt
+KUKU,6,,r/wien,guenstig,https://www.reddit.com/r/wien/comments/9hkloq/lokale_zum_versumpern_grindig_aber_mit_charme/,0.6,1,erwähnt
+KUKU,6,,r/wien,rau,https://www.reddit.com/r/wien/comments/9hkloq/lokale_zum_versumpern_grindig_aber_mit_charme/,0.6,1,erwähnt
+Medl Bräu,14,,r/wien,bier,https://www.reddit.com/r/wien/comments/16xs4kx/interessante_bars_in_wien_mit_gutem_bier/,1.1,2,erwähnt
+Weinhappel,4,,r/wien,urig,https://www.reddit.com/r/wien/comments/1kg0xtp/empfehlung_f%C3%BCr_ein_typisches_wiener_lokal_n%C3%A4he/,1.0,2,erwähnt
+"""C"" Café",2,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,1.0,1,erwähnt
+Salm Bräu,3,,r/wien,bier,https://www.reddit.com/r/wien/comments/16xs4kx/interessante_bars_in_wien_mit_gutem_bier/,1.0,1,erwähnt
+die freunderlwirtschaft,9,,r/wien,bier,https://www.reddit.com/r/wien/comments/16xs4kx/interessante_bars_in_wien_mit_gutem_bier/,1.0,1,erwähnt
+Ammutsøn Craft Beer Dive,6,,r/wien,bier,https://www.reddit.com/r/wien/comments/16xs4kx/interessante_bars_in_wien_mit_gutem_bier/,1.0,1,erwähnt
+Falkensteiner Stüberl,3,,r/wien,urig,https://www.reddit.com/r/wien/comments/1kg0xtp/empfehlung_f%C3%BCr_ein_typisches_wiener_lokal_n%C3%A4he/,1.0,1,erwähnt
+Wiener Blut,4,,r/wien,urig,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,0.8,1,erwähnt
+Café-Pub Holzi,14,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,0.7,3,stark
+Barfly's,6,,r/wien,bier,https://www.reddit.com/r/wien/comments/16xs4kx/interessante_bars_in_wien_mit_gutem_bier/,0.8,1,erwähnt
+Bierteufl,3,,r/wien,bier,https://www.reddit.com/r/wien/comments/16xs4kx/interessante_bars_in_wien_mit_gutem_bier/,0.8,1,erwähnt
+The Green Room,17,,r/wien,bier,https://www.reddit.com/r/wien/comments/16xs4kx/interessante_bars_in_wien_mit_gutem_bier/,0.8,1,erwähnt
+Cafe Benno,8,,r/wien,bier,https://www.reddit.com/r/wien/comments/16xs4kx/interessante_bars_in_wien_mit_gutem_bier/,0.8,1,erwähnt
+Erdberger Braustuben,3,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,0.4,2,erwähnt
+Erdberger Braustuben,3,,r/wien,urig,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.3,2,erwähnt
+Fredi's Feuerhalle,5,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,0.7,2,erwähnt
+Meiselmarkt Cafe-Pub,15,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,0.7,2,erwähnt
+Weinhaus Pfandler,12,,r/wien,urig,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,0.7,2,erwähnt
+Manuela's Pub,5,,r/wien,urig,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,0.4,2,erwähnt
+Manuela's Pub,5,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,0.3,2,erwähnt
+Cafe Maria,15,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,0.6,1,erwähnt
+Gasthaus Palatin,12,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,0.6,1,erwähnt
+Guggi's Beisl,10,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,0.6,1,erwähnt
+Kakadu Beisl,23,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,0.6,3,stark
+Bockshorn Irish Pub,1,,r/wien,bier,https://www.reddit.com/r/wien/comments/1mqbfjc/gibt_es_noch_g%C3%BCnstige_bierbeislnurige_cafes_oder/,0.5,1,erwähnt
+Fischerbräu,19,,r/wien,bier,https://www.reddit.com/r/wien/comments/1mqbfjc/gibt_es_noch_g%C3%BCnstige_bierbeislnurige_cafes_oder/,0.5,1,erwähnt
+Kolonitz Beisl,3,,r/wien,urig,https://www.reddit.com/r/wien/comments/1mqbfjc/gibt_es_noch_g%C3%BCnstige_bierbeislnurige_cafes_oder/,0.5,1,erwähnt
+Dick Mack's,1,,r/wien,guenstig,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,0.5,1,erwähnt
+Gasthaus Kopp,20,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,0.5,1,erwähnt
+Buchenbeisl,10,,r/wien,urig,https://www.reddit.com/r/wien/comments/1ec164c/was_sind_eure_lieblings_ranz_kneipen_in_der_stadt/,0.5,1,erwähnt
+Zur Gemütlichkeit,17,,r/wien,urig,https://www.reddit.com/r/wien/comments/1ec164c/was_sind_eure_lieblings_ranz_kneipen_in_der_stadt/,0.5,1,erwähnt
+Restaurant zu den 3 Hacken,1,,r/wien,bier,https://www.reddit.com/r/wien/comments/16xs4kx/interessante_bars_in_wien_mit_gutem_bier/,0.5,1,erwähnt
+7Sternbräu,7,,r/wien,bier,https://www.reddit.com/r/wien/comments/16xs4kx/interessante_bars_in_wien_mit_gutem_bier/,0.5,1,erwähnt
+Philosoph,1,,r/wien,bier,https://www.reddit.com/r/wien/comments/16xs4kx/interessante_bars_in_wien_mit_gutem_bier/,0.5,1,erwähnt
+Arndtstüberl,12,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,0.5,2,erwähnt
+Colorado,14,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,0.5,2,erwähnt
+Café Malipop,3,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,0.4,1,erwähnt
+Café frame,20,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,0.4,1,erwähnt
+Cafe Family,10,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,0.4,1,erwähnt
+Rainer-Stüberl,4,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,0.4,1,erwähnt
+Kulturcafé HENRIETTE,20,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,0.4,1,erwähnt
+Franz von Hahn,2,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,0.4,1,erwähnt
+Café Journal,7,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/179b00g/interessante_kneipen_in_wien/,0.4,1,erwähnt
+Espresso Babsi,18,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,0.4,2,erwähnt
+Cafe Matz,5,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.3,1,erwähnt
+Süsses Eck,20,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.3,1,erwähnt
+Stefan,11,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,0.3,2,erwähnt
+Dalli-Dalli,10,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,0.3,2,erwähnt
+Weberknecht,16,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,0.3,2,erwähnt
+Zur Eisernen Zeit,6,,r/wien,urig,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,0.3,1,erwähnt
+Cafe Platin,15,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,0.3,1,erwähnt
+Morgenstern,7,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/9hkloq/lokale_zum_versumpern_grindig_aber_mit_charme/,0.3,1,erwähnt
+ST.ART,7,,r/wien,alternativ,https://www.reddit.com/r/wien/comments/9hkloq/lokale_zum_versumpern_grindig_aber_mit_charme/,0.3,1,erwähnt
+Restaurant D'Landsknecht,9,,r/wien,urig,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,0.3,1,erwähnt
+Cafe-Restaurant A´Dabei,23,,r/wien,rau,https://www.reddit.com/r/wien/comments/1cazlch/ranzigste_beisln_in_wien/,0.3,1,erwähnt
+Café Stress,22,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,0.3,2,erwähnt
+Café Sapperlot,12,,r/wien,urig,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,0.2,2,erwähnt
+Südtirolerplatzl,4,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,0.2,1,erwähnt
+Zur Legende,2,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,0.2,1,erwähnt
+Amananths Place,9,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,0.2,1,erwähnt
+Cafe Zero,12,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,0.2,2,erwähnt
+Cafe Big Mama,15,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,0.2,2,erwähnt
+Cafe Pub Weinhold,17,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,0.1,1,erwähnt
+Filiz,22,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,0.1,1,erwähnt
+Café Frog,11,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,0.1,1,erwähnt
+Café Maxi,22,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,0.1,1,erwähnt
+Gasthaus Elisabeth,5,,r/wien,urig,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,0.1,1,erwähnt
+Kaiser Stüberl,19,,r/wien,rau,https://www.reddit.com/r/wien/comments/11bgxdh/sch%C3%A4bigste_g%C3%A4steh%C3%A4userkneipenbeisl_in_wien/,0.1,1,erwähnt
+rifugio,5,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,0.1,2,erwähnt
+Gasthaus Keksi,12,,r/wien,urig,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.1,1,erwähnt
+Domino,16,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.1,1,erwähnt
+Pulkautaler Weinhaus,15,,r/wien,urig,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.1,1,erwähnt
+Gasthaus Simon,3,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.1,1,erwähnt
+Bierbaron,7,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.1,1,erwähnt
+Espresso Susi,20,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.1,1,erwähnt
+Horoskop Cafe,17,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.1,1,erwähnt
+Cafe Weingartner,15,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.1,1,erwähnt
+Cafe U3,16,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.1,1,erwähnt
+Big Ben,10,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.1,1,erwähnt
+Habe,18,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.1,1,erwähnt
+Alpha Cafe,2,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,0.1,1,erwähnt
+Cafe Espresso M2,5,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,0.1,1,erwähnt
+Cafe Grande,23,,r/wien,rau,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,0.1,1,erwähnt
+Heinzis Beisl,6,,r/wien,urig,https://www.reddit.com/r/wien/comments/1se9jk9/die_sch%C3%A4bigsten_beislbars_in_jedem_bezirk/,0.1,1,erwähnt
+Gasthaus Haschka,12,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.0,1,erwähnt
+Die Mia,12,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.0,1,erwähnt
+M & H Beisl,12,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.0,1,erwähnt
+Der Brandstetter,17,,r/wien,urig,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.0,1,erwähnt
+Cafe Miami,20,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.0,1,erwähnt
+Siege's Stüberl,22,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.0,1,erwähnt
+Café am Heumarkt,3,,r/wien,urig,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.0,1,erwähnt
+Jazzcafe Sofa,7,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.0,1,erwähnt
+Albatros,22,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.0,1,erwähnt
+Zum Sieg,2,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.0,1,erwähnt
+Cafe K6,10,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.0,1,erwähnt
+Cafe Erlach,10,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.0,1,erwähnt
+Hinteralm,5,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.0,1,erwähnt
+Pharo's Café-Pub,14,,r/wien,rau,https://www.reddit.com/r/wien/comments/1o1vmde/alkoholiker_kneipen_in_wien/,0.0,1,erwähnt

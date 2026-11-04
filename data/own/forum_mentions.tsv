@@ -1,0 +1,496 @@
+thread	name	place	district	kind	score	note
+r1	Café Defizit	Cafe defizit	17	rau	58	
+r1	Gerüchteküche	Gerüchteküche	17	rau	58	
+r1	Stehbuffet Floridsdorf	"Stehbuffet ""am Franz-Jonas-Platz"""	21	rau	72	legendär, zentral
+r1	Café Speising	Cafe Speising	13	rau	40	
+r1	Glashütte	Glashütte	9	rau	28	
+r1	Café Zwutschkerl	Café Zwutschkerl	12	rau	13	
+r1	Zur Press		11	rau	10	
+r1	Lindenstüberl	Lindenstüberl	7	urig	12	herzlich, gutes Mittagsmenü, Schanigarten
+r1	6er Haus	6er Haus	2	rau	9	
+r1	Check in by Lesia	Check In by Lesya	4	rau	9	
+r1	Café Fendistüberl		5	rau	9	
+r1	Café Caro	Cafe Caro	6	rau	9	
+r1	Papa Freddy's	Papa Freddy's Wiener Beisl	7	rau	9	
+r1	Café Zipp	Cafe Zipp	11	rau	9	
+r1	Café Matzi Katzi	Matzi Katzi	16	rau	9	
+r1	Café Happy	Cafe Happy	18	rau	9	
+r1	Café Dialog	Cafe Dialog	3	rau	17	
+r1	Espresso Black Jack	Black Jack	3	rau	17	vielleicht geschlossen
+r1	Schweden Espresso	Schweden Espresso	1	rau	8	
+r1	Café Happy Day	Cafe Happy Day	2	rau	8	
+r1	Buffalo's Saloon	Buffalos Saloon	7	rau	6	
+r1	Café Nadine	Cafe Bistro Nadine	20	rau	4	
+r1	Café Einhorn	Café Einhorn	6	rau	12	Keller; inzwischen bobofiziert
+r1	Café Bendl	Café Bendl	1	rau	15	
+r1	Pezzlbeisl	Gasthaus Pezzl	17	rau	3	
+r1	Renate's Beisl		20	rau	3	Hannovermarkt
+r1	Südtirolerplatzl	Südtirolerplatzl	4	rau	2	
+r1	Rudis Beisl		21	rau	3	Kubinplatz
+r1	Mitzis Treff	Mitzi's Treff	5	rau	2	
+r1	Café Susanne		10	rau	2	Quellenstraße
+r1	Café Paradies		2	rau	2	
+r1	Zur Legende	Zur Legende	2	rau	2	
+r1	Donaubeisl	Donaubeisl	2	rau	2	
+r1	Café Malibu	Café Mailibu	2	rau	2	
+r1	Café Stress	Café Stress	22	rau	2	
+r1	Kagraner Kistl	Kagraner Kistl	22	rau	1	
+r1	Amananths Place	Amananths Place	9	rau	2	
+r1	Café Alex	Café Alex	15	rau	2	
+r1	Café Treff	Cafe Treff	5	rau	2	
+r1	Café U1	Cafe U1	4	urig	3	eher kultig als abgeranzt; gutes Mittagsmenü
+r1	Wiener Blut	Wiener Blut	4	urig	3	eher kultig
+r1	Café Zero	Cafe Zero	12	rau	1	
+r1	Café Esplanada		12	rau	1	
+r1	Café Meyer		12	rau	1	
+r1	Arndtstüberl	Arndtstüberl	12	rau	1	
+r1	Café Sapperlot	Café Sapperlot	12	urig	2	angenehm und sauber
+r1	Café Dominika		12	rau	1	
+r1	Café Rifugio	rifugio	5	rau	1	
+r1	Café Pascha		10	rau	1	
+r1	Buffet Zum Freundlichen	Buffet Zum Freundlichen	10	rau	1	
+r1	Café Windstill	Café Windstill	10	urig	1	richtig nett
+r1	Schnauzer & Beagle	Schnauzer & Beagle Brewery	10	bier	1	richtig nett
+r1	Loco Bar	Loco Bar	9	rau	1	
+r1	Susi & Strolch	Cafe Susi und Strolch(i)	10	rau	1	
+r1	Concherto	Cafe Concerto	16	rau	1	
+r1	Café Alpha	Alpha Cafe	2	rau	1	
+r1	Café Voodoo	Café Voodoo	7	rau	1	
+r1	Espresso M2	Cafe Espresso M2	5	rau	1	
+r1	Schmauswaberl	Schmauswaberl	6	rau	1	
+r1	Café Stadlau		22	rau	1	
+r1	Café Grande	Cafe Grande	23	rau	1	
+r1	Colorado	Colorado	14	rau	1	
+r1	Holzi	Café-Pub Holzi	14	urig	1	schräges Publikum, geh selbst gern hin
+r1	Café Rumpelstilzchen	Café Rumpelstilzchen	23	rau	1	
+r1	Café Hera	Hera	9	rau	1	
+r1	Heinzis Beisl	Heinzis Beisl	6	urig	1	fröhliche Gäste
+r1	Café Jelinek		6	urig	1	geliebt
+r1	Taxi Treff	Taxi Treff	3	rau	1	billig und extrem schäbig
+r1	Taxi Treff	Taxi Treff	3	guenstig	1	billig
+r1	Zum Schlauch	Zum Schlauch	2	rau	1	
+r1	Blauensteiner	Gastwirtschaft Blauensteiner	8	urig	2	Schnitzel Weltklasse, urig, witziger Chef
+r2	Café Bendl	Café Bendl	1	rau	13	tiaf und ranzig
+r2	Glashütte	Glashütte	9	rau	16	"asozial, kalter Rauch; ""a traum"""
+r2	Taxi Treff	Taxi Treff	3	rau	16	
+r2	Willy's Beisl		12	urig	4	nicht ranzig, eher tiaf
+r2	Café Happy Day	Cafe Happy Day	2	rau	4	
+r2	Stehbuffet Floridsdorf	"Stehbuffet ""am Franz-Jonas-Platz"""	21	rau	20	
+r2	Ravens Bar	Raven's Pub	3	rau	20	
+r2	Café Treff	Cafe Treff	5	rau	42	U6 Gumpendorfer Straße
+r2	Café Zwutschkerl	Café Zwutschkerl	12	rau	27	
+r2	Café DaCapo	DaCapo	10	rau	15	
+r2	Buffet Prokes	Prokes	10	rau	15	
+r2	Kopfwehinsel	Zur Kopfwehinsel	20	rau	15	
+r2	Marktbeisl Schwendermarkt	Marktbeisl	15	rau	15	
+r2	Café Servus Du	Servus Du	10	rau	15	
+r2	Bar Gösser		15	rau	15	
+r2	Café Zeit	Cafe Zeit	8	rau	15	
+r2	Café Retro	Retro	2	rau	15	
+r2	Franz-Josef Stüberl		9	rau	12	Julius-Tandler-Platz
+r2	Café Liquid	Cafe Liquid	5	rau	13	tiaf und ranzig
+r2	Fredis Feuerhalle	Fredi's Feuerhalle	5	rau	6	inzwischen renoviert
+r2	Schmauswaberl	Schmauswaberl	6	rau	19	legendär grindig, Flaschenbier
+r2	Café Defizit	Cafe defizit	17	rau	29	super Tschoch
+r2	Café Dialog	Cafe Dialog	3	rau	10	früher 24/7, legendär
+r2	Café 165		17	rau	9	
+r2	Café Malibu	Café Mailibu	2	rau	9	
+r2	Schweden Espresso	Schweden Espresso	1	urig	9	Original, alter Wurlitzer
+r2	Stehcafe Laxenburger Straße		10	rau	25	
+r2	Café Carina	Cafe Carina	8	rau	8	
+r2	Bernardstüberl	Bernard Stüberl	7	rau	7	
+r2	Pink Pepper	Pink Pepper	20	rau	12	Café Bauchstich
+r2	Café Lepa Brena		15	rau	6	Mariahilfer Gürtel
+r2	Café Maria	Cafe Maria	15	rau	6	Mariahilfer Gürtel
+r2	Meisel Pub	Meiselmarkt Cafe-Pub	15	rau	6	best of the worst
+r2	Gasthaus Palatin	Gasthaus Palatin	12	rau	6	
+r2	Weinhaus Pfandler	Weinhaus Pfandler	12	urig	6	
+r2	Guggi's Beisl	Guggi's Beisl	10	rau	6	
+r2	Vickys Pub		3	rau	6	Fasangasse, Darts und Wuzler
+r2	Zur Wienerin	Zur Wienerin	12	rau	5	
+r2	Lukas Café	Lukas	1	rau	5	
+r2	s'Stammbeisl	's Stammbeisl	3	urig	5	großartig
+r2	Café Speising	Cafe Speising	13	rau	5	nur Bier
+r2	Silvias Tschocherl		17	rau	4	Hernalser Hauptstraße
+r2	Räuberhöhle	Räuberhöhle	10	rau	4	
+r2	Arndtstüberl	Arndtstüberl	12	rau	4	
+r2	Colorado	Colorado	14	rau	4	
+r2	Holzi	Café-Pub Holzi	14	rau	4	
+r2	Kakadu	Kakadu Beisl	23	rau	4	
+r2	Loco Bar	Loco Bar	9	rau	4	
+r2	Bierochse		10	rau	6	ranzig aber charmant
+r2	Leopoldstüberl		2	rau	6	
+r2	Lindenstüberl	Lindenstüberl	7	rau	3	
+r2	Café Lindenblatt	Café Lindenblatt	7	rau	3	
+r2	Café Tina		20	rau	3	
+r2	Manuela's Pub	Manuela's Pub	5	urig	3	Publikum tiaf, Lokal sauber
+r2	Keinerstüberl	Keiner Stuben	3	rau	3	
+r2	Kainerstuben	Keiner Stuben	3	rau	3	
+r2	Erdberger Braustuben	Erdberger Braustuben	3	rau	3	
+r2	Café Nadine	Cafe Bistro Nadine	20	rau	3	
+r2	Green Mile		20	rau	2	
+r2	Café All-In		3	rau	3	
+r2	Café Happy Day	Cafe Happy Day	2	rau	3	
+r2	Arena Beisl	Arena Beisl	3	rau	8	grindig, nicht grauslich
+r2	Café Dezentral	dEZENTRAl	2	urig	4	mit Patina
+r2	Café Jelinek		6	urig	4	alt, nicht ranzig
+r2	Zum Landsknecht	Restaurant D'Landsknecht	9	urig	2	Stüberl mit Patina, Schnitzel super
+r2	Gasthaus Stefan	Stefan	11	rau	2	Simmeringer Hauptstraße 120
+r2	Café Rumpelstilzchen	Café Rumpelstilzchen	23	rau	2	
+r2	Adabei	Cafe-Restaurant A´Dabei	23	rau	2	Siebenhirten
+r2	Café Kadett	Café Kadett	14	rau	2	
+r2	Café Dalli Dalli	Dalli-Dalli	10	rau	2	
+r2	Café Meyer		12	rau	2	nur Stammgäste
+r2	Styria		14	rau	2	
+r2	Espresso Babsi	Espresso Babsi	18	rau	2	
+r2	Café Klim Bim	Cafe Klim Bim	21	urig	4	nicht grausig, in der Zeit hängengeblieben
+r2	Café Zipp	Cafe Zipp	11	rau	3	Simmering
+r2	Café Einhorn	Café Einhorn	6	rau	6	Keller sketchy
+r2	Weberknecht	Weberknecht	16	rau	2	Gürtel
+r2	Café Stadtbahn	Cafe Stadtbahn	18	urig	5	nicht ranzig, gibts noch
+r2	Café Family	Cafe Family	10	rau	1	Knöllgasse
+r2	Rainer Stüberl	Rainer-Stüberl	4	rau	1	
+r2	Schlupfwinkel Abendbeisl	Schlupfwinkel	4	rau	1	
+r2	Café Windstill	Café Windstill	10	guenstig	1	80er-Kitsch, gemütlich, günstig
+r2	Café Windstill	Café Windstill	10	urig	1	
+r3	Johnny's Pub	Johnny's Pub	4	guenstig	12	Hausbier 0,56 l um 3,90 €
+r3	Café Weidinger	Cafe Weidinger	16	urig	3	Gastgarten
+r3	Café Habakuk	habakuk	6	urig	9	urig angefuckt, nicht ranzig; Stimmung super
+r3	Bockshorn	Bockshorn Irish Pub	1	bier	1	
+r3	Fischerbräu	Fischerbräu	19	bier	1	
+r3	Hawidere	Hawidere	15	bier	1	
+r3	Kolonitz Beisl	Kolonitz Beisl	3	urig	1	gemütliche Wirtin, urige Karte
+r3	Café Anno	Café Anno	8	guenstig	3	0,5 l um 3,60 €
+r4	Steman	Gastwirtschaft Steman	6	urig	37	
+r4	Café Hera	Hera	9	rau	1	immer voll mit Charakteren
+r5	Weinhold	Cafe Pub Weinhold	17	rau	2	Hernalser Hauptstraße, nette Leute
+r5	Café Zwutschkerl	Café Zwutschkerl	12	rau	45	
+r5	Café Arcade		12	rau	45	beim Schöpfwerk
+r5	Glashütte	Glashütte	9	rau	45	
+r5	Kagraner Kistl	Kagraner Kistl	22	rau	34	
+r5	Unbedingt zur Gerti	"Unbedingt zur ""Gerti"""	9	urig	29	anläuten, Gerti-Toast spät nachts, total urig und gemütlich
+r5	Café Defizit	Cafe defizit	17	rau	48	
+r5	Café Zipp	Cafe Zipp	11	rau	19	
+r5	Schmauswaberl	Schmauswaberl	6	rau	19	
+r5	Einfach so	Einfach So	18	rau	19	
+r5	Tee- und Likörstube		22	rau	19	Kaisermühlen
+r5	Kopfwehinsel	Zur Kopfwehinsel	20	rau	19	Hannovermarkt
+r5	Gasthaus Dani		20	rau	19	
+r5	Café Dialog	Cafe Dialog	3	rau	13	
+r5	Espresso Black Jack	Black Jack	3	rau	13	
+r5	s'Beisl am Bahnhof Liesing		23	rau	12	80er-Jahre-Flair
+r5	Café Bendl	Café Bendl	1	rau	23	recht speziell
+r5	Gasthaus Pezzl	Gasthaus Pezzl	17	rau	11	
+r5	Fatmir Mehmedi KEG		3	rau	11	
+r5	Café Graffiti		10	rau	11	
+r5	Café Rumpelstilzchen	Café Rumpelstilzchen	23	rau	11	
+r5	Café Fendistüberl		5	rau	11	
+r5	Café Alex	Café Alex	15	rau	11	
+r5	MMM	Espresso MMM	8	rau	11	
+r5	Schweden Espresso	Schweden Espresso	1	rau	11	
+r5	Café Stadtbahn	Cafe Stadtbahn	18	rau	8	
+r5	Café Furby		16	rau	7	
+r5	Ottakrügerl	Ottakrügerl	16	rau	7	
+r5	Tommy's Stüberl	Tommy's Stüberl	16	rau	7	
+r5	Café Wunderlampe	Café Wunderlampe	16	rau	7	
+r5	Familienstüberl	Familienstüberl	16	rau	7	
+r5	Café Gutruf	Café Gutruf	1	rau	5	abgeranzt, exzellentes chinesisches Essen
+r5	Café Norok		20	rau	5	
+r5	Café U1	Cafe U1	4	rau	5	
+r5	S'Weckerl		19	rau	9	Heiligenstadt
+r5	Donaubeisl	Donaubeisl	2	rau	4	Mexikoplatz
+r5	Café Fluchtweg		10	rau	4	
+r5	Straußennest		2	rau	4	
+r5	C-Café	"""C"" Café"	2	rau	4	
+r5	Bierochse		10	urig	4	grindig, nett und charmant
+r5	Café Hera	Hera	9	rau	3	
+r5	Irish International Pub		21	rau	3	
+r5	Styria		14	rau	3	
+r5	Café Titanic		16	rau	3	
+r5	Café Zero	Cafe Zero	12	rau	2	
+r5	Ritmo Latino		10	atzig	2	
+r5	Tenne		11	atzig	2	eher Disko, richtig schäbig
+r5	Stehbuffet Floridsdorf	"Stehbuffet ""am Franz-Jonas-Platz"""	21	rau	2	
+r5	Café Big Mama	Cafe Big Mama	15	rau	2	
+r5	Café Filiz	Filiz	22	rau	2	
+r5	Café Frog	Café Frog	11	rau	2	Klassiker
+r5	Café Maxi	Café Maxi	22	rau	2	
+r5	Papillon		15	rau	2	
+r5	Gasthaus Elisabeth	Gasthaus Elisabeth	5	urig	2	nicht schäbig aber urig
+r5	Zwergenhöhle		10	rau	2	
+r5	Bierwaage		14	urig	2	absolut legendär
+r5	Café Romantica		14	rau	2	
+r5	Medl Bräu	Medl Bräu	14	bier	2	leiwand
+r5	Kakadu	Kakadu Beisl	23	rau	2	Weltklasse
+r5	Kaiser Stüberl	Kaiser Stüberl	19	rau	2	Heiligenstädter Str. 177
+r5	Café Amigo		21	rau	2	
+r5	Café DaCapo	DaCapo	10	rau	2	
+r5	Café Weidinger	Cafe Weidinger	16	guenstig	2	Toast um 1,50 €
+r5	Rodauner Jausenstüberl		23	rau	2	
+r5	Café Treff	Cafe Treff	5	rau	2	
+r5	Café Baby	Cafe Baby	20	rau	2	
+r5	Zum Seidl		13	rau	2	
+r5	Café Perper		17	rau	2	
+r5	Lindenstüberl	Lindenstüberl	7	urig	3	erstaunlich sauber, Chefin ein Sonnenschein
+r5	Dick Mack's	Dick Mack's	1	guenstig	3	preiswertes Vorglühlokal
+r5	Café Rüdiger			rau	3	
+r5	Gasthaus Kopp	Gasthaus Kopp	20	rau	3	
+r5	Café Falk		22	rau	2	
+r5	Bardolino	Bardolino	14	rau	1	
+r5	Holzi	Café-Pub Holzi	14	rau	1	
+r5	Manuela's Pub	Manuela's Pub	5	rau	1	
+r5	Eiserne Zeit	Zur Eisernen Zeit	6	urig	1	Naschmarkt
+r5	Conny's Café		5	rau	1	
+r5	Kuba Bar		20	rau	1	Hannovermarkt
+r5	Café Platin	Cafe Platin	15	rau	1	Schwendermarkt
+r6	Café Defizit	Cafe defizit	17	rau	17	
+r6	Bricks	Bricks	2	atzig	10	räudig wie eh und je
+r6	Siebenbrunnen-Café	Cafe Siebenbrunnen	5	urig	8	schräge Deko, gemischtes Publikum
+r6	Keinerstüberl	Keiner Stuben	3	urig	8	Hausmannskost, grantige Einheimische
+r6	Café Bendl	Café Bendl	1	rau	12	
+r6	Café Zipp	Cafe Zipp	11	rau	6	Flaschenbier
+r6	Café Zwutschkerl	Café Zwutschkerl	12	rau	6	
+r6	Debakel	Debakel	8	rau	5	
+r6	Schwarzer Rabe	Schwarzer Rabe	16	rau	5	Bier gut, stinkt nach Rauch
+r6	Café Dezentral	dEZENTRAl	2	rau	4	
+r6	Café Dialog	Cafe Dialog	3	rau	4	
+r6	Vickys Pub		3	rau	6	Viki ist die Beste
+r6	Café Voodoo	Café Voodoo	7	rau	4	
+r6	Lukas Café	Lukas	1	rau	8	abgefuckt
+r6	Kreisky	Kreisky	7	urig	7	
+r6	Café Kaisermühlen		22	rau	3	
+r6	Bierochse		10	rau	3	
+r6	Kopfwehinsel	Zur Kopfwehinsel	20	rau	3	
+r6	Café Baby	Cafe Baby	20	rau	2	
+r6	Buchenbeisl	Buchenbeisl	10	urig	1	gut essen
+r6	Gasthaus zur Gemütlichkeit	Zur Gemütlichkeit	17	urig	1	nicht ranzig, aber Kult
+r6	Schmauswaberl	Schmauswaberl	6	rau	1	
+r6	Käuzchen	Käuzchen	7	rau	1	
+r7	Schmauswaberl	Schmauswaberl	6	alternativ	11	
+r7	Café Gagarin		9	alternativ	11	
+r7	Schweden Espresso	Schweden Espresso	1	alternativ	11	
+r7	Café Carina	Cafe Carina	8	alternativ	11	Open Stage
+r7	Café Einhorn	Café Einhorn	6	alternativ	30	
+r7	Café Monic	Cafe Monic	6	alternativ	30	
+r7	Exil in der Märzstraße	Exil in der Märzstraße	15	alternativ	30	Exil beste
+r7	Stehbeisl	Stehbeisl	6	alternativ	22	
+r7	Brauhund	Brauhund	15	bier	22	
+r7	Zum schwarzen Flamingo	Zum Schwarzen Flamingo	15	alternativ	22	
+r7	Futuregarden	futuregarden	6	alternativ	22	
+r7	New Bar	New Bar	2	alternativ	22	
+r7	Café Stadtbahn	Cafe Stadtbahn	18	alternativ	22	
+r7	Café Mocca			alternativ	22	
+r7	Café Anno	Café Anno	8	alternativ	19	
+r7	Wunderbar	Wunderbar	1	alternativ	19	Schönlaterngasse
+r7	Jetzt	Das Jetzt	17	alternativ	19	
+r7	Weinhaus Sittl	Weinhaus Sittl	16	urig	19	am Gürtel, auch Essen
+r7	Café Clash	Clash	9	alternativ	15	große Liebe
+r7	Café Bendl	Café Bendl	1	rau	26	sehr schräg, jede Klientel
+r7	Schlupfwinkel Abendbeisl	Schlupfwinkel	4	alternativ	12	
+r7	Stehbuffet Floridsdorf	"Stehbuffet ""am Franz-Jonas-Platz"""	21	rau	9	
+r7	Käuzchen	Käuzchen	7	alternativ	17	ziemlich knuffig
+r7	Café Voodoo	Café Voodoo	7	alternativ	6	
+r7	Xeno	Xeno	4	alternativ	5	
+r7	Schikaneder	Schikaneder	4	alternativ	5	
+r7	Siebenbrunnen-Café	Cafe Siebenbrunnen	5	alternativ	5	ziemlich schräg
+r7	Venster99	Venster99	9	alternativ	10	linksradikal
+r7	EKH		10	alternativ	10	linksradikal
+r7	Café Concerto	Cafe Concerto	16	alternativ	1	Open Stage
+r7	Café Kriemhild	Cafe Kriemhild	15	alternativ	3	sehr nett
+r7	Rupp's Beisl	Rupps	5	alternativ	3	über 1000 Whiskeys, veganes Chili
+r7	Café Zwutschkerl	Café Zwutschkerl	12	rau	4	trinkfest und gesprächig
+r7	Pink Pepper	Pink Pepper	20	rau	2	
+r7	Glashütte	Glashütte	9	rau	2	
+r7	Unbedingt zur Gerti	"Unbedingt zur ""Gerti"""	9	urig	2	
+r7	Café Habakuk	habakuk	6	alternativ	2	
+r7	Café Dezentral	dEZENTRAl	2	alternativ	2	
+r7	Café Malipop	Café Malipop	3	alternativ	2	
+r7	Café Frame	Café frame	20	alternativ	2	
+r7	Henriette	Kulturcafé HENRIETTE	20	alternativ	1	
+r7	Franz von Hahn	Franz von Hahn	2	alternativ	1	
+r7	Journal	Café Journal	7	alternativ	1	jung besucht
+r7	Bierwaage		14	urig	1	
+r8	Känguruh	Känguruh	6	bier	10	
+r8	Brauhund	Brauhund	15	bier	10	
+r8	Beaver Brewing	Beaver Brewing Company	9	bier	10	
+r8	Hawidere	Hawidere	15	bier	10	große Auswahl, Kostproben
+r8	Schnauzer & Beagle	Schnauzer & Beagle Brewery	10	bier	20	
+r8	Ten.Fifty	Bräuhaus Ten.Fifty	10	bier	20	
+r8	100 Blumen Brauerei	100 Blumen Brauerei	23	bier	7	
+r8	Medl Bräu	Medl Bräu	14	bier	7	
+r8	Salm Bräu	Salm Bräu	3	bier	7	
+r8	Freunderlwirtschaft	die freunderlwirtschaft	9	bier	7	
+r8	Ammutson	Ammutsøn Craft Beer Dive	6	bier	7	teuer, interessante Auswahl
+r8	Mel's Diner			bier	7	
+r8	Delirium		1	bier	7	
+r8	Le Pub		1	bier	7	
+r8	1516 Brewing Company	1516 Brewing Company	1	bier	6	Klassiker mit eigenem Bier
+r8	Barfly's	Barfly's	6	bier	2	
+r8	Bierteufl	Bierteufl	3	bier	2	gute Küche, gutes Bier
+r8	Green Room	The Green Room	17	bier	2	
+r8	Café Benno	Cafe Benno	8	bier	2	
+r8	Loco Bar	Loco Bar	9	atzig	5	
+r8	Radio			bier	1	
+r8	Zu den 3 Hacken	Restaurant zu den 3 Hacken	1	bier	1	Augustiner vom Fass
+r8	7Sternbräu	7Sternbräu	7	bier	1	
+r8	Philosoph	Philosoph	1	bier	1	Craftbiere
+r9	Kopfwehinsel	Zur Kopfwehinsel	20	rau	25	Name ist Programm; mehrfach empfohlen
+r9	Café Zwutschkerl	Café Zwutschkerl	12	rau	14	
+r9	Café Stadtbahn	Cafe Stadtbahn	18	urig	5	Publikum normal, Charme einer Alkoholikerkneipe
+r9	Café Anno	Café Anno	8	urig	2	Tatort-Kulisse
+r9	Glashütte	Glashütte	9	rau	56	
+r9	Café Concerto	Cafe Concerto	16	urig	2	
+r9	Kreisky	Kreisky	7	urig	2	Charme der Tranglerhütte beibehalten
+r9	Café Einhorn	Café Einhorn	6	urig	2	
+r9	Café Monic	Cafe Monic	6	urig	2	
+r9	Poky's	Poky's Cafe	14	rau	2	
+r9	Café Defizit	Cafe defizit	17	rau	23	ganz leiwand, schwere Empfehlung
+r9	Lercherl	Zum Lercherl von Hernals	17	rau	56	Branntweiner deluxe
+r9	Stehbuffet Floridsdorf	"Stehbuffet ""am Franz-Jonas-Platz"""	21	rau	73	
+r9	Café Klim Bim	Cafe Klim Bim	21	rau	73	
+r9	Café Stadlau		22	rau	73	
+r9	Café Jedermann	Jedermann	22	rau	73	
+r9	Siebenbrunnen-Café	Cafe Siebenbrunnen	5	rau	70	
+r9	Zum Schlauch	Zum Schlauch	2	rau	24	Lassallestraße
+r9	Café Happy	Cafe Happy	18	rau	23	
+r9	Café Pascha		10	rau	10	Hansson-Zentrum
+r9	Toni's Kaffeehaus		20	guenstig	9	Krügerl unter 4 €
+r9	Café Lindenblatt	Café Lindenblatt	7	urig	9	"eine Insel im Bezirk, ""a Traum"""
+r9	Schmauswaberl	Schmauswaberl	6	rau	9	spektakulär
+r9	Camillo			rau	9	
+r9	Café Dialog	Cafe Dialog	3	rau	9	
+r9	Café Zipp	Cafe Zipp	11	rau	6	
+r9	Susi & Strolch	Cafe Susi und Strolch(i)	10	rau	5	Quellenstraße
+r9	Beisl am Eck	's Beisl am Eck	17	rau	4	43er Palffygasse
+r9	Mitzis Treff	Mitzi's Treff	5	rau	4	
+r9	Eh Da		14	urig	4	Gewölbe unter der Erde, Wiener Urgestein
+r9	Café Bendl	Café Bendl	1	rau	4	
+r9	Café Nadine	Cafe Bistro Nadine	20	rau	3	
+r9	Zur Wienerin	Zur Wienerin	12	rau	3	täglich dieselben, sehr höflichen Leute
+r9	Tommy's Stüberl	Tommy's Stüberl	16	rau	3	
+r9	Café Matz	Cafe Matz	5	rau	3	
+r9	Erdberger Braustuben	Erdberger Braustuben	3	urig	3	urig, sauber, gutes Essen, nettes Personal
+r9	Ravens Bar	Raven's Pub	3	rau	3	
+r9	Café Treff	Cafe Treff	5	rau	3	
+r9	Café Andrea		5	rau	3	
+r9	Café Alte Lampe		5	rau	3	
+r9	Café U1	Cafe U1	4	urig	3	großartige Kulisse
+r9	Süßes Eck	Süsses Eck	20	rau	3	wirkt nett
+r9	Café Baby	Cafe Baby	20	rau	6	
+r9	Café Romeo		5	rau	3	
+r9	Keksis Gasthaus	Gasthaus Keksi	12	urig	2	seit den 60ern nicht renoviert
+r9	Café Rumpelstilzchen	Café Rumpelstilzchen	23	rau	2	
+r9	Domino	Domino	16	rau	2	Gablenzgasse
+r9	Marktbeisl Schwendermarkt	Marktbeisl	15	rau	2	
+r9	Café Monika		20	rau	2	Jägerstraße
+r9	Weinstüberl		9	rau	2	
+r9	Pulkautaler Weinhaus	Pulkautaler Weinhaus	15	urig	2	
+r9	Café Paradies		2	rau	2	Ausstellungsstraße
+r9	Gasthaus Simon	Gasthaus Simon	3	rau	2	
+r9	Taxi Treff	Taxi Treff	3	rau	2	
+r9	Bierbaron	Bierbaron	7	rau	2	Kandlgasse
+r9	Espresso Black Jack	Black Jack	3	rau	2	
+r9	Arneth's Schmähbankerl		16	rau	2	
+r9	Café Wunderlampe	Café Wunderlampe	16	rau	2	altwienerisch, grantig
+r9	Café Happy Day	Cafe Happy Day	2	rau	2	
+r9	Espresso Susi	Espresso Susi	20	rau	2	
+r9	Café Horoskop	Horoskop Cafe	17	rau	2	
+r9	Café Weingartner	Cafe Weingartner	15	rau	2	
+r9	Stadtbeisl		3	rau	2	Mohsgasse
+r9	Café U3	Cafe U3	16	rau	2	
+r9	Big Ben	Big Ben	10	rau	2	Laxenburger Straße
+r9	Espresso Babsi	Espresso Babsi	18	rau	2	
+r9	Café Habe	Habe	18	rau	2	
+r9	Café Papa Joe		10	rau	1	
+r9	Gasthaus Stefan	Stefan	11	rau	1	
+r9	Weinhaus Sittl	Weinhaus Sittl	16	urig	1	in der Zeit stehen geblieben, hervorragende Wiener Küche
+r9	Café-Pub Meiselmarkt	Meiselmarkt Cafe-Pub	15	rau	1	
+r9	Café Big Mama	Cafe Big Mama	15	rau	1	
+r9	Gasthaus Haschka	Gasthaus Haschka	12	rau	1	
+r9	Mia	Die Mia	12	rau	1	
+r9	M&H	M & H Beisl	12	rau	1	
+r9	Alt Erdberg		3	atzig	1	Karaoke jeden zweiten Samstag, lustigste Abende
+r9	Bar Gösser		6	urig	1	alteingesessen, nettes Klientel, philosophieren
+r9	Leopold Brandstetter	Der Brandstetter	17	urig	1	seit Jahrzehnten unverändert
+r9	Lukas Café	Lukas	1	rau	1	Besitzer sehr freundlich
+r9	Gasthaus Timo	Timo	10	rau	1	
+r9	Imbiss Alischer	Imbiss Alischer	11	rau	1	
+r9	Café Miami	Cafe Miami	20	rau	1	
+r9	Café Hera	Hera	9	rau	1	
+r9	Sieges Stüberl	Siege's Stüberl	22	rau	1	das tiafste
+r9	Kakadu	Kakadu Beisl	23	rau	1	
+r9	Weinhappel	Weinhappel	4	rau	1	
+r9	Café Heumarkt	Café am Heumarkt	3	urig	1	gut gealtert
+r9	Café Rifugio	rifugio	5	rau	1	
+r9	Café Liquid	Cafe Liquid	5	rau	1	
+r9	Tee- und Likörstube		22	rau	1	Spira hat dort gedreht
+r9	BlackPearl		16	rau	1	
+r9	Café Stern		17	rau	1	Kalvarienberggasse
+r9	Jazzcafé Sofa	Jazzcafe Sofa	7	rau	1	
+r9	Café Albatros	Albatros	22	rau	1	
+r9	Kagraner Kistl	Kagraner Kistl	22	rau	1	
+r9	Bernardstüberl	Bernard Stüberl	7	rau	1	liebe Kerlchen
+r9	Buffalo's Saloon	Buffalos Saloon	7	urig	1	nicht runtergekommen, perfekter Vibe
+r9	Weberknecht	Weberknecht	16	rau	1	
+r9	Maria's Café		12	rau	1	Hetzendorf
+r9	Espresso am Quellenplatz		10	rau	1	
+r9	Gasthof zum Sieg	Zum Sieg	2	rau	1	
+r9	Pub Schönbrunn		13	rau	1	
+r9	Espresso Suny		21	rau	1	
+r9	Rudis Beisl		21	rau	1	
+r9	Café Stress	Café Stress	22	rau	1	
+r9	Café Sapperlot	Café Sapperlot	12	rau	1	
+r9	Fredis Feuerhalle	Fredi's Feuerhalle	5	rau	1	
+r9	Café Kaisermühlen		22	rau	1	
+r9	Café K6	Cafe K6	10	rau	1	
+r9	Café Dalli Dalli	Dalli-Dalli	10	rau	1	
+r9	Erlach	Cafe Erlach	10	rau	1	
+r9	Schweden Espresso	Schweden Espresso	1	rau	1	
+r9	Fliegender Holländer	Fliegender Holländer	2	rau	1	
+r9	Café Bukowski	Bukowski the Pub	7	urig	1	
+r9	Hinteralm	Hinteralm	5	rau	1	
+r9	Pharos	Pharo's Café-Pub	14	rau	1	Linzer Straße
+r9	Café DaCapo	DaCapo	10	rau	1	eine Gruft
+r9	Blauensteiner	Gastwirtschaft Blauensteiner	8	urig	6	uriges Wirtshaus, fantastische Küche
+r9	Weinhaus Pfandler	Weinhaus Pfandler	12	urig	1	
+r10	Café Voodoo	Café Voodoo	7	rau	13	
+r10	Dondrixne			rau	13	
+r10	Café Gitarre	Café Gitarre	4	urig	8	Schmalzbrot um eins in der Früh
+r10	Schlupfwinkel Abendbeisl	Schlupfwinkel	4	rau	7	
+r10	Kreisky	Kreisky	7	rau	6	
+r10	Café Bukowski	Bukowski the Pub	7	rau	6	
+r10	Café Falk		22	rau	6	
+r10	Café Concerto	Cafe Concerto	16	rau	6	Vorsicht: Dealer
+r10	Café Carina	Cafe Carina	8	rau	6	
+r10	Café Anno	Café Anno	8	rau	6	
+r10	Café Bendl	Café Bendl	1	rau	10	
+r10	Café Jetzt	Das Jetzt	17	rau	5	bissl grindig, hat Charme
+r10	Bierwaage		14	urig	5	bissl grindig, hat Charme
+r10	Café Defizit	Cafe defizit	17	rau	5	
+r10	Café Blackout		5	rau	3	sehr heftig
+r10	Café Kafka		6	rau	3	
+r10	Café U1	Cafe U1	4	urig	3	Geheimtipp
+r10	Stehbeisl	Stehbeisl	6	rau	2	
+r10	Drechsler		6	urig	2	
+r10	Kuku	KUKU	6	guenstig	2	Bier unter 3 €, gute Musik, flexible Sperrstunde
+r10	Kuku	KUKU	6	rau	2	
+r10	Schweden Espresso	Schweden Espresso	1	rau	2	ab 5 Uhr früh
+r10	Mozart's		15	rau	1	warme Küche
+r10	Schwarzer Rabe	Schwarzer Rabe	16	urig	3	solide Wirtshaus-Beisl-Pub-Mischung, eigenes Bier
+r10	Café Stadtbahn	Cafe Stadtbahn	18	urig	1	abgefuckt aber nett, gute Livemusik
+r10	Glashütte	Glashütte	9	rau	1	
+r10	Lukas Café	Lukas	1	rau	1	
+r10	Schmauswaberl	Schmauswaberl	6	rau	1	
+r10	Morgenstern	Morgenstern	7	alternativ	1	Risiko und Wuzler
+r10	St.Art	ST.ART	7	alternativ	1	
+r11	Schilling	Schilling	7	urig	2	sehr gute Wiener Küche, eher teuer
+r11	Gasthaus Haidinger		15	urig	3	super urig und sehr nett
+r11	Steman	Gastwirtschaft Steman	6	urig	2	ebenerdig
+r11	Gasthaus Hansy	Gasthaus Hansy	2	urig	1	
+r12	Ringsmuth	Ringsmuth	10	urig	13	
+r12	Kleine Steiermark	klein Steiermark	3	urig	15	sehr nett
+r12	Zum alten Beisl	Zum Alten Beisl	10	urig	6	Tiptop Küche, schöner Innenhof
+r12	Böhmerwald	Restaurant Böhmerwald	4	urig	6	typisch Wiener Beisl
+r12	Stöckl im Park	Stöckl im Park	3	urig	10	ok für eine Feier
+r12	Weinhappel	Weinhappel	4	urig	1	
+r12	Falkensteiner Stüberl	Falkensteiner Stüberl	3	urig	1	

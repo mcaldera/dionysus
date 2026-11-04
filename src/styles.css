@@ -451,3 +451,15 @@ label.check { display: flex; align-items: center; gap: 0.45rem; font-size: 0.86r
 .mode-legend, .type-counts { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.25rem 0.9rem; font-size: 0.82rem; color: var(--ink-2); }
 .mode-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 0.3rem; vertical-align: -1px; }
 .type-counts .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; }
+
+/* Focused district chip */
+.district-focus {
+  position: absolute; top: 14px; left: 50%; transform: translateX(calc(-50% - 220px)); z-index: 3;
+  display: flex; align-items: center; gap: 0.7rem; padding: 0.45rem 0.5rem 0.45rem 1rem; border-radius: 999px;
+  background: rgba(28, 20, 16, 0.9); color: #f8efe4; box-shadow: var(--shadow); backdrop-filter: blur(8px);
+  animation: pop 0.2s ease-out; white-space: nowrap;
+}
+.district-focus span { opacity: 0.75; font-size: 0.85rem; }
+.district-focus .icon-btn { color: #f8efe4; }
+.district-focus .icon-btn:hover { background: rgba(255, 255, 255, 0.12); }
+@media (max-width: 900px) { .district-focus { transform: translateX(-50%); } }

@@ -1,3 +1,4 @@
 name,district,lat,lon,type,note
 Gasthaus Emerich,21,48.2724443,16.4182076,beisl_wirtshaus,Nominatim address point; check by hand
 Likörstube Sveceny,21,48.261243,16.4004622,tschocherl,"Brünner Straße 26-32 (Floridsdorfer Markt); Branntweiner, per Falter 2023. Owner suggestion; Nominatim address point"
+Café Zwutschkerl,12,48.1744116,16.3255762,tschocherl,"Hohenbergstraße 14-16 per r/wien; Nominatim shows a place named Monte at this address, check by hand"

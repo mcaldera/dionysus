@@ -17,42 +17,63 @@ export const SOURCE_LABEL: Record<SourceKind, string> = {
 export const SOURCE_KINDS: SourceKind[] = ['presse', 'magazin', 'forum', 'offiziell']
 
 /**
- * What a forum post praises a place for. Kept apart on purpose: "günstig" is not "schäbig",
- * and many who write "ranzig" or "Absteige" are looking for exactly that. The Absteige tag
- * itself stays manual (SPEC 5.5); these are other people's recommendations.
+ * What a recommendation praises a place for, across all sources. Kept apart on purpose:
+ * "günstig" is not "schäbig", and many who write "ranzig" or "Absteige" are looking for
+ * exactly that. The Absteige tag itself stays manual (SPEC 5.5).
  */
-export const FORUM_KINDS = ['guenstig', 'urig', 'rau', 'atzig'] as const
-export type ForumKind = (typeof FORUM_KINDS)[number]
+export const TIP_KINDS = ['urig', 'rau', 'guenstig', 'bier', 'alternativ', 'atzig'] as const
+export type TipKind = (typeof TIP_KINDS)[number]
 
-export const FORUM_KIND_LABEL: Record<ForumKind, string> = {
-  guenstig: 'günstig',
+export const TIP_KIND_LABEL: Record<TipKind, string> = {
   urig: 'urig & klassisch',
   rau: 'rau & kultig',
-  atzig: 'atzig & laut',
+  guenstig: 'günstig',
+  bier: 'gutes Bier',
+  alternativ: 'alternativ & studentisch',
+  atzig: 'Party & laut',
 }
 
-export function forumKinds(bar: Bar): Set<string> {
-  return new Set((bar.tips ?? []).filter((t) => sourceKind(t.source) === 'forum' && t.kind).map((t) => t.kind!))
+// Kinds of the older lists (Falter, 1000things, offbeat) mapped onto the shared ones.
+const LEGACY_KIND: Record<string, TipKind> = { beisl: 'urig', tschocherl: 'urig', kultig: 'rau', bier: 'bier' }
+
+type Tip = NonNullable<Bar['tips']>[number]
+
+export function tipKind(t: Tip): TipKind | null {
+  if (!t.kind) return null
+  if ((TIP_KINDS as readonly string[]).includes(t.kind)) return t.kind as TipKind
+  return LEGACY_KIND[t.kind] ?? null
 }
 
-/** "r/wien: rau & kultig" for a forum tip, the source name otherwise. */
-export function tipLabel(t: { source: string; kind?: string }): string {
-  if (sourceKind(t.source) === 'forum' && t.kind && t.kind in FORUM_KIND_LABEL) {
-    return `r/wien: ${FORUM_KIND_LABEL[t.kind as ForumKind]}`
-  }
-  return t.source
+/** Forum tips can be single mentions; press and magazine tips always count. */
+export function isStrong(t: Tip): boolean {
+  return t.strength !== 'erwähnt'
+}
+
+export function strongTips(bar: Bar): Tip[] {
+  return (bar.tips ?? []).filter(isStrong)
+}
+
+export function tipKinds(bar: Bar, includeWeak: boolean): Set<TipKind> {
+  return new Set((bar.tips ?? []).filter((t) => includeWeak || isStrong(t)).map(tipKind).filter((k): k is TipKind => !!k))
+}
+
+/** "r/wien · rau & kultig", "Falter Lokalführer: Biertrinken". Strength stays in the background. */
+export function tipLabel(t: Tip): string {
+  if (sourceKind(t.source) !== 'forum') return t.source
+  const k = tipKind(t)
+  return k ? `${t.source} · ${TIP_KIND_LABEL[k]}` : t.source
 }
 
 /** Kind of a tip source, from its name, e.g. "Falter Lokalführer: Biertrinken". */
 export function sourceKind(source: string): SourceKind {
   const s = source.toLowerCase()
   if (s.includes('falter') || s.includes('standard') || s.includes('presse')) return 'presse'
-  if (s.includes('reddit') || s.includes('forum')) return 'forum'
+  if (s.startsWith('r/') || s.includes('reddit') || s.includes('forum')) return 'forum'
   return 'magazin'
 }
 
-export function barSources(bar: Bar): Set<SourceKind> {
-  const out = new Set<SourceKind>((bar.tips ?? []).map((t) => sourceKind(t.source)))
+export function barSources(bar: Bar, includeWeak = false): Set<SourceKind> {
+  const out = new Set<SourceKind>((bar.tips ?? []).filter((t) => includeWeak || isStrong(t)).map((t) => sourceKind(t.source)))
   if (bar.official.length) out.add('offiziell')
   return out
 }
@@ -63,22 +84,30 @@ export interface MapFilter {
   tags: Set<Tag>
   /** Bars must be recommended by at least one of these; empty = no filter. */
   sources: Set<SourceKind>
-  /** Bars must have a forum mention of one of these kinds; empty = no filter. */
-  forumKinds: Set<ForumKind>
+  /** Bars must be recommended as one of these; empty = no filter. */
+  tipKinds: Set<TipKind>
+  /** Also count single forum mentions; only applies while the forum source is selected. */
+  weakTips: boolean
   /** Hide bars known to be closed at this minute of the week; null = no filter. */
   openAt: number | null
 }
 
+/** Single mentions count only while "Foren" is chosen as source. */
+export function includeWeak(f: MapFilter): boolean {
+  return f.weakTips && f.sources.has('forum')
+}
+
 export function matchesFilter(bar: Bar, f: MapFilter): boolean {
   if (!f.venueTypes.has(bar.venueType)) return false
+  const weak = includeWeak(f)
   for (const t of f.tags) if (!bar.tags.includes(t)) return false
   if (f.sources.size) {
-    const s = barSources(bar)
+    const s = barSources(bar, weak)
     if (![...f.sources].some((k) => s.has(k))) return false
   }
-  if (f.forumKinds.size) {
-    const k = forumKinds(bar)
-    if (![...f.forumKinds].some((x) => k.has(x))) return false
+  if (f.tipKinds.size) {
+    const k = tipKinds(bar, weak)
+    if (![...f.tipKinds].some((x) => k.has(x))) return false
   }
   if (f.openAt !== null && isOpenAt(bar.weeklyOpen, f.openAt) === false) return false
   return true
@@ -86,5 +115,5 @@ export function matchesFilter(bar: Bar, f: MapFilter): boolean {
 
 /** Number of active filter conditions, for the badge on the button. */
 export function activeFilters(f: MapFilter, allTypes: number): number {
-  return (f.venueTypes.size < allTypes ? 1 : 0) + f.tags.size + f.sources.size + f.forumKinds.size + (f.openAt !== null ? 1 : 0)
+  return (f.venueTypes.size < allTypes ? 1 : 0) + f.tags.size + f.sources.size + f.tipKinds.size + (includeWeak(f) ? 1 : 0) + (f.openAt !== null ? 1 : 0)
 }

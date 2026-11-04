@@ -2,7 +2,8 @@
 
 Inputs: data/interim/bars.json, data/interim/opening_hours.json, data/own/tags.csv,
 public/data/travel/manifest.json (written by 06_travel_matrix.py).
-Outputs: public/data/bars.json, public/data/districts.geojson, public/data/manifest.json.
+Outputs: public/data/bars.json, public/data/districts.geojson, public/data/vienna_mask.geojson,
+public/data/manifest.json.
 
 Tags from OSM (essen, gastgarten, live_musik) and computed ones (lang_offen) are derived
 here; tags.csv rows (claude, manual) are applied on top, and value 0 removes a tag.
@@ -16,6 +17,7 @@ import json
 from datetime import datetime
 
 import geopandas as gpd
+from shapely.geometry import box, mapping
 
 from common import INTERIM, OWN, PUBLIC_DATA, RAW, log
 
@@ -75,6 +77,13 @@ def build_districts(bars: list[dict]) -> None:
     for feat in gj["features"]:  # 5 decimals is about 1 m
         feat["geometry"] = json.loads(json.dumps(feat["geometry"]), parse_float=lambda x: round(float(x), 5))
     (PUBLIC_DATA / "districts.geojson").write_text(json.dumps(gj, separators=(",", ":")), encoding="utf-8")
+    # Everything outside Vienna, for a grey wash on the map: a large box minus the city. A tiny
+    # buffer closes the slivers between the simplified district outlines.
+    city = gdf.geometry.buffer(0.00002).union_all()
+    mask = box(14.0, 47.0, 18.8, 49.6).difference(city)
+    mask_gj = {"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {},
+                                                          "geometry": json.loads(json.dumps(mapping(mask)), parse_float=lambda x: round(float(x), 5))}]}
+    (PUBLIC_DATA / "vienna_mask.geojson").write_text(json.dumps(mask_gj, separators=(",", ":")), encoding="utf-8")
 
 
 def main() -> None:
@@ -125,7 +134,9 @@ def main() -> None:
             "weeklyOpen": weekly,
             "official": b["official"],
             # Public tip sources only; the owner's own lists stay private.
-            **({"tips": tips} if (tips := [{"source": t["source"], "url": t["url"], **({"kind": t["kind"]} if t.get("kind") else {})}
+            **({"tips": tips} if (tips := [{"source": t["source"], "url": t["url"],
+                                           **{k: t[k] for k in ("kind", "strength") if t.get(k)},
+                                           **({"threads": int(t["threads"])} if t.get("threads") else {})}
                                           for t in b.get("tips", [])
                                           if t["source"] != "owner" and t["url"]]) else {}),
             "tags": [t for t in TAGS if t in tags],

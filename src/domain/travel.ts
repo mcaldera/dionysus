@@ -47,6 +47,9 @@ export function googleMapsDirections(
   return `https://www.google.com/maps/dir/?api=1&origin=${from.lat},${from.lon}&destination=${to.lat},${to.lon}&travelmode=${mode}`
 }
 
-export function googleMapsPlace(bar: { name: string; address?: string }): string {
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${bar.name} ${bar.address ?? 'Wien'}`)}`
+/** Search by name plus address; without an address, the district's postcode (1200 for the
+ *  20th) keeps Google from picking a same-named place elsewhere in Vienna. */
+export function googleMapsPlace(bar: { name: string; address?: string; district: number }): string {
+  const where = bar.address ?? `${1000 + bar.district * 10} Wien`
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${bar.name}, ${where}`)}`
 }

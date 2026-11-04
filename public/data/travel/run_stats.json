@@ -1,10 +1,10 @@
 {
- "points": 2140,
+ "points": 2142,
  "chunks": 32,
- "wall_s": 321.4,
- "slowest_chunk_s": 320.5,
- "cpu_chunk_s_sum": 8703,
- "peak_rss_mb_per_process": 5982,
- "peak_rss_mb_all_processes": 129919,
+ "wall_s": 316.3,
+ "slowest_chunk_s": 315.4,
+ "cpu_chunk_s_sum": 8933,
+ "peak_rss_mb_per_process": 5465,
+ "peak_rss_mb_all_processes": 128522,
  "max_memory_per_process": "8G"
 }

@@ -3,6 +3,7 @@
 // district order. Outer step: multi-start local search (2-opt, Or-opt) over that order.
 // No React or browser APIs here, so the worker and the tests can use it alone.
 
+import { strongTips } from './filter'
 import { DAY, isOpenAt, WEEK } from './hours'
 import { match, passesFilters, type Constraints } from './recommend'
 import type { Matrices } from './travel'
@@ -133,7 +134,7 @@ const CONN_SHARE = 0.25
 
 /** Known places first when nothing else differs: tips, official lists and tags. */
 function richness(b: Bar): number {
-  return 2 * (b.tips?.length ?? 0) + b.official.length + 0.5 * b.tags.length
+  return 2 * strongTips(b).length + b.official.length + 0.5 * b.tags.length
 }
 
 let connCache: { key: string; bars: Bar[]; conn: Map<string, number> } | null = null

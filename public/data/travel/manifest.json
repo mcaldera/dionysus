@@ -1,6 +1,6 @@
 {
- "generated": "2026-11-03T16:28:31",
- "n": 2140,
+ "generated": "2026-11-04T13:34:38",
+ "n": 2142,
  "order": [
   "osm:node/46823888",
   "osm:node/46823914",
@@ -2138,10 +2138,12 @@
   "osm:node/9025493153",
   "osm:way/130558727",
   "own:likorstube-sveceny",
+  "own:cafe-zwutschkerl",
   "osm:node/4408685906",
   "osm:node/11261329101",
   "osm:node/1770649858",
-  "osm:node/1312933786"
+  "osm:node/1312933786",
+  "osm:node/5184042865"
  ],
  "names": [
   "Heidingers Gasthaus",
@@ -4280,10 +4282,12 @@
   "Boulderbar Seestadt",
   "Restaurant Karl-Wirt",
   "Likörstube Sveceny",
+  "Café Zwutschkerl",
   "Uko",
   "Aufzug Café",
   "Klein aber Fein",
-  "Hawidere"
+  "Hawidere",
+  "Loco Bar"
  ],
  "departure": "2026-11-14T10:00:00",
  "window_hours": 12,

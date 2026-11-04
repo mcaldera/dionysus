@@ -1,7 +1,7 @@
 // Compact facts about a bar: type, district, open status, tags, tips. Shared by the
 // bar panel, hover card, recommendation cards and the taste finder.
 
-import { tipLabel } from '../domain/filter'
+import { strongTips, tipLabel } from '../domain/filter'
 import { clock, isOpenAt, openUntil } from '../domain/hours'
 import { TAG_LABEL, type Bar, type Tag } from '../domain/types'
 import { TYPE_COLOR, TYPE_ICON, TYPE_SHORT } from '../theme'
@@ -40,6 +40,7 @@ export function TagChips({ bar, highlight, max }: { bar: Bar; highlight?: Set<Ta
 }
 
 export function TipBadge({ bar }: { bar: Bar }) {
-  if (!bar.tips?.length) return null
-  return <span className="tip-badge" title={bar.tips.map(tipLabel).join(', ')}>★ Tipp</span>
+  const tips = strongTips(bar)
+  if (!tips.length) return null
+  return <span className="tip-badge" title={tips.map(tipLabel).join(', ')}>★ Tipp</span>
 }

@@ -23,7 +23,14 @@ export interface Bar {
   official: string[]
   /** Public lists that recommend the bar. */
   /** kind: what the source praises, e.g. "rau" for a forum mention of a rough, beloved place. */
-  tips?: { source: string; url: string; kind?: string }[]
+  tips?: {
+    source: string
+    url: string
+    kind?: string
+    /** Forum tips: "stark" (several threads or many upvotes) or "erwähnt" (single mention). */
+    strength?: 'stark' | 'erwähnt'
+    threads?: number
+  }[]
   tags: Tag[]
   unreviewedTags: Tag[]
   description?: string

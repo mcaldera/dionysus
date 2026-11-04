@@ -46,7 +46,7 @@ export default function App() {
     weekday: 5, startMinutes: 11 * 60, stopMinutes: 20, walkToleranceMinutes: 5, districts: ALL_DISTRICTS,
     startDistrict: null, endDistrict: null, venueTypes: new Set(VENUE_TYPES), officialOnly: false, noBacktrack: true,
   })
-  const [filter, setFilter] = useState<MapFilter>({ venueTypes: new Set(VENUE_TYPES), tags: new Set(), sources: new Set(), forumKinds: new Set(), openAt: null })
+  const [filter, setFilter] = useState<MapFilter>({ venueTypes: new Set(VENUE_TYPES), tags: new Set(), sources: new Set(), tipKinds: new Set(), weakTips: false, openAt: null })
   const [group, setGroup] = useState<Participant>({ name: 'Wir', likes: [], avoids: [] })
   const [prefs, setPrefs] = useState<Omit<Preferences, 'participants'>>({ similarity: 'similar', speedVsMatch: 0.5 })
   const [slotIds, setSlotIds] = useState<SlotIds[]>([])
@@ -64,6 +64,7 @@ export default function App() {
   const [activeProposal, setActiveProposal] = useState(0)
   const [busy, setBusy] = useState<string | null>(null)
   const [swapIndex, setSwapIndex] = useState<number | null>(null)
+  const [focusDistrict, setFocusDistrict] = useState<number | null>(null)
   const [fit, setFit] = useState<{ key: string; extras: Map<string, number>; done: boolean } | null>(null)
 
   useEffect(() => {
@@ -494,7 +495,11 @@ export default function App() {
   const escRef = useRef(clearSelection)
   useEffect(() => { escRef.current = clearSelection })
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !tasteOpen && !planOpen) escRef.current() }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || tasteOpen || planOpen) return
+      escRef.current()
+      setFocusDistrict(null)
+    }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [tasteOpen, planOpen])
@@ -513,7 +518,7 @@ export default function App() {
   // In swap mode: what taking the hovered bar would change.
   const hoverSwap = swap && swapSlot && hovered && hovered.district === swapSlot.district && hovered.id !== swapSlot.bar?.id
     ? slotDelta(slots, swap.index, hovered, data.matrices, listOptions) : null
-  const hd = hoverDistrict && !hoverBar ? districtInfo.get(hoverDistrict.district) : null
+  const hd = hoverDistrict && !hoverBar && hoverDistrict.district !== focusDistrict ? districtInfo.get(hoverDistrict.district) : null
   const showWelcome = !selected && slotIds.length === 0 && !proposals
   const planSummary = `${WEEKDAYS[plan.weekday].slice(0, 2)} ${clock(plan.startMinutes)} · ${plan.districts.length} Bezirke`
 
@@ -525,9 +530,15 @@ export default function App() {
       </header>
       <main className="planner">
         <div className="map-wrap">
-          <MapView bars={mapBars} districts={data.districts} districtLabels={data.districtLabels} visitedDistricts={visited}
+          <MapView bars={mapBars} districts={data.districts} districtLabels={data.districtLabels} viennaMask={data.viennaMask} visitedDistricts={visited}
             tourLegs={tourLegs} recLines={recLines} preview={preview} ghosts={ghosts} highlightId={highlightId} focus={focus}
-            onSelect={(id) => pick(id, false)} onBackgroundClick={clearSelection}
+            focusDistrict={focusDistrict} onSelect={(id) => pick(id, false)}
+            onBackgroundClick={(d) => {
+              // An empty spot clears the selection; inside a district it also focuses it (again: unfocus).
+              const hadSelection = !!selectedId || swapIndex !== null
+              clearSelection()
+              if (!hadSelection) setFocusDistrict((cur) => (d === null || cur === d ? null : d))
+            }}
             onHoverBar={setHoverBar} onHoverDistrict={setHoverDistrict} />
           {hovered && hoverBar && (
             <div className="hover-card" style={{ left: hoverBar.x + 16, top: hoverBar.y + 12 }}>
@@ -552,6 +563,13 @@ export default function App() {
               <strong>{hoverDistrict.district}. {hd.name}</strong>
               <span>{hd.count} Lokale{visited.has(hoverDistrict.district) ? ' · ✓ in der Tour' : ''}
                 {!included.has(hoverDistrict.district) ? ' · nicht in der Planung' : ''}</span>
+            </div>
+          )}
+          {focusDistrict !== null && (
+            <div className="district-focus" role="status">
+              <strong>{districtName(focusDistrict)}</strong>
+              <span>{districtInfo.get(focusDistrict)?.count ?? 0} Lokale{visited.has(focusDistrict) ? ' · ✓ in der Tour' : ''}</span>
+              <button type="button" className="icon-btn" aria-label="Bezirksfokus beenden" onClick={() => setFocusDistrict(null)}>×</button>
             </div>
           )}
           <div className="map-legend" aria-label="Legende">

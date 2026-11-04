@@ -397,7 +397,10 @@ def merge_with_import(out: list[dict], venues: list[Venue]) -> None:
     log(f"merged with import: {counts}; {len(bars)} bars in data/interim/bars.json")
 
 
-TIP_TYPE = {"tschocherl": "tschocherl", "bier": "pub_bar", "beisl": "beisl_wirtshaus", "kultig": "pub_bar"}
+TIP_TYPE = {"tschocherl": "tschocherl", "bier": "pub_bar", "beisl": "beisl_wirtshaus", "kultig": "pub_bar",
+            # Forum kinds (forum_tips.py)
+            "rau": "tschocherl", "urig": "beisl_wirtshaus", "guenstig": "tschocherl", "alternativ": "pub_bar",
+            "atzig": "pub_bar"}
 
 
 def tip_score(tip: str, name: str, no_district: bool) -> float:
@@ -464,7 +467,8 @@ def merge_tips(bars: list[dict], by_id: dict[str, dict]) -> list[dict]:
         bar = best[1]
         bar.setdefault("tips", [])
         if not any(t["source"] == tip["source"] and t.get("kind") == tip["kind"] for t in bar["tips"]):
-            bar["tips"].append({"source": tip["source"], "kind": tip["kind"], "url": tip["url"]})
+            bar["tips"].append({"source": tip["source"], "kind": tip["kind"], "url": tip["url"],
+                                **{k: tip[k] for k in ("weight", "threads", "strength") if tip.get(k)}})
         report.append({**tip, "status": how, "bar": bar["name"], "bar_id": bar["id"]})
     counts: dict[str, int] = {}
     for r in report:

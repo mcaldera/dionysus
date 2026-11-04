@@ -1,7 +1,8 @@
 import * as maplibregl from 'maplibre-gl'
-import type { GeoJSONSource, MapLayerMouseEvent } from 'maplibre-gl'
+import type { ExpressionSpecification, GeoJSONSource, MapLayerMouseEvent } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useEffect, useLayoutEffect, useRef } from 'react'
+import { strongTips } from '../domain/filter'
 import type { Bar } from '../domain/types'
 import { TYPE_COLOR } from '../theme'
 
@@ -40,6 +41,7 @@ interface Props {
   bars: MapBar[]
   districts: GeoJSON.FeatureCollection
   districtLabels: GeoJSON.FeatureCollection
+  viennaMask: GeoJSON.FeatureCollection
   visitedDistricts: Set<number>
   tourLegs: Leg[]
   recLines: [number, number][][]
@@ -49,8 +51,10 @@ interface Props {
   highlightId: string | null
   focus: { lat: number; lon: number; key: number } | null
   onSelect: (id: string) => void
-  /** A click on the map that hits no bar. */
-  onBackgroundClick: () => void
+  /** A click on the map that hits no bar; with the district under it, if any. */
+  onBackgroundClick: (district: number | null) => void
+  /** District picked by a click on empty map: emphasised and zoomed to. */
+  focusDistrict: number | null
   onHoverBar: (h: HoverInfo | null) => void
   onHoverDistrict: (h: { district: number; x: number; y: number } | null) => void
 }
@@ -69,9 +73,9 @@ function barsGeoJson(bars: MapBar[]): GeoJSON.FeatureCollection {
       type: 'Feature',
       geometry: { type: 'Point', coordinates: [m.bar.lon, m.bar.lat] },
       properties: {
-        id: m.bar.id, role: m.role, type: m.bar.venueType, label: m.label != null ? String(m.label) : '',
+        id: m.bar.id, role: m.role, type: m.bar.venueType, district: m.bar.district, label: m.label != null ? String(m.label) : '',
         closed: m.closed ? 1 : 0, dim: m.dim ? 1 : 0,
-        rich: m.bar.tags.length + (m.bar.tips?.length ?? 0) > 1 ? 1 : 0,
+        rich: m.bar.tags.length + strongTips(m.bar).length > 1 ? 1 : 0,
       },
     })),
   }
@@ -115,6 +119,7 @@ export default function MapView(props: Props) {
     ;(m.getSource('bars') as GeoJSONSource).setData(barsGeoJson(p.bars))
     ;(m.getSource('districts') as GeoJSONSource).setData(districtsGeoJson(p.districts, p.visitedDistricts))
     ;(m.getSource('district-labels') as GeoJSONSource).setData(p.districtLabels)
+    ;(m.getSource('outside') as GeoJSONSource).setData(p.viennaMask)
     ;(m.getSource('tour') as GeoJSONSource).setData(lines(p.tourLegs))
     ;(m.getSource('rec-lines') as GeoJSONSource).setData(lines(p.recLines.map((coords) => ({ coords }))))
     ;(m.getSource('preview') as GeoJSONSource).setData(lines(p.preview))
@@ -126,13 +131,41 @@ export default function MapView(props: Props) {
   }
 
   function setDistrictHover(d: number | null) {
-    const m = map.current
-    if (!m || d === hoveredDistrict.current) return
-    if (hoveredDistrict.current != null) m.setFeatureState({ source: 'districts', id: hoveredDistrict.current }, { hover: false })
+    if (d === hoveredDistrict.current) return
     hoveredDistrict.current = d
-    if (d != null) m.setFeatureState({ source: 'districts', id: d }, { hover: true })
-    // Other districts fade, so the hovered one stands out.
-    m.setPaintProperty('districts-dim', 'fill-opacity', d == null ? 0 : ['case', ['==', ['get', 'district'], d], 0, 0.42])
+    emphasise()
+  }
+
+  /**
+   * One district stands out: the focused one (clicked), else the hovered one. The others
+   * darken, the district gets a warm glow and, when focused, a soft shadow that lifts it off
+   * the map; bars outside a focused district fade.
+   */
+  function emphasise() {
+    const m = map.current
+    if (!m || !ready.current) return
+    const focused = latest.current.focusDistrict
+    const d = focused ?? hoveredDistrict.current
+    const strong = focused !== null
+    const is: ExpressionSpecification = ['==', ['get', 'district'], d ?? -1]
+    m.setPaintProperty('districts-dim', 'fill-opacity', d == null ? 0 : ['case', is, 0, strong ? 0.34 : 0.16])
+    // Outside Vienna darkens like the other districts.
+    m.setPaintProperty('outside-dim', 'fill-opacity', d == null ? 0 : strong ? 0.34 : 0.16)
+    m.setFilter('districts-shadow', ['==', ['get', 'district'], strong ? d : -1])
+    m.setFilter('districts-glow', ['==', ['get', 'district'], d ?? -1])
+    m.setPaintProperty('districts-glow', 'line-opacity', strong ? 0.95 : 0.6)
+    m.setPaintProperty('districts-line', 'line-color', ['case', is, '#3b2414', '#8a6a48'])
+    m.setPaintProperty('districts-line', 'line-width', ['case', is, strong ? 3 : 2.4, 1.3])
+    m.setPaintProperty('districts-fill', 'fill-opacity', ['case',
+      is, ['case', ['==', ['get', 'visited'], 1], 0.3, strong ? 0.04 : 0.08],
+      ['==', ['get', 'visited'], 1], 0.18, 0])
+    m.setPaintProperty('bars-other', 'circle-opacity', ['case',
+      ['==', ['get', 'dim'], 1], 0.28,
+      strong ? ['case', is, 0.95, 0.22] : 0.9])
+    m.setPaintProperty('district-labels', 'text-opacity', d == null ? 0.55 : ['case', is, 0.95, strong ? 0.3 : 0.45])
+    const named: ExpressionSpecification = ['format', ['to-string', ['get', 'district']], { 'font-scale': 1 }, '\n', {}, ['get', 'name'], { 'font-scale': 0.6 }]
+    m.setLayoutProperty('district-labels', 'text-field',
+      ['step', ['zoom'], ['case', is, named, ['to-string', ['get', 'district']]], 12.6, named])
   }
 
   useEffect(() => {
@@ -148,7 +181,17 @@ export default function MapView(props: Props) {
     m.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left')
 
     m.on('load', () => {
+      m.addSource('outside', { type: 'geojson', data: empty })
       m.addSource('districts', { type: 'geojson', data: empty, promoteId: 'district' })
+      // Outside Vienna: a permanent light wash, so the city stands out; darkens with district focus.
+      m.addLayer({
+        id: 'outside-wash', type: 'fill', source: 'outside',
+        paint: { 'fill-color': '#ece7e0', 'fill-opacity': 0.72 },
+      })
+      m.addLayer({
+        id: 'outside-dim', type: 'fill', source: 'outside',
+        paint: { 'fill-color': '#1c1410', 'fill-opacity': 0, 'fill-opacity-transition': { duration: 300, delay: 0 } },
+      })
       m.addSource('district-labels', { type: 'geojson', data: empty })
       m.addSource('tour', { type: 'geojson', data: empty })
       m.addSource('rec-lines', { type: 'geojson', data: empty })
@@ -167,11 +210,17 @@ export default function MapView(props: Props) {
       })
       m.addLayer({
         id: 'districts-dim', type: 'fill', source: 'districts',
-        paint: { 'fill-color': '#f8f5f0', 'fill-opacity': 0, 'fill-opacity-transition': { duration: 250, delay: 0 } },
+        paint: { 'fill-color': '#1c1410', 'fill-opacity': 0, 'fill-opacity-transition': { duration: 300, delay: 0 } },
+      })
+      // Soft drop shadow under the focused district, so it looks lifted off the map.
+      m.addLayer({
+        id: 'districts-shadow', type: 'line', source: 'districts', filter: ['==', ['get', 'district'], -1],
+        layout: { 'line-join': 'round' },
+        paint: { 'line-color': '#1c1410', 'line-width': 18, 'line-blur': 16, 'line-opacity': 0.45, 'line-translate': [0, 7] },
       })
       m.addLayer({
         id: 'districts-casing', type: 'line', source: 'districts',
-        paint: { 'line-color': '#ffffff', 'line-width': ['case', ['boolean', ['feature-state', 'hover'], false], 6, 3.5], 'line-opacity': 0.9 },
+        paint: { 'line-color': '#ffffff', 'line-width': 3.5, 'line-opacity': 0.9 },
       })
       m.addLayer({
         id: 'districts-line', type: 'line', source: 'districts',
@@ -179,6 +228,11 @@ export default function MapView(props: Props) {
           'line-color': ['case', ['boolean', ['feature-state', 'hover'], false], '#3b2414', '#8a6a48'],
           'line-width': ['case', ['boolean', ['feature-state', 'hover'], false], 2.6, 1.3],
         },
+      })
+      m.addLayer({
+        id: 'districts-glow', type: 'line', source: 'districts', filter: ['==', ['get', 'district'], -1],
+        layout: { 'line-join': 'round' },
+        paint: { 'line-color': '#fbbf24', 'line-width': 8, 'line-blur': 5, 'line-opacity': 0.6 },
       })
       m.addLayer({
         id: 'district-labels', type: 'symbol', source: 'district-labels',
@@ -310,7 +364,9 @@ export default function MapView(props: Props) {
 
       m.on('click', (e) => {
         const hit = m.queryRenderedFeatures(e.point, { layers: BAR_LAYERS.filter((l) => m.getLayer(l)) })
-        if (!hit.length) latest.current.onBackgroundClick()
+        if (hit.length) return
+        const d = m.queryRenderedFeatures(e.point, { layers: ['districts-fill'] })[0]?.properties?.district
+        latest.current.onBackgroundClick(d ? Number(d) : null)
       })
       for (const layer of BAR_LAYERS) {
         m.on('click', layer, (e: MapLayerMouseEvent) => {
@@ -340,6 +396,7 @@ export default function MapView(props: Props) {
       })
       ready.current = true
       update()
+      emphasise()
     })
     return () => {
       ready.current = false
@@ -348,8 +405,24 @@ export default function MapView(props: Props) {
     }
   }, [])
 
-  useEffect(update, [props.bars, props.districts, props.districtLabels, props.visitedDistricts, props.tourLegs,
+  useEffect(update, [props.bars, props.districts, props.districtLabels, props.viennaMask, props.visitedDistricts, props.tourLegs,
     props.recLines, props.preview, props.ghosts, props.highlightId])
+
+  // Focus on a district: emphasise it and zoom so it fills the map left of the panel.
+  useEffect(() => {
+    emphasise()
+    const m = map.current
+    if (!m || props.focusDistrict === null) return
+    const f = props.districts.features.find((x) => Number(x.properties?.district) === props.focusDistrict)
+    if (!f) return
+    const b = new maplibregl.LngLatBounds()
+    const walk = (c: unknown): void => {
+      if (Array.isArray(c) && typeof c[0] === 'number') b.extend(c as [number, number])
+      else if (Array.isArray(c)) c.forEach(walk)
+    }
+    walk((f.geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon).coordinates)
+    m.fitBounds(b, { padding: { top: 70, bottom: 70, left: 70, right: 480 }, duration: 800, maxZoom: 15.5 })
+  }, [props.focusDistrict, props.districts])
 
   useEffect(() => {
     if (props.focus && map.current) {
