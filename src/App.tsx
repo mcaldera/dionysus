@@ -282,7 +282,8 @@ export default function App() {
 
   const mapBars: MapBar[] = useMemo(() => {
     if (!data) return []
-    const ranked = finder ? nearby.slice(0, 40).map((r) => r.bar) : swap ? swap.options.map((o) => o.bar) : refinedRecs.map((r) => r.bar)
+    // Finder: every bar in reach is ranked (top ones numbered); with a starting point, the rest fade.
+    const ranked = finder ? nearby.map((r) => r.bar) : swap ? swap.options.map((o) => o.bar) : refinedRecs.map((r) => r.bar)
     const rank = new Map(ranked.map((b, i) => [b.id, i]))
     const stopIndex = new Map<string, number>(finder ? [] : previewTl ? previewTl.map((s, i) => [s.bar.id, i])
       : slots.flatMap((s, i) => (s.bar ? [[s.bar.id, i] as const] : [])))
@@ -304,13 +305,13 @@ export default function App() {
         out.push({ bar, role: r < numbered ? 'top' : 'next', label: r < numbered ? r + 1 : undefined })
       } else {
         // Fade bars you can't pick next, and districts outside the plan.
-        const blocked = finder ? false : swapSlot ? !inSwapDistrict : !included.has(bar.district) || (!!selected
+        const blocked = finder ? !!(selected || point) : swapSlot ? !inSwapDistrict : !included.has(bar.district) || (!!selected
           && (bar.district === selected.district || stops.some((s) => s.district === bar.district)))
         out.push({ bar, role: 'other', dim: blocked })
       }
     }
     return out
-  }, [data, finder, nearby, refinedRecs, swap, swapSlot, mapTl, previewTl, slots, selected, stops, shownFilter, included])
+  }, [data, finder, nearby, point, refinedRecs, swap, swapSlot, mapTl, previewTl, slots, selected, stops, shownFilter, included])
 
   const highlighted = highlightId ? byId.get(highlightId) ?? null : null
   // The bar a highlighted recommendation or swap option is reached from.
@@ -829,6 +830,12 @@ export default function App() {
             <div>
               {VENUE_TYPES.map((t) => <span key={t}><i className="type-dot" style={{ background: TYPE_COLOR[t] }} /> {TYPE_SHORT[t]}</span>)}
             </div>
+            {finder && (selected || point) && (
+              <div>
+                <span><i className="reach-dot in" /> in {maxMinutes} Min. erreichbar ({nearby.length})</span>
+                <span><i className="reach-dot out" /> zu weit</span>
+              </div>
+            )}
             {!finder && <div>
               <span><i className="lg walk" /> zu Fuß</span>
               <span><i className="lg ride" /> Öffi-Linie</span>

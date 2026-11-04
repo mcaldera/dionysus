@@ -370,7 +370,7 @@ export default function MapView(props: Props) {
       m.addLayer({
         id: 'bars-next', type: 'circle', source: 'bars', filter: ['==', ['get', 'role'], 'next'],
         paint: {
-          'circle-radius': 7, 'circle-color': hollow(typeColor),
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 4, 14, 7.5], 'circle-color': hollow(typeColor),
           'circle-stroke-color': ['case', ['==', ['get', 'closed'], 1], typeColor, '#ffffff'],
           'circle-stroke-width': ['case', ['==', ['get', 'closed'], 1], 2.5, 2],
         },
