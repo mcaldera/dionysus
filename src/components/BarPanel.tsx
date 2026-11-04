@@ -25,6 +25,8 @@ interface Props {
   onPlan: () => void
   /** The tour has an empty slot for this bar's district. */
   emptySlot: boolean
+  /** Finder mode: no tour actions; a "Merken" toggle instead. */
+  finder?: { favorite: boolean; onFavorite: () => void }
   onClose: () => void
   onTagChange?: (bar: Bar, tag: string, value: 0 | 1) => void
 }
@@ -35,7 +37,7 @@ function editionLabel(e: string): string {
 }
 
 export default function BarPanel(props: Props) {
-  const { bar, arrival, blockedBy, inTour, newestEdition, tourEmpty, busy, onAdd, onReplace, onPropose, onTemplate, onPlan, emptySlot, onClose, onTagChange } = props
+  const { bar, arrival, blockedBy, inTour, newestEdition, tourEmpty, busy, onAdd, onReplace, onPropose, onTemplate, onPlan, emptySlot, finder, onClose, onTagChange } = props
   if (!bar) {
     return (
       <section className="card welcome" aria-label="Ausgewähltes Lokal">
@@ -95,6 +97,11 @@ export default function BarPanel(props: Props) {
           {arrival !== null && <><dt>Ankunft</dt><dd>{clock(arrival)}{open === false && <strong className="warn"> · geschlossen</strong>}</dd></>}
         </dl>
         <div className="actions">
+          {finder ? (
+            <button type="button" className={finder.favorite ? 'primary' : 'ghost'} aria-pressed={finder.favorite} onClick={finder.onFavorite}>
+              {finder.favorite ? '♥ Gemerkt' : '♡ Merken'}
+            </button>
+          ) : (<>
           {inTour ? (
             <span className="in-tour">✓ In eurer Tour</span>
           ) : (
@@ -109,10 +116,11 @@ export default function BarPanel(props: Props) {
               ✨ Touren ab hier
             </button>
           )}
+          </>)}
           {bar.website && <a className="ghost" href={bar.website} target="_blank" rel="noreferrer">Website</a>}
           <a className="ghost" href={googleMapsPlace(bar)} target="_blank" rel="noreferrer">In Google Maps ansehen</a>
         </div>
-        {blockedBy && !inTour && <p className="hint">Im {bar.district}. Bezirk habt ihr schon {blockedBy.name}; dieses Lokal kommt an seine Stelle.</p>}
+        {!finder && blockedBy && !inTour && <p className="hint">Im {bar.district}. Bezirk habt ihr schon {blockedBy.name}; dieses Lokal kommt an seine Stelle.</p>}
         {import.meta.env.DEV && onTagChange && <TagEditor bar={bar} onChange={onTagChange} />}
       </div>
     </section>

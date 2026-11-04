@@ -90,6 +90,8 @@ export interface MapFilter {
   weakTips: boolean
   /** Hide bars known to be closed at this minute of the week; null = no filter. */
   openAt: number | null
+  /** With openAt: also keep bars whose hours are unknown (about a third of them). */
+  includeUnknownHours: boolean
 }
 
 /** Single mentions count only while "Foren" is chosen as source. */
@@ -109,7 +111,10 @@ export function matchesFilter(bar: Bar, f: MapFilter): boolean {
     const k = tipKinds(bar, weak)
     if (![...f.tipKinds].some((x) => k.has(x))) return false
   }
-  if (f.openAt !== null && isOpenAt(bar.weeklyOpen, f.openAt) === false) return false
+  if (f.openAt !== null) {
+    const open = isOpenAt(bar.weeklyOpen, f.openAt)
+    if (open === false || (open === null && !f.includeUnknownHours)) return false
+  }
   return true
 }
 

@@ -51,8 +51,12 @@ interface Props {
   highlightId: string | null
   focus: { lat: number; lon: number; key: number } | null
   onSelect: (id: string) => void
-  /** A click on the map that hits no bar; with the district under it, if any. */
-  onBackgroundClick: (district: number | null) => void
+  /** A click on the map that hits no bar; with the district under it, if any, and the point. */
+  onBackgroundClick: (district: number | null, at: { lat: number; lon: number }) => void
+  /** Right-click: a point picked on the map. */
+  onContextPoint?: (at: { lat: number; lon: number }) => void
+  /** Finder: the free point bars are searched from (home, GPS, click). */
+  origin: { lat: number; lon: number } | null
   /** District picked by a click on empty map: emphasised and zoomed to. */
   focusDistrict: number | null
   onHoverBar: (h: HoverInfo | null) => void
@@ -125,6 +129,10 @@ export default function MapView(props: Props) {
     ;(m.getSource('districts') as GeoJSONSource).setData(districtsGeoJson(p.districts, p.visitedDistricts))
     ;(m.getSource('district-labels') as GeoJSONSource).setData(p.districtLabels)
     ;(m.getSource('outside') as GeoJSONSource).setData(p.viennaMask)
+    ;(m.getSource('origin') as GeoJSONSource).setData({
+      type: 'FeatureCollection',
+      features: p.origin ? [{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [p.origin.lon, p.origin.lat] } }] : [],
+    })
     ;(m.getSource('tour') as GeoJSONSource).setData(lines(p.tourLegs))
     ;(m.getSource('rec-lines') as GeoJSONSource).setData(lines(p.recLines.map((coords) => ({ coords }))))
     ;(m.getSource('preview') as GeoJSONSource).setData(lines(p.preview))
@@ -220,6 +228,7 @@ export default function MapView(props: Props) {
       m.addSource('preview', { type: 'geojson', data: empty })
       m.addSource('bars', { type: 'geojson', data: empty })
       m.addSource('ghosts', { type: 'geojson', data: empty })
+      m.addSource('origin', { type: 'geojson', data: empty })
 
       m.addLayer({
         id: 'districts-fill', type: 'fill', source: 'districts',
@@ -328,6 +337,14 @@ export default function MapView(props: Props) {
         layout: { 'text-field': ['get', 'label'], 'text-font': FONT, 'text-size': 12, 'text-allow-overlap': true },
         paint: { 'text-color': '#7a6a5c' },
       })
+      m.addLayer({
+        id: 'origin-halo', type: 'circle', source: 'origin',
+        paint: { 'circle-radius': 22, 'circle-color': 'rgba(37,99,235,0.16)', 'circle-stroke-color': 'rgba(37,99,235,0.35)', 'circle-stroke-width': 1 },
+      })
+      m.addLayer({
+        id: 'origin', type: 'circle', source: 'origin',
+        paint: { 'circle-radius': 8, 'circle-color': '#2563eb', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 3 },
+      })
       const hollow = (color: string) => ['case', ['==', ['get', 'closed'], 1], '#ffffff', color] as unknown as string
       m.addLayer({
         id: 'bars-other', type: 'circle', source: 'bars', filter: ['==', ['get', 'role'], 'other'],
@@ -388,7 +405,10 @@ export default function MapView(props: Props) {
         const hit = m.queryRenderedFeatures(e.point, { layers: BAR_LAYERS.filter((l) => m.getLayer(l)) })
         if (hit.length) return
         const d = m.queryRenderedFeatures(e.point, { layers: ['districts-fill'] })[0]?.properties?.district
-        latest.current.onBackgroundClick(d ? Number(d) : null)
+        latest.current.onBackgroundClick(d ? Number(d) : null, { lat: e.lngLat.lat, lon: e.lngLat.lng })
+      })
+      m.on('contextmenu', (e) => {
+        latest.current.onContextPoint?.({ lat: e.lngLat.lat, lon: e.lngLat.lng })
       })
       for (const layer of BAR_LAYERS) {
         m.on('click', layer, (e: MapLayerMouseEvent) => {
@@ -417,6 +437,8 @@ export default function MapView(props: Props) {
         latest.current.onHoverDistrict(null)
       })
       ready.current = true
+      // For tests and tools: the map now has its sources, layers and handlers.
+      if (container.current) container.current.dataset.ready = '1'
       update()
       emphasise()
     })
@@ -429,7 +451,7 @@ export default function MapView(props: Props) {
   }, [])
 
   useEffect(update, [props.bars, props.districts, props.districtLabels, props.viennaMask, props.visitedDistricts, props.tourLegs,
-    props.recLines, props.preview, props.ghosts, props.highlightId])
+    props.recLines, props.preview, props.ghosts, props.origin, props.highlightId])
 
   // Focus on a district: emphasise it and zoom so it fills the map left of the panel.
   useEffect(() => {

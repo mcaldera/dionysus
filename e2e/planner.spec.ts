@@ -10,6 +10,8 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/')
   await expect(page.getByRole('heading', { name: 'Seidl-Tour-Planer' })).toBeVisible()
   await expect(page.getByTestId('map')).toBeVisible({ timeout: 30_000 })
+  // New visitors start in the Beisl-Finder; these tests are about the tour planner.
+  await page.getByRole('tab', { name: /Seidl-Tour/ }).click()
 })
 
 test('selecting a bar opens the panel and shows 5 recommendations', async ({ page }) => {
@@ -130,4 +132,34 @@ test('stops can be reordered by drag and drop', async ({ page }) => {
   const second = await names.nth(1).textContent()
   await page.locator('.timeline > li').nth(1).dragTo(page.locator('.timeline > li').nth(3))
   await expect(names.nth(3)).toHaveText(second ?? '')
+})
+
+test.describe('Beisl-Finder', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.getByRole('tab', { name: /Beisl-Finder/ }).click()
+  })
+
+  test('a bar shows what is reachable from it, in any district', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: /Wo seid ihr/ })).toBeVisible()
+    await pick(page, 'Café Bendl')
+    await expect(page.getByRole('heading', { name: 'Von Café Bendl aus' })).toBeVisible()
+    const items = page.locator('[aria-label="In der Nähe"] .recs li')
+    await expect(items.first()).toBeVisible()
+    await page.getByRole('button', { name: '30′' }).click()
+    await page.getByRole('button', { name: /Öffis/ }).click()
+    expect(await items.count()).toBeGreaterThan(5)
+    // No tour actions here; a Merkliste instead.
+    await expect(page.getByRole('button', { name: 'Zur Tour hinzufügen' })).toHaveCount(0)
+    await page.getByRole('button', { name: '♡ Merken' }).click()
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('heading', { name: /Eure Merkliste/ })).toBeVisible()
+  })
+
+  test('a right-click sets a point to search from', async ({ page }) => {
+    await expect(page.getByTestId('map')).toHaveAttribute('data-ready', '1', { timeout: 30_000 })
+    await page.getByTestId('map').click({ button: 'right', position: { x: 500, y: 420 } })
+    await expect(page.getByRole('heading', { name: /Gewählter Punkt/ })).toBeVisible()
+    await page.getByRole('button', { name: 'Punkt entfernen' }).click()
+    await expect(page.getByRole('heading', { name: /Wo seid ihr/ })).toBeVisible()
+  })
 })

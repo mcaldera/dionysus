@@ -9,7 +9,7 @@ function bar(tips: Bar['tips']): Bar {
   }
 }
 
-const filter: MapFilter = { venueTypes: new Set(VENUE_TYPES), tags: new Set(), sources: new Set(), tipKinds: new Set(), weakTips: false, openAt: null }
+const filter: MapFilter = { venueTypes: new Set(VENUE_TYPES), tags: new Set(), sources: new Set(), tipKinds: new Set(), weakTips: false, openAt: null, includeUnknownHours: true }
 
 describe('recommendation kinds', () => {
   it('maps older list kinds onto the shared ones', () => {

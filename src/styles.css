@@ -463,3 +463,46 @@ label.check { display: flex; align-items: center; gap: 0.45rem; font-size: 0.86r
 .district-focus .icon-btn { color: #f8efe4; }
 .district-focus .icon-btn:hover { background: rgba(255, 255, 255, 0.12); }
 @media (max-width: 900px) { .district-focus { transform: translateX(-50%); } }
+
+/* Mode tabs in the header */
+.mode-tabs { display: inline-flex; padding: 3px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12); }
+.mode-tabs button {
+  border: 0; background: none; color: #d8c9ba; padding: 0.3rem 0.85rem; border-radius: 999px; cursor: pointer; font-weight: 600;
+  font-size: 0.88rem; white-space: nowrap; transition: all 0.15s;
+}
+.mode-tabs button[aria-selected='true'] { background: linear-gradient(135deg, #fbbf24, #f97316); color: var(--ink); box-shadow: 0 2px 8px rgba(249, 115, 22, 0.35); }
+.mode-tabs button[aria-selected='false']:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+
+/* Finder */
+.finder-controls { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.4rem; }
+.finder-summary { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.4rem; }
+.plan-mode.active { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25); }
+.rec.active { border-color: #f3c9a5; box-shadow: 0 4px 14px rgba(194, 65, 12, 0.18); }
+h4.sub { margin: 0.8rem 0 0.2rem; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.fav-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.2rem; }
+.fav-list .link { color: var(--accent); font-weight: 600; }
+
+/* District card */
+.district-card { display: grid; gap: 0.45rem; }
+.district-card .card-head { margin-bottom: 0; }
+.district-card h4 { margin: 0.2rem 0 0; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.type-bars { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.type-bars li { display: grid; grid-template-columns: 9.5rem 1fr 5.5rem; align-items: center; gap: 0.5rem; font-size: 0.84rem; }
+.type-bar-track { height: 10px; border-radius: 4px; background: #f1e9df; overflow: hidden; }
+.type-bar-track span { display: block; height: 100%; border-radius: 4px; }
+.type-bar-value { text-align: right; font-variant-numeric: tabular-nums; }
+.facts-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.2rem; font-size: 0.86rem; color: var(--ink-2); }
+
+/* District card floating bottom-left, above the legend */
+.district-float {
+  position: absolute; left: 12px; bottom: 74px; z-index: 3; width: min(360px, calc(100% - 24px));
+  max-height: calc(100% - 150px); overflow-y: auto; padding: 0.8rem 0.9rem; animation: pop 0.18s ease-out;
+}
+.district-float .stat-tiles strong { font-size: 0.95rem; }
+
+/* Open-hours choice in the finder header */
+.open-modes { display: inline-flex; padding: 2px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.14); }
+.open-modes button {
+  border: 0; background: none; color: #d8c9ba; padding: 0.25rem 0.65rem; border-radius: 999px; cursor: pointer; font-size: 0.8rem; white-space: nowrap;
+}
+.open-modes button[aria-pressed='true'] { background: var(--accent-2); color: var(--ink); font-weight: 600; }

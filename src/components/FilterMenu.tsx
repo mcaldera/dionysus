@@ -13,9 +13,15 @@ interface Props {
   /** Default day and time for "open at", from the tour plan. */
   planMinuteOfWeek: number
   onPick: (id: string) => void
-  onPlan: () => void
-  planSummary: string
+  mode: AppMode
+  /** The open-at filter; the finder has its own time control instead. */
+  showOpenFilter: boolean
+  onMode: (m: AppMode) => void
+  /** Mode-specific controls on the right. */
+  actions: React.ReactNode
 }
+
+export type AppMode = 'finder' | 'tour'
 
 function norm(s: string): string {
   return s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss')
@@ -28,7 +34,7 @@ function toggled<T>(set: Set<T>, x: T): Set<T> {
   return next
 }
 
-export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, onPick, onPlan, planSummary }: Props) {
+export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, onPick, mode, onMode, showOpenFilter, actions }: Props) {
   const [query, setQuery] = useState('')
   const root = useRef<HTMLDivElement>(null)
 
@@ -78,6 +84,10 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
       <div className="brand">
         <span className="logo" aria-hidden="true">🍺</span>
         <h1>Seidl-Tour-Planer</h1>
+      </div>
+      <div className="mode-tabs" role="tablist" aria-label="Modus">
+        <button type="button" role="tab" aria-selected={mode === 'finder'} onClick={() => onMode('finder')}>🔎 Beisl-Finder</button>
+        <button type="button" role="tab" aria-selected={mode === 'tour'} onClick={() => onMode('tour')}>🗺 Seidl-Tour</button>
       </div>
       <details className="popover filter-menu">
         <summary>⚲ Filter{active ? <span className="badge-count">{active}</span> : null} <span className="caret">▾</span></summary>
@@ -139,7 +149,7 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
               </label>
             )}
           </section>
-          <section>
+          {showOpenFilter && <section>
             <h4>Öffnungszeiten</h4>
             <label className="check">
               <input type="checkbox" checked={filter.openAt !== null}
@@ -158,9 +168,14 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
                   if (!Number.isNaN(h)) onFilter({ ...filter, openAt: openDay * DAY + h * 60 + (m || 0) })
                 }} />
             </div>
-          </section>
+            <label className="check">
+              <input type="checkbox" checked={filter.includeUnknownHours} disabled={filter.openAt === null}
+                onChange={(e) => onFilter({ ...filter, includeUnknownHours: e.target.checked })} />
+              Auch Lokale ohne bekannte Öffnungszeiten (etwa ein Drittel)
+            </label>
+          </section>}
           <button type="button" className="ghost small" disabled={!active}
-            onClick={() => onFilter({ venueTypes: new Set(VENUE_TYPES), tags: new Set(), sources: new Set(), tipKinds: new Set(), weakTips: false, openAt: null })}>
+            onClick={() => onFilter({ venueTypes: new Set(VENUE_TYPES), tags: new Set(), sources: new Set(), tipKinds: new Set(), weakTips: false, openAt: null, includeUnknownHours: true })}>
             Filter zurücksetzen
           </button>
         </div>
@@ -181,10 +196,7 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
           </ul>
         )}
       </div>
-      <div className="top-actions">
-        <span className="plan-summary">{planSummary}</span>
-        <button type="button" className="accent-btn" onClick={onPlan}>🗺 Tour planen</button>
-      </div>
+      <div className="top-actions">{actions}</div>
     </div>
   )
 }

@@ -163,7 +163,8 @@ def main() -> None:
     manifest = {
         "dataVersion": h.hexdigest()[:12],
         "generated": datetime.now().isoformat(timespec="seconds"),
-        "n": len(bars),
+        # The matrix size, not the bar count: hidden bars keep their rows, so indices have gaps.
+        "n": len(travel["order"]),
         "order": travel["order"],
         "travel": {k: travel[k] for k in ["departure", "window_hours", "speed_walking_kmh", "feeds"]},
         "osmTimestamp": src["stats"]["osm_timestamp"],

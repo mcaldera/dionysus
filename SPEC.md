@@ -608,6 +608,7 @@ Footer and notices from section 12, build, and deploy to the static host. Test t
 ### Later
 - Matrices for weekdays, Sundays and late night. U-Bahn night service differs by day, so check this against the feed.
 - Line names per leg (`r5py.DetailedItineraries`)
+- Bar photos via Mapillary street-level images (CC BY-SA, free access token on a Meta account). *Owner's choice 2026-11-04*; the owner checks Mapillary first and comes back to it. Rejected: Google photos (terms), Panoramax (no coverage at our bars), OSM/Wikimedia images (about 1-2 % of bars).
 - Tagging stage 2
 - Mobile layout
 - General bar guide
