@@ -28,3 +28,12 @@ describe('leg', () => {
     expect(leg(matrices(UNREACHABLE, UNREACHABLE, UNREACHABLE, UNREACHABLE), 0, 1, 5)).toEqual({ mode: 'unreachable' })
   })
 })
+
+describe('googleMapsPlace', () => {
+  it('searches name and address around the bar, at street zoom', async () => {
+    const { googleMapsPlace } = await import('./travel')
+    const url = googleMapsPlace({ name: 'Espresso Jackie', address: 'Thaliastraße, 1160 Wien', district: 16, lat: 48.212988, lon: 16.310251 })
+    expect(url).toBe('https://www.google.com/maps/search/Espresso%20Jackie%2C%20Thaliastra%C3%9Fe%2C%201160%20Wien/@48.212988,16.310251,18z')
+    expect(googleMapsPlace({ name: 'X', district: 20, lat: 48.2, lon: 16.3 })).toContain('X%2C%201200%20Wien')
+  })
+})

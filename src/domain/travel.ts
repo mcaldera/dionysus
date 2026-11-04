@@ -47,13 +47,12 @@ export function googleMapsDirections(
   return `https://www.google.com/maps/dir/?api=1&origin=${from.lat},${from.lon}&destination=${to.lat},${to.lon}&travelmode=${mode}`
 }
 
-/** Search by name plus address; without an address, the district's postcode (1200 for the
- *  20th) keeps Google from picking a same-named place elsewhere in Vienna. The viewport at
- *  the bar's coordinates biases the result further; `mapsQuery` overrides the name. */
-export function googleMapsPlace(
-  bar: { name: string; address?: string; district: number; lat: number; lon: number; mapsQuery?: string },
-): string {
+/**
+ * Search by name and address, centred on the bar at street zoom. The plain `api=1&query=`
+ * link can't be tied to a location, so Google sometimes picked a same-named place elsewhere
+ * (Süsses Eck, Espresso Jackie).
+ */
+export function googleMapsPlace(bar: { name: string; address?: string; district: number; lat: number; lon: number }): string {
   const where = bar.address ?? `${1000 + bar.district * 10} Wien`
-  const query = encodeURIComponent(`${bar.mapsQuery ?? bar.name}, ${where}`)
-  return `https://www.google.com/maps/search/${query}/@${bar.lat},${bar.lon},18z`
+  return `https://www.google.com/maps/search/${encodeURIComponent(`${bar.name}, ${where}`)}/@${bar.lat.toFixed(6)},${bar.lon.toFixed(6)},18z`
 }
