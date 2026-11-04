@@ -12,7 +12,14 @@ interface Props {
   blockedBy: Bar | null
   inTour: boolean
   newestEdition: string | null
+  /** The tour has no stops yet: offer planning from scratch. */
+  tourEmpty: boolean
+  busy: boolean
   onAdd: () => void
+  /** Put this bar in place of `blockedBy`. */
+  onReplace: () => void
+  /** Propose complete tours, from this bar or (without a bar) from anywhere. */
+  onPropose: () => void
   onClose: () => void
   onTagChange?: (bar: Bar, tag: string, value: 0 | 1) => void
 }
@@ -22,13 +29,33 @@ function editionLabel(e: string): string {
   return `${m === '04' ? 'April' : m === '10' ? 'Oktober' : m} ${y}`
 }
 
-export default function BarPanel({ bar, arrival, blockedBy, inTour, newestEdition, onAdd, onClose, onTagChange }: Props) {
+export default function BarPanel(props: Props) {
+  const { bar, arrival, blockedBy, inTour, newestEdition, tourEmpty, busy, onAdd, onReplace, onPropose, onClose, onTagChange } = props
   if (!bar) {
     return (
       <section className="card welcome" aria-label="Ausgewähltes Lokal">
         <h2>Prost! 🍻</h2>
-        <p>Klickt ein Lokal auf der Karte an oder sucht oben nach einem Namen. Die Farben zeigen die Art des Lokals, größere Punkte haben mehr Infos.</p>
-        <p className="hint">Tipp: Fahrt über einen Bezirk, um ihn hervorzuheben.</p>
+        {tourEmpty ? (
+          <>
+            <p>Wie möchtet ihr planen?</p>
+            <div className="plan-modes">
+              <button type="button" className="plan-mode" disabled={busy} onClick={onPropose}>
+                <strong>✨ Komplette Tour vorschlagen</strong>
+                <span>Ihr bekommt sofort drei ganze Routen und tauscht dann einzelne Lokale.</span>
+              </button>
+              <div className="plan-mode static">
+                <strong>👣 Schritt für Schritt</strong>
+                <span>Klickt ein Lokal auf der Karte an oder sucht oben nach einem Namen. Dann zeigen wir die besten nächsten Lokale.</span>
+              </div>
+            </div>
+            <p className="hint">Bezirke, Startzeit und Aufenthalt stellt ihr oben bei 🕒 ein, euren Geschmack bei ✨ Geschmackstest.</p>
+          </>
+        ) : (
+          <>
+            <p>Klickt ein Lokal auf der Karte an oder sucht oben nach einem Namen. Die Farben zeigen die Art des Lokals, größere Punkte haben mehr Infos.</p>
+            <p className="hint">In der Tour unten könnt ihr jedes Lokal tauschen (⇄) oder fixieren (📌).</p>
+          </>
+        )}
       </section>
     )
   }
@@ -71,14 +98,21 @@ export default function BarPanel({ bar, arrival, blockedBy, inTour, newestEditio
           {inTour ? (
             <span className="in-tour">✓ In eurer Tour</span>
           ) : (
-            <button type="button" className="primary" onClick={onAdd} disabled={blockedBy !== null}>
-              Zur Tour hinzufügen
+            blockedBy ? (
+              <button type="button" className="primary" onClick={onReplace}>Statt {blockedBy.name} nehmen</button>
+            ) : (
+              <button type="button" className="primary" onClick={onAdd}>Zur Tour hinzufügen</button>
+            )
+          )}
+          {tourEmpty && !inTour && (
+            <button type="button" className="ghost" disabled={busy} onClick={onPropose} title="Drei komplette Touren, die hier beginnen">
+              ✨ Touren ab hier
             </button>
           )}
           {bar.website && <a className="ghost" href={bar.website} target="_blank" rel="noreferrer">Website</a>}
           <a className="ghost" href={googleMapsPlace(bar)} target="_blank" rel="noreferrer">In Google Maps ansehen</a>
         </div>
-        {blockedBy && !inTour && <p className="hint">Im {bar.district}. Bezirk habt ihr schon {blockedBy.name}.</p>}
+        {blockedBy && !inTour && <p className="hint">Im {bar.district}. Bezirk habt ihr schon {blockedBy.name}; dieses Lokal kommt an seine Stelle.</p>}
         {import.meta.env.DEV && onTagChange && <TagEditor bar={bar} onChange={onTagChange} />}
       </div>
     </section>

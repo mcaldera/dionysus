@@ -122,6 +122,7 @@ Keep `src/domain/` free of React and browser APIs so it can be tested alone and 
 | U-Bahn, tram, bus, Badner Bahn | [Wiener Linien GTFS on data.gv.at](https://www.data.gv.at/katalog/dataset/wiener-linien-fahrplandaten-gtfs-wien), also listed in the [Mobility Database](https://mobilitydatabase.org/feeds/gtfs/mdb-648) | CC BY | Listing shows Wiener Linien and Wiener Lokalbahnen only; not yet downloaded |
 | S-Bahn | [ÖBB data platform](https://data.oebb.at/) or Mobilitätsverbünde Österreich (feed names seen: `Railway-Current-Reference-Data`, `PTA-Eastern-Region`) | Check terms | *Unverified*, may need registration. Eastern Region may duplicate Wiener Linien trips |
 | District boundaries | Stadt Wien open data (`BEZIRKSGRENZEOGD` layer), fallback OSM boundaries (likely `admin_level=9`) | CC BY or ODbL | *Unverified* |
+| Drawn routes (display only) | Walking: [FOSSGIS OSRM](https://routing.openstreetmap.de/); transit lines: [Transitous](https://transitous.org/api/) (MOTIS 2), fetched in the browser for tour legs only | ODbL / per-feed, see transitous.org/sources | Travel times still come from our matrices. Transitous asks for an open-source, non-commercial, low-volume client and contact info on the site |
 | Map tiles | [OpenFreeMap](https://openfreemap.org/), style `https://tiles.openfreemap.org/styles/liberty` | Attribution required | No API key or usage limit |
 | Official bars, April 2026 | [Booklet PDF](https://www.ottakringerbrauerei.at/de/wp-content/uploads/sites/6/2026/03/0226_OTK_Seidlwandertage_Gastro_Booklet_105x148mm_Innenseiten_v11_WEB.pdf), transcribed in `official_2026-04.csv` | Facts only; don't republish the descriptions | 51 venues transcribed |
 | Official bars, October 2026 | [Vol. 4 PDF](https://www.ottakringerbrauerei.at/de/wp-content/uploads/sites/6/2026/08/ReiseBIERgleiter_Ottakringer-Seidlwandertage_Vol4_barrierefrei.pdf) | Same | Not readable when this spec was written. Press mentions seven additional partners. Add as `official_2026-10.csv` |
@@ -424,12 +425,15 @@ This is a generalized travelling salesman problem with open ends: one bar per di
 objective = Σ leg minutes + Σ closedPenalty(v, arrival) − λ × Σ match(v)
 ```
 
-*Starting values:* `closedPenalty` = 90 per stop known to be closed on arrival, `λ` = 5 minutes per 1.0 of match, adjustable through the slider. Penalties rather than hard rules mean a tour always exists, with warnings where needed.
+*Starting values:* `closedPenalty` = 90 per stop known to be closed on arrival, `λ` = 5 minutes per 1.0 of match, adjustable through the slider (`λ = 10 × slider`). Penalties rather than hard rules mean a tour always exists, with warnings where needed.
 
 **Method:**
-1. **Candidates:** for each district, apply the filters and keep `K` bars (default 15, maximum 30). Take half by `match`, and the other half spread across the district so the choice isn't clustered.
+1. **Candidates:** for each district, apply the filters and keep `K` bars (default 15, maximum 30). Take half by `match`, and the other half spread across the district so the choice isn't clustered. *Tuned 2026-11-04:* without preferences, a quarter by richness (tips, official, tags), a quarter by connectivity (sum of the two shortest legs to other districts), the rest spread. Bars known to be closed for the whole day window are dropped. This cut a 23-district tour from 234 to 203 travel minutes at K = 15.
 2. **Inner step:** for a fixed district order, a layered dynamic programme picks the best bar per district. Track the arrival time along the best path to each bar, for opening hours. This makes it a heuristic, which is fine here.
 3. **Outer step:** multi-start local search over the district order, using Or-opt and 2-opt moves with first improvement. Use a seeded random generator so tests are repeatable.
+4. **Polish** *(added 2026-11-04)*: try every eligible bar of each free stop's district in place and keep improvements, since the search only sees K candidates.
+
+Measured on the real data (2,140 bars, 23 districts, Node 22): one solve 0.6-0.8 s, three proposals without a start 3.5-4.7 s, refining 20 recommendations 2.3 s.
 
 **Constraints to support:**
 - Fixed prefix (stops already chosen)
@@ -515,7 +519,7 @@ Always visible: attribution and notices from section 12.
 
 The site is public, so before deployment:
 
-- **Credits in the footer:** "© OpenStreetMap-Mitwirkende (ODbL)", "OpenFreeMap © OpenMapTiles", "Fahrplandaten: Wiener Linien (CC BY)", plus any S-Bahn and boundary sources used.
+- **Credits in the footer:** "© OpenStreetMap-Mitwirkende (ODbL)", "OpenFreeMap © OpenMapTiles", "Fahrplandaten: Wiener Linien (CC BY)", plus any S-Bahn and boundary sources used, and a link to transitous.org/sources for drawn transit routes.
 - **Bar data:** `bars.json` contains OSM data and is public, so offer it under ODbL. Keep OSM and own data separate in the repository (each tag's `source`, `tags.csv`). The [OSM Foundation guideline](https://osmfoundation.org/wiki/Community_Guidelines/Collective_Database_Guideline_Guideline) treats own data as independent only if a property is entirely from OSM or entirely from elsewhere, and merging a private bar list into OSM data may bring it under share-alike. This matters mainly for any future commercial version.
 - **Tags as opinion:** show "Tags sind subjektive Einschätzungen." plus a way to request a correction or removal, and act on requests.
 - **Not official:** show "Kein offizielles Angebot der Ottakringer Brauerei." Don't use its logo or branding. Write own descriptions rather than copying the booklet.
@@ -615,7 +619,7 @@ Footer and notices from section 12, build, and deploy to the static host. Test t
 | Is a 12-hour median window across all bars fast enough on 16 GB? | Phases 1 and 3 |
 | Can S-Bahn data be obtained, and does it overlap with Wiener Linien? | Phase 1 |
 | Are the district boundary source and Overpass query correct as written? | Phases 1 and 2 |
-| Does the solver stay quick with real data, `K = 30` and opening hours? | Phase 5 |
+| Does the solver stay quick with real data, `K = 30` and opening hours? | Phase 5: yes for K = 15 (see section 9); K = 30 doubles the time for about 1.5% shorter tours |
 | What share of bars have websites good enough for tagging? Price tags will likely have the most gaps | Phase 4 |
 | Do Claude plan limits allow tagging at a useful pace? | Phase 4 |
 

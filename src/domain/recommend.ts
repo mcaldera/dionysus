@@ -32,6 +32,8 @@ export interface Recommendation {
   leg: Leg
   closeness: number
   tourFit: number
+  /** Minutes the best remaining tour grows by going here; set by the refine stage (SPEC 8.3). */
+  tourExtra?: number
   match: number
   similarity: number
   reasons: string[]
@@ -44,6 +46,17 @@ export function weights(p: Preferences): [number, number, number, number] {
   const travel = 0.9 - w3
   const w4 = p.similarity === 'ignore' ? 0 : 0.1
   return [(travel * 4) / 7, (travel * 3) / 7, w3, w4]
+}
+
+/** Refine stage (SPEC 8.3): replace the instant tourFit of 0.5 with the solver's and re-sort. */
+export function refine(recs: Recommendation[], extras: Map<string, number>, p: Preferences): Recommendation[] {
+  const [, w2] = weights(p)
+  return recs.map((r) => {
+    const extra = extras.get(r.bar.id)
+    if (extra === undefined) return r
+    const tourFit = 1 - Math.min(Math.max(extra, 0), 30) / 30
+    return { ...r, tourFit, tourExtra: extra, score: r.score + w2 * (tourFit - r.tourFit) }
+  }).sort((a, b) => b.score - a.score || legMinutes(a.leg) - legMinutes(b.leg))
 }
 
 export function closeness(minutes: number): number {

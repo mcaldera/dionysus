@@ -45,6 +45,8 @@ export interface Manifest {
   newestOfficialEdition: string | null
 }
 
+export const ALL_DISTRICTS = Array.from({ length: 23 }, (_, i) => i + 1)
+
 export const VENUE_TYPES: VenueType[] = ['pub_bar', 'tschocherl', 'beisl_wirtshaus', 'heuriger', 'special']
 
 export const VENUE_TYPE_LABEL: Record<VenueType, string> = {

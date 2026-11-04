@@ -1,52 +1,101 @@
-// Taste finder: turn likes and dislikes of sample bars into preferences.
+// Taste quiz: a few this-or-that questions about kinds of places (not about bars by name,
+// which nobody can judge from a list of 2,000). Answers become the group's preferences.
 
-import { TAGS, VENUE_TYPES, type Bar, type Participant, type Tag, type VenueType } from './types'
+import { TAGS, VENUE_TYPES, type Participant, type Tag, type VenueType } from './types'
 
-export type Verdict = 'like' | 'dislike' | 'skip'
-
-/** Pick n sample bars, spread over venue types, preferring bars with tags or tips. */
-export function sampleBars(bars: Bar[], n: number, seed: number): Bar[] {
-  let s = seed >>> 0 || 1
-  const rand = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32)
-  const informative = bars.filter((b) => b.tags.length >= 1 || (b.tips?.length ?? 0) > 0)
-  const pool = informative.length >= n * 3 ? informative : bars
-  const byType = new Map<VenueType, Bar[]>()
-  for (const b of pool) byType.set(b.venueType, [...(byType.get(b.venueType) ?? []), b])
-  for (const list of byType.values()) list.sort(() => rand() - 0.5)
-  const types = VENUE_TYPES.filter((t) => byType.get(t)?.length)
-  const out: Bar[] = []
-  for (let i = 0; out.length < n && i < n * 10; i++) {
-    const b = byType.get(types[i % types.length])?.pop()
-    if (b) out.push(b)
-  }
-  return out
+export interface TasteOption {
+  icon: string
+  label: string
+  hint?: string
+  likes?: Tag[]
+  avoids?: Tag[]
+  likedTypes?: VenueType[]
 }
 
-/** Tags and venue types that liked bars share more often than disliked ones. */
-export function preferencesFrom(verdicts: { bar: Bar; verdict: Verdict }[], name = 'Wir'): Participant {
-  const tagScore = new Map<Tag, { like: number; dislike: number }>()
-  const typeScore = new Map<VenueType, number>()
-  for (const { bar, verdict } of verdicts) {
-    if (verdict === 'skip') continue
-    const d = verdict === 'like' ? 1 : -1
-    for (const t of bar.tags) {
-      const cur = tagScore.get(t) ?? { like: 0, dislike: 0 }
-      if (d > 0) cur.like++
-      else cur.dislike++
-      tagScore.set(t, cur)
+export interface TasteQuestion {
+  id: string
+  question: string
+  options: TasteOption[]
+  /** Several options may be chosen; otherwise one, or "Egal". */
+  multi?: boolean
+}
+
+export const QUESTIONS: TasteQuestion[] = [
+  {
+    id: 'vibe', question: 'Wo fühlt ihr euch eher wohl?', options: [
+      { icon: '🪵', label: 'Altes Beisl', hint: 'Holzvertäfelung, Stammtisch, seit Jahrzehnten gleich', likes: ['urig'] },
+      { icon: '🍸', label: 'Neue Bar', hint: 'Durchdachtes Konzept, schönes Design', likes: ['modern'] },
+    ],
+  },
+  {
+    id: 'price', question: 'Was darf ein Seidl kosten?', options: [
+      { icon: '🪙', label: 'So wenig wie möglich', hint: 'Ehrliche Preise, nix Schickes', likes: ['preiswert'], avoids: ['gehoben'] },
+      { icon: '🥂', label: 'Darf auch mehr sein', hint: 'Schöne Gläser, aufmerksamer Service', likes: ['gehoben'], avoids: ['preiswert'] },
+    ],
+  },
+  {
+    id: 'absteige', question: 'Und richtige Absteigen?', options: [
+      { icon: '🎰', label: 'Gehören dazu', hint: 'Neonlicht, Automat, Stammgäste mit Geschichten', likes: ['absteige'] },
+      { icon: '🙅', label: 'Lieber nicht', hint: 'Ein bisschen gepflegt darf es sein', avoids: ['absteige'] },
+    ],
+  },
+  {
+    id: 'food', question: 'Wollt ihr unterwegs essen?', options: [
+      { icon: '🍖', label: 'Ja, zwischendurch was Warmes', hint: 'Schnitzel, Gulasch, Würstel', likes: ['essen'] },
+      { icon: '🍺', label: 'Nur trinken', hint: 'Essen spielt keine Rolle' },
+    ],
+  },
+  {
+    id: 'outside', question: 'Drinnen oder draußen?', options: [
+      { icon: '🌳', label: 'Draußen, wenn es geht', hint: 'Gastgarten oder Schanigarten', likes: ['gastgarten'] },
+      { icon: '🛋️', label: 'Drinnen passt', hint: 'Hauptsache gemütlich' },
+    ],
+  },
+  {
+    id: 'music', question: 'Live-Musik?', options: [
+      { icon: '🎸', label: 'Gern, mit Band', hint: 'Konzerte, Sessions, Kleinkunst', likes: ['live_musik'] },
+      { icon: '🗣️', label: 'Lieber zum Reden', hint: 'Musik leise im Hintergrund', avoids: ['live_musik'] },
+    ],
+  },
+  {
+    id: 'late', question: 'Wie lange geht es?', options: [
+      { icon: '🌙', label: 'Bis spät in die Nacht', hint: 'Lokale, die nach 1 Uhr noch offen haben', likes: ['lang_offen'] },
+      { icon: '☀️', label: 'Eher tagsüber', hint: 'Spätestens um Mitternacht daheim' },
+    ],
+  },
+  {
+    id: 'types', multi: true, question: 'Was soll auf jeden Fall dabei sein?', options: [
+      { icon: '🍺', label: 'Bar & Pub', hint: 'Irish Pub, Craft-Beer-Bar, Eckbar', likedTypes: ['pub_bar'] },
+      { icon: '☕', label: 'Tschocherl', hint: 'Kleines Espresso oder Stüberl ums Eck', likedTypes: ['tschocherl'] },
+      { icon: '🍽️', label: 'Beisl & Wirtshaus', hint: 'Wiener Küche, Bier vom Fass', likedTypes: ['beisl_wirtshaus'] },
+      { icon: '🍷', label: 'Heuriger', hint: 'Wein statt Bier, eher am Stadtrand', likedTypes: ['heuriger'] },
+      { icon: '✨', label: 'Besondere Orte', hint: 'Kegelbahn, Boulderhalle, Konzertlokal', likedTypes: ['special'] },
+    ],
+  },
+]
+
+/** Answers by question ID: the chosen option indexes; empty = "Egal". */
+export type TasteAnswers = Record<string, number[]>
+
+export function preferencesFrom(answers: TasteAnswers, name = 'Wir'): Participant {
+  const likes = new Set<Tag>()
+  const avoids = new Set<Tag>()
+  const likedTypes = new Set<VenueType>()
+  for (const q of QUESTIONS) {
+    for (const i of answers[q.id] ?? []) {
+      const o = q.options[i]
+      o?.likes?.forEach((t) => likes.add(t))
+      o?.avoids?.forEach((t) => avoids.add(t))
+      o?.likedTypes?.forEach((t) => likedTypes.add(t))
     }
-    typeScore.set(bar.venueType, (typeScore.get(bar.venueType) ?? 0) + d)
   }
-  const likes: Tag[] = []
-  const avoids: Tag[] = []
-  for (const t of TAGS) {
-    const sc = tagScore.get(t)
-    if (!sc) continue
-    const net = sc.like - sc.dislike
-    if (net >= 2 || (net >= 1 && sc.dislike === 0)) likes.push(t)
-    else if (net <= -2 || (net <= -1 && sc.like === 0)) avoids.push(t)
+  // Liking every type says nothing.
+  const types = likedTypes.size === VENUE_TYPES.length ? [] : VENUE_TYPES.filter((t) => likedTypes.has(t))
+  return {
+    name,
+    likes: TAGS.filter((t) => likes.has(t) && !avoids.has(t)),
+    avoids: TAGS.filter((t) => avoids.has(t) && !likes.has(t)),
+    likedTypes: types,
+    avoidedTypes: [],
   }
-  const likedTypes = VENUE_TYPES.filter((t) => (typeScore.get(t) ?? 0) >= 1)
-  const avoidedTypes = VENUE_TYPES.filter((t) => (typeScore.get(t) ?? 0) <= -1)
-  return { name, likes, avoids, likedTypes, avoidedTypes }
 }

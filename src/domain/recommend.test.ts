@@ -111,16 +111,18 @@ describe('tag rows', () => {
 })
 
 describe('taste finder', () => {
-  it('turns verdicts into liked and avoided tags and types', async () => {
+  it('turns quiz answers into liked and avoided tags and types', async () => {
     const { preferencesFrom } = await import('./taste')
-    const a = { ...bar(1, 1, ['urig', 'gastgarten']), venueType: 'beisl_wirtshaus' as const }
-    const b = { ...bar(2, 2, ['urig']), venueType: 'beisl_wirtshaus' as const }
-    const c = { ...bar(3, 3, ['modern']), venueType: 'pub_bar' as const }
-    const p = preferencesFrom([{ bar: a, verdict: 'like' }, { bar: b, verdict: 'like' }, { bar: c, verdict: 'dislike' }])
-    expect(p.likes).toContain('urig')
-    expect(p.avoids).toEqual(['modern'])
-    expect(p.likedTypes).toEqual(['beisl_wirtshaus'])
-    expect(p.avoidedTypes).toEqual(['pub_bar'])
+    // Altes Beisl, cheap, no Absteige, Egal on the rest, Tschocherl and Beisl wanted.
+    const p = preferencesFrom({ vibe: [0], price: [0], absteige: [1], types: [1, 2] })
+    expect(p.likes).toEqual(['urig', 'preiswert'])
+    expect(p.avoids).toEqual(['gehoben', 'absteige'])
+    expect(p.likedTypes).toEqual(['tschocherl', 'beisl_wirtshaus'])
+  })
+
+  it('liking every venue type says nothing', async () => {
+    const { preferencesFrom } = await import('./taste')
+    expect(preferencesFrom({ types: [0, 1, 2, 3, 4] }).likedTypes).toEqual([])
   })
 
   it('venue type preferences count in match, also for untagged bars', () => {

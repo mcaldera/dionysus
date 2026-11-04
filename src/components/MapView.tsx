@@ -22,7 +22,11 @@ export interface MapBar {
 
 export interface Leg {
   coords: [number, number][]
-  mode: 'walk' | 'transit'
+  /** walk: a walking leg; ride: on a vehicle; transfer: walking within a transit leg;
+   *  pending: a transit leg whose route isn't known (yet), drawn as a dashed arc. */
+  mode: 'walk' | 'ride' | 'transfer' | 'pending'
+  color?: string
+  line?: string
 }
 
 export interface HoverInfo {
@@ -38,10 +42,12 @@ interface Props {
   visitedDistricts: Set<number>
   tourLegs: Leg[]
   recLines: [number, number][][]
-  preview: Leg | null
+  preview: Leg[]
   highlightId: string | null
   focus: { lat: number; lon: number; key: number } | null
   onSelect: (id: string) => void
+  /** A click on the map that hits no bar. */
+  onBackgroundClick: () => void
   onHoverBar: (h: HoverInfo | null) => void
   onHoverDistrict: (h: { district: number; x: number; y: number } | null) => void
 }
@@ -78,11 +84,13 @@ function districtsGeoJson(fc: GeoJSON.FeatureCollection, visited: Set<number>): 
   }
 }
 
-function lines(items: { coords: [number, number][]; mode?: string }[]): GeoJSON.FeatureCollection {
+function lines(items: { coords: [number, number][]; mode?: string; color?: string; line?: string }[]): GeoJSON.FeatureCollection {
   return {
     type: 'FeatureCollection',
     features: items.filter((i) => i.coords.length > 1).map((i) => ({
-      type: 'Feature', properties: { mode: i.mode ?? '' }, geometry: { type: 'LineString', coordinates: i.coords },
+      type: 'Feature',
+      properties: { mode: i.mode ?? '', color: i.color ?? '#dc2626', line: i.line ?? '' },
+      geometry: { type: 'LineString', coordinates: i.coords },
     })),
   }
 }
@@ -106,7 +114,7 @@ export default function MapView(props: Props) {
     ;(m.getSource('district-labels') as GeoJSONSource).setData(p.districtLabels)
     ;(m.getSource('tour') as GeoJSONSource).setData(lines(p.tourLegs))
     ;(m.getSource('rec-lines') as GeoJSONSource).setData(lines(p.recLines.map((coords) => ({ coords }))))
-    ;(m.getSource('preview') as GeoJSONSource).setData(lines(p.preview ? [p.preview] : []))
+    ;(m.getSource('preview') as GeoJSONSource).setData(lines(p.preview))
     m.setFilter('bars-highlight', ['==', ['get', 'id'], p.highlightId ?? ''])
   }
 
@@ -130,7 +138,7 @@ export default function MapView(props: Props) {
       attributionControl: { compact: true },
     })
     map.current = m
-    m.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right')
+    m.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left')
 
     m.on('load', () => {
       m.addSource('districts', { type: 'geojson', data: empty, promoteId: 'district' })
@@ -183,23 +191,44 @@ export default function MapView(props: Props) {
         id: 'tour-casing', type: 'line', source: 'tour', layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: { 'line-color': '#ffffff', 'line-width': 8, 'line-opacity': 0.9 },
       })
+      // Legs: walking solid dark; rides in their line colour; walking within a transit leg dotted;
+      // transit legs without a known route as a dashed arc.
+      const legLayers = (source: string, opacity: number) => {
+        m.addLayer({
+          id: `${source}-walk`, type: 'line', source, filter: ['==', ['get', 'mode'], 'walk'],
+          layout: { 'line-cap': 'round', 'line-join': 'round' },
+          paint: { 'line-color': '#3b2414', 'line-width': 4.5, 'line-opacity': opacity },
+        })
+        m.addLayer({
+          id: `${source}-transfer`, type: 'line', source, filter: ['==', ['get', 'mode'], 'transfer'],
+          layout: { 'line-cap': 'round', 'line-join': 'round' },
+          paint: { 'line-color': '#3b2414', 'line-width': 3, 'line-dasharray': [0.6, 1.6], 'line-opacity': opacity },
+        })
+        m.addLayer({
+          id: `${source}-ride`, type: 'line', source, filter: ['==', ['get', 'mode'], 'ride'],
+          layout: { 'line-cap': 'round', 'line-join': 'round' },
+          paint: { 'line-color': ['get', 'color'], 'line-width': 5.5, 'line-opacity': opacity },
+        })
+        m.addLayer({
+          id: `${source}-pending`, type: 'line', source, filter: ['==', ['get', 'mode'], 'pending'],
+          layout: { 'line-cap': 'round', 'line-join': 'round' },
+          paint: { 'line-color': '#dc2626', 'line-width': 3, 'line-dasharray': [1, 1.6], 'line-opacity': 0.7 * opacity },
+        })
+        m.addLayer({
+          id: `${source}-lines`, type: 'symbol', source, filter: ['==', ['get', 'mode'], 'ride'],
+          layout: {
+            'symbol-placement': 'line-center', 'text-field': ['get', 'line'], 'text-font': FONT, 'text-size': 12,
+            'text-allow-overlap': true, 'text-rotation-alignment': 'viewport', 'text-keep-upright': true,
+          },
+          paint: { 'text-color': '#ffffff', 'text-halo-color': ['get', 'color'], 'text-halo-width': 3, 'text-opacity': opacity },
+        })
+      }
+      legLayers('tour', 1)
       m.addLayer({
-        id: 'tour', type: 'line', source: 'tour', filter: ['==', ['get', 'mode'], 'walk'],
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': '#3b2414', 'line-width': 4.5 },
+        id: 'preview-casing', type: 'line', source: 'preview', layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': '#ffffff', 'line-width': 7, 'line-opacity': 0.8 },
       })
-      m.addLayer({
-        id: 'tour-transit', type: 'line', source: 'tour', filter: ['==', ['get', 'mode'], 'transit'],
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': '#dc2626', 'line-width': 4, 'line-dasharray': [1, 1.6] },
-      })
-      m.addLayer({
-        id: 'preview', type: 'line', source: 'preview', layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: {
-          'line-color': ['case', ['==', ['get', 'mode'], 'transit'], '#dc2626', '#c2410c'],
-          'line-width': 3.5, 'line-opacity': 0.85, 'line-dasharray': [1.2, 1.2],
-        },
-      })
+      legLayers('preview', 0.85)
 
       const hollow = (color: string) => ['case', ['==', ['get', 'closed'], 1], '#ffffff', color] as unknown as string
       m.addLayer({
@@ -257,6 +286,10 @@ export default function MapView(props: Props) {
         paint: { 'text-color': ['case', ['==', ['get', 'closed'], 1], '#111827', '#ffffff'] },
       })
 
+      m.on('click', (e) => {
+        const hit = m.queryRenderedFeatures(e.point, { layers: BAR_LAYERS.filter((l) => m.getLayer(l)) })
+        if (!hit.length) latest.current.onBackgroundClick()
+      })
       for (const layer of BAR_LAYERS) {
         m.on('click', layer, (e: MapLayerMouseEvent) => {
           const id = e.features?.[0]?.properties?.id

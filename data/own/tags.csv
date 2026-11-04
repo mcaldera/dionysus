@@ -33,3 +33,327 @@ osm:way/30528334,essen,1,claude,Daily set dishes such as schnitzel,0
 osm:node/2507465152,essen,1,claude,Large Wirtshaus menu with platters and seasonal goose,0
 osm:node/9961201853,essen,1,claude,Gasthaus kitchen with seasonal goose menu,0
 osm:node/526684628,essen,1,claude,Full menu from soups to steak dishes,0
+osm:node/373470635,essen,1,claude,Viennese classics and seasonal dishes; goose menus in autumn,0
+osm:node/373470635,gastgarten,1,claude,Website offers seats in the Schanigarten,0
+osm:node/373470635,modern,1,claude,Calls itself a new Viennese Beisl,0
+osm:node/5564359011,essen,1,claude,Neapolitan pizzeria with full menu and seasonal dishes,0
+osm:node/409188539,essen,1,claude,Known for Wiener Schnitzel; hot kitchen until 23:00,0
+osm:node/409188539,gastgarten,1,claude,Guests can sit outside in good weather,0
+osm:node/4118542488,preiswert,1,claude,Standing beer bar promising affordable draught beer without frills,0
+osm:node/3730835599,essen,1,claude,Brunch menu with toasts and homemade cakes,0
+osm:node/3360829687,preiswert,1,claude,"Seidl, Spritzer or schnapps for 2.50 euros",0
+osm:node/1708782898,preiswert,1,claude,Website promises cheap drinks,0
+osm:node/335654627,essen,1,claude,"Breakfast, lunch and dinner menu",0
+osm:node/335654627,gastgarten,1,claude,Website mentions its garden for a beer outside,0
+osm:node/2526083494,essen,1,claude,"Homemade Viennese cooking, schnitzel and burgers",0
+osm:way/26721761,gastgarten,1,claude,Rustic Gasthaus with a large garden in the zoo grounds,0
+osm:node/2076303268,live_musik,1,claude,"Club with regular blues, jazz and other concerts",0
+osm:node/2076303268,essen,1,claude,Hot kitchen until at least 22:00 with daily specials,0
+osm:node/1485601687,essen,1,claude,Viennese cooking; kitchen open until 21:30,0
+osm:node/1485601687,urig,1,claude,Calls itself the most traditional Wirtshaus in Ottakring,0
+osm:node/4691978100,essen,1,claude,Kitchen at lunch and in the evening with Beisl dishes,0
+osm:node/4691978100,gastgarten,1,claude,Website announces its Gastgarten season,0
+osm:node/2139290505,essen,1,claude,Five changing lunch menus daily plus a full menu,0
+osm:node/1874254578,essen,1,claude,"Viennese cooking, burgers and grilled dishes",0
+osm:node/1874254578,gastgarten,1,claude,Large Gastgarten with about 250 seats,0
+osm:node/4987028621,gastgarten,1,claude,Garden and terrace for about 90 guests,0
+osm:node/601411477,essen,1,claude,Hearty home cooking and a weekly lunch menu,0
+osm:node/601411477,urig,1,claude,Beer Beisl in the Bermuda triangle since the 1980s,0
+osm:node/928313174,essen,1,claude,"Hot kitchen until 22:00, small dishes until midnight",0
+osm:node/310192247,gastgarten,1,claude,Website mentions seasonal garden service,0
+osm:node/3255811316,live_musik,1,claude,Live music club with national and international bands,0
+osm:node/9506315186,essen,1,claude,Freshly cooked Austrian classics daily,0
+osm:node/10311336391,essen,1,claude,"Homemade traditional cuisine, schnitzel, goulash and grill plates",0
+osm:node/10311336391,gastgarten,1,claude,Website mentions a beer garden,0
+osm:node/5578380846,essen,1,claude,Greek restaurant with full menu and lunch menu,0
+osm:node/252549228,essen,1,claude,Viennese classics and grill dishes with draught beer,0
+osm:node/252549228,urig,1,claude,Presents itself as a traditional Viennese beer place,0
+osm:node/281295823,essen,1,claude,Viennese classics and vegetarian dishes from its own kitchen,0
+osm:node/281295823,gastgarten,1,claude,Garden under chestnut trees,0
+osm:node/281295823,urig,1,claude,Viennese brewpub since 1985,0
+osm:node/335296359,essen,1,claude,Café-restaurant with varied menu and daily menu,0
+osm:node/335296359,gastgarten,1,claude,"Large Gastgarten, redesigned in 2009",0
+osm:node/8443290117,essen,1,claude,Traditional dishes; hot kitchen daily 16:00-22:00,0
+osm:node/8443290117,urig,1,claude,Rustic beer place built on traditional Wirtshaus culture,0
+osm:node/410455891,essen,1,claude,"Café-restaurant serving meals, also to take away",0
+osm:node/618284053,essen,1,claude,Hot kitchen 12:00-22:00 with Viennese dishes,0
+osm:node/618284053,urig,1,claude,Calls itself an old-Viennese Gasthaus; butchering day each Tuesday,0
+osm:node/318297340,essen,1,claude,Large menu with cheap hot food,0
+osm:node/318297340,preiswert,1,claude,Known for very student-friendly prices,0
+osm:way/98105901,essen,1,claude,Viennese cooking in the green Prater,0
+osm:way/98105901,gastgarten,1,claude,Website highlights its Gastgarten,0
+osm:node/561323738,essen,1,claude,Creative Austrian dishes with seasonal menu,0
+osm:node/561323738,modern,1,claude,Creative modern take on Austrian cooking,0
+osm:node/3371230811,essen,1,claude,Brunch menu with traditional and modern dishes,0
+osm:node/3371230811,modern,1,claude,Trendy brunch café with specialty coffee and natural wines,0
+osm:node/419289410,essen,1,claude,"Breakfast, tapas and homemade burgers all day",0
+osm:node/1770649858,essen,1,claude,Daily dishes and weekly specials on its menu,0
+osm:node/442585871,essen,1,claude,Brewpub with full menu and weekly specials,0
+osm:node/442585871,gastgarten,1,claude,Shady Gastgarten described as an oasis in town,0
+osm:node/442585871,urig,1,claude,Brewing its own beer here since 1994,0
+osm:node/2579219364,essen,1,claude,Italian and international dishes,0
+osm:node/6634307846,essen,1,claude,Seasonal home cooking and daily lunch menus,0
+osm:node/6634307846,gastgarten,1,claude,Seats in the Gastgarten,0
+osm:node/10013110915,essen,1,claude,Organic vegan dishes with weekly changing menu,0
+osm:node/813542571,essen,1,claude,"Viennese and Mediterranean dishes, lunch menu",0
+osm:node/8913055407,essen,1,claude,Kitchen 12:00-22:00 at the brewery restaurant,0
+osm:node/8913055407,gastgarten,1,claude,Beer garden with about 150 outdoor seats,0
+osm:node/8913055407,urig,1,claude,Inn and hotel on this site for over 100 years,0
+osm:node/3031707747,essen,1,claude,Beer bar with its own food menu,0
+osm:node/3031707747,modern,1,claude,Describes a modern ambience and trendy beer bar,0
+osm:node/249485842,essen,1,claude,Home cooking with very large portions,0
+osm:node/249485842,preiswert,1,claude,Owner stresses big portions at low prices,0
+osm:node/249485842,urig,1,claude,"Traditional Viennese Gasthaus, family-owned for generations",0
+osm:node/319755259,essen,1,claude,Traditional Austrian cooking and international dishes,0
+osm:node/319755259,modern,1,claude,Beer hall in a modern industrial style,0
+osm:node/2004973987,essen,1,claude,Full menu and weekday lunch menu,0
+osm:node/2004973987,gastgarten,1,claude,Sunny terrace for about 100 guests,0
+osm:node/11172175422,essen,1,claude,Neapolitan pizzeria with full menu,0
+osm:node/583229905,essen,1,claude,Kitchen open 11:00-21:00 with homemade desserts,0
+osm:node/336244940,essen,1,claude,Bohemian and Austrian cooking; kitchen until 21:45,0
+osm:way/1303973266,essen,1,claude,"Viennese classics and seasonal dishes, homemade",0
+osm:way/1303973266,gastgarten,1,claude,Quiet Gastgarten facing the Karlskirche,0
+osm:node/4304967572,essen,1,claude,Austro-French-Mediterranean cooking with weekly lunch menu,0
+osm:node/2329405787,essen,1,claude,Bar food such as mac and cheese and nachos,0
+osm:node/2181937533,essen,1,claude,"Austrian and Viennese dishes, freshly prepared",0
+osm:node/2181937533,urig,1,claude,Traditional restaurant with nostalgic 1920s interior,0
+osm:way/819869624,essen,1,claude,Austrian and Bohemian dishes cooked fresh daily,0
+osm:node/2655441412,essen,1,claude,Hearty home cooking with large menu and weekly card,0
+osm:node/2481283639,essen,1,claude,Irish food; kitchen open 16:00-22:00,0
+osm:node/373550674,essen,1,claude,Traditional Austrian cooking and international dishes,0
+osm:node/260990967,essen,1,claude,Viennese cooking with daily lunch menus,0
+osm:node/260990967,gastgarten,1,claude,Website mentions its Schanigarten,0
+osm:node/1717868121,essen,1,claude,Homemade Anatolian dishes,0
+osm:node/1717868121,gastgarten,1,claude,Schanigarten in good weather,0
+osm:node/336003485,essen,1,claude,Freshly cooked dishes from Austrian ingredients,0
+osm:node/336003485,urig,1,claude,"Describes itself as cosy and urig, lots of wood and brick",0
+osm:node/249485841,essen,1,claude,Home cooking with very large portions,0
+osm:node/249485841,preiswert,1,claude,Owner stresses big portions at low prices,0
+osm:node/249485841,urig,1,claude,"Traditional Viennese Gasthaus, family-owned for generations",0
+osm:node/1699092263,essen,1,claude,Viennese cooking with weekly menu,0
+osm:node/2450295917,essen,1,claude,Classic Viennese cooking and seasonal dishes,0
+osm:node/2450295917,gastgarten,1,claude,Gastgarten with shady corners and large umbrellas,0
+osm:node/2450295917,urig,1,claude,Calls itself a Viennese Gasthaus rich in tradition,0
+osm:node/4626464676,essen,1,claude,Viennese cooking with changing lunch menus,0
+osm:node/3566377888,essen,1,claude,"Hearty Viennese cooking, schnitzel fried in lard",0
+osm:node/13275971977,essen,1,claude,Trattoria with stone-oven pizza and lunch menus,0
+osm:node/6124963021,essen,1,claude,Hearty cooking and a large wine list,0
+osm:node/5754639525,gehoben,1,claude,"Ritz-Carlton rooftop bar, described as an upscale experience",0
+osm:node/8826034055,essen,1,claude,Hot kitchen daily 17:00-22:00,0
+osm:node/443216730,essen,1,claude,"Lunch offers, schnitzel, pizza and pasta",0
+osm:node/3186185369,essen,1,claude,International dishes by its cook; kitchen until 22:00,0
+osm:node/5099749537,essen,1,claude,Traditional Viennese cooking such as goulash and schnitzel,0
+osm:node/2000560985,essen,1,claude,Hot kitchen until 23:00,0
+osm:node/8812381966,modern,1,claude,Rooftop bar in Nordic design with a fireplace,0
+osm:node/8812381966,gastgarten,1,claude,Large roof terrace with a view over Vienna,0
+osm:node/370483984,essen,1,claude,Seasonal regional dishes and weekly menu,0
+osm:node/370483984,gastgarten,1,claude,Website has its own Gastgarten page,0
+osm:node/370483984,urig,1,claude,"Old-Viennese Wirtshaus since 1895, family-run since 1928",0
+osm:node/836251309,essen,1,claude,Creative cooking with beer and wine,0
+osm:node/836251309,gastgarten,1,claude,Seats outside in the Gastgarten in good weather,0
+osm:way/195521763,essen,1,claude,"Homemade traditional Viennese cooking, breakfast until 11:00",0
+osm:way/179604855,essen,1,claude,Traditional Austrian dishes and seasonal specials,0
+osm:way/179604855,urig,1,claude,Saturday roast from a wood oven by an old family recipe,0
+osm:node/3759120294,essen,1,claude,Austrian dishes with international touches,0
+osm:node/3759120294,gastgarten,1,claude,Gastgarten in summer,0
+osm:node/1913129892,essen,1,claude,"Schnitzel, pizza and lunch menu, also delivered",0
+osm:node/310676113,essen,1,claude,Restaurant with food menu and buffets,0
+osm:node/310676113,gastgarten,1,claude,Mediterranean Schanigarten in summer,0
+osm:node/310676113,urig,1,claude,"Old place, long in the street, many regulars",0
+osm:node/304983570,essen,1,claude,Beer place that also serves full meals,0
+osm:node/304983570,gastgarten,1,claude,Quiet Gastgarten among the vineyards,0
+osm:node/1777315906,essen,1,claude,Hearty Viennese cooking and lunch menu,0
+osm:node/1777315906,gastgarten,1,claude,Schanigarten in summer,0
+osm:node/1777315906,urig,1,claude,Traditional Gasthaus in the Brigittenau since 1983,0
+osm:way/176384783,essen,1,claude,Viennese classics and burgers,0
+osm:way/174269670,essen,1,claude,"Smash burgers, curries, schnitzel and Langos",0
+osm:way/174269670,gastgarten,1,claude,Outdoor pool bar in summer,0
+osm:node/4987019224,essen,1,claude,Home cooking and creative dishes,0
+osm:node/4987019224,gastgarten,1,claude,About 100 garden seats under a big walnut tree,0
+osm:node/4987019224,urig,1,claude,Viennese Wirtshaus since 1962,0
+osm:node/444247110,essen,1,claude,Hot kitchen daily 17:00-22:00,0
+osm:node/374485605,essen,1,claude,Austrian dishes and lunch menu,0
+osm:node/374485605,gastgarten,1,claude,Cosy outdoor seating area,0
+osm:node/1434634576,essen,1,claude,Austrian and Vietnamese dishes,0
+osm:node/11396690208,essen,1,claude,Full menu with tartare and lobster soup,0
+osm:node/11396690208,gastgarten,1,claude,Gastgarten said to be among the cosiest in town,0
+osm:node/11396690208,gehoben,1,claude,Menu with lobster soup and tartare up to 29 euros,0
+osm:node/5857267100,urig,1,claude,"Classic cocktail bar since 1990, concept unchanged",0
+osm:node/244497161,urig,1,claude,Viennese Beisl since 1980,0
+osm:node/244497161,gastgarten,1,claude,Vine-shaded courtyard garden in a house from 1700,0
+osm:node/308111492,essen,1,claude,Home cooking with very large portions,0
+osm:node/308111492,preiswert,1,claude,Owner stresses big portions at low prices,0
+osm:node/308111492,urig,1,claude,"Traditional Viennese Gasthaus, family-owned for generations",0
+osm:node/2152354132,essen,1,claude,Lunch menu and seasonal dishes from 16:00,0
+osm:node/4395889025,essen,1,claude,Balkan dishes from breakfast to dinner,0
+osm:node/13481377785,essen,1,claude,Dishes from its own kitchen and a menu plan,0
+osm:node/13481377785,gastgarten,1,claude,Gasthaus with a courtyard garden,0
+osm:node/469485014,essen,1,claude,Viennese home cooking and Bohemian dishes,0
+osm:node/469485014,gastgarten,1,claude,Website mentions its Gastgarten,0
+osm:node/469485014,urig,1,claude,Calls itself a Gasthaus rich in tradition,0
+osm:node/1960941676,essen,1,claude,Wide choice of Viennese classics and daily menu,0
+osm:node/334230868,essen,1,claude,Kitchen at lunch and until 21:30,0
+osm:node/334230868,gastgarten,1,claude,Large shady Gastgarten,0
+osm:way/186867086,essen,1,claude,"Grill and fish dishes, regional and international",0
+osm:node/1205089151,essen,1,claude,"Schnitzel, Fiakergulasch and other Viennese dishes",0
+osm:node/1802230473,essen,1,claude,Weekday lunch menus and à la carte dishes,0
+osm:node/1319197250,essen,1,claude,Old-Viennese cooking and weekly menus,0
+osm:way/198742474,essen,1,claude,Traditional dishes and drinks,0
+osm:way/198742474,gastgarten,1,claude,Website mentions its Gastgarten,0
+osm:node/8807884416,essen,1,claude,"Kitchen at lunch and evening, Italian aperitivo food",0
+osm:node/2133047687,essen,1,claude,"Viennese cooking, seasonal dishes and lunch menus",0
+osm:node/2133047687,gastgarten,1,claude,Large Schanigarten in the warm months,0
+osm:node/2133047687,urig,1,claude,"Family-run Beisl, cellar room with tiled stove",0
+osm:node/660130435,essen,1,claude,Irish pub serving food alongside beer and whiskey,0
+osm:node/370931029,live_musik,1,claude,Live gigs and events on a regular basis,0
+osm:node/5016014119,essen,1,claude,Old family recipes and regional dishes,0
+osm:node/5016014119,urig,1,claude,Traditional Viennese Wirtshaus with a long history,0
+osm:node/2315665961,essen,1,claude,Short changing menu with mains and small plates,0
+osm:node/2315665961,modern,1,claude,"Natural wine bar, a classic Beisl with a modern twist",0
+osm:node/2315665961,live_musik,1,claude,Hosts jazz nights and concerts,0
+osm:node/2326240000,live_musik,1,claude,Club with a stage for live acts,0
+osm:node/2210358270,essen,1,claude,Daily lunch menus and full menu,0
+osm:node/1822711264,essen,1,claude,Hearty Austrian dishes and weekly lunch menu,0
+osm:node/8400007842,essen,1,claude,Viennese cooking and weekly lunch menu,0
+osm:node/8400007842,urig,1,claude,Viennese Wirtshaus since 1988,0
+osm:node/2529344661,essen,1,claude,Daily lunch menus and full menu,0
+osm:node/2529344661,gastgarten,1,claude,Quiet Gastgarten open March to November,0
+osm:node/12085769399,essen,1,claude,Viennese cooking; hot kitchen until 20:30,0
+osm:node/693438046,urig,1,claude,Gasthaus at this address since 1896,0
+osm:node/618477202,essen,1,claude,Balkan grill dishes from old recipes,0
+osm:node/618477202,preiswert,1,claude,"Promises good food at pleasant, not expensive prices",0
+osm:node/286557366,essen,1,claude,Austrian home cooking plus Arabic specialties,0
+osm:node/286557366,urig,1,claude,Family-run Gasthaus for over 30 years,0
+osm:node/3266784188,essen,1,claude,Austrian cooking from market produce,0
+osm:way/166858412,essen,1,claude,Hot kitchen all day with classics and seasonal dishes,0
+osm:way/166858412,gastgarten,1,claude,Quiet Gastgarten,0
+osm:node/1873911446,essen,1,claude,"Fish dishes, breakfast and lunch menu",0
+osm:node/411757173,essen,1,claude,Traditional Viennese cooking,0
+osm:node/411757173,urig,1,claude,Run by the Czaak family since 1926,0
+osm:node/5463168185,essen,1,claude,Steakhouse with full menu,0
+osm:node/5507799407,essen,1,claude,Seasonal snacks and alpine hut dishes,0
+osm:node/10163505214,essen,1,claude,Modern Wirtshaus cooking,0
+osm:node/10163505214,modern,1,claude,Modern Wirtshaus food in a lounge atmosphere,0
+osm:node/9144519691,live_musik,1,claude,Weekly programme with live music and DJs,0
+osm:way/354945759,essen,1,claude,Austrian dishes and seasonal specials,0
+osm:way/354945759,gastgarten,1,claude,Schanigarten among flowers under shady umbrellas,0
+osm:node/8336096194,essen,1,claude,Viennese home cooking and regular specials,0
+osm:node/8336096194,preiswert,1,claude,Calls its Viennese home cooking good but inexpensive,0
+osm:way/207697712,essen,1,claude,Daily menu and lunch menu,0
+osm:way/207697712,urig,1,claude,"House built 1928, run by the same family since 1948",0
+osm:node/3360508916,essen,1,claude,Viennese cooking with weekday lunch menus,0
+osm:node/1416644640,essen,1,claude,Schnitzel by traditional family recipes,0
+osm:way/120858401,essen,1,claude,Austrian classics and Mediterranean dishes,0
+osm:way/120858401,gastgarten,1,claude,Outdoor seating under a wooden awning,0
+osm:node/288015983,essen,1,claude,Creative cooking at a wine bar restaurant,0
+osm:node/1166348216,essen,1,claude,Traditional Viennese cooking; kitchen until 21:30,0
+osm:node/1166348216,urig,1,claude,Viennese inn since 1899,0
+osm:node/4817739521,essen,1,claude,Regional seasonal cooking and daily lunch dishes,0
+osm:way/286606303,essen,1,claude,Austrian cooking and weekly menu,0
+osm:node/2451762209,essen,1,claude,Viennese home cooking and seasonal dishes,0
+osm:node/2451762209,gastgarten,1,claude,Large Gastgarten,0
+osm:node/1363142293,essen,1,claude,"Snacks, tarte flambée and oven pizza",0
+osm:node/960200368,essen,1,claude,Large choice of dishes and daily menu,0
+osm:node/2821271693,essen,1,claude,"Grilled Balkan dishes, soups and homemade food",0
+osm:node/1401845624,essen,1,claude,Weekly menu plans and grilled dishes,0
+osm:node/844544378,essen,1,claude,Food menu and weekly specials,0
+osm:node/5159317270,essen,1,claude,"Full menu; fried dishes pan-cooked, no deep fryer",0
+osm:node/4098511098,essen,1,claude,"Austrian dishes, lunch and evening menus",0
+osm:node/4098511098,modern,1,claude,Austrian dishes reinterpreted in creative set menus,0
+osm:node/1467165240,essen,1,claude,Russian and Ukrainian cooking,0
+osm:node/410689272,gastgarten,1,claude,Garden used in the summer months,0
+osm:node/4584003400,essen,1,claude,Viennese dishes; kitchen closes an hour before closing,0
+osm:node/4584003400,gastgarten,1,claude,Schanigarten with about 70 seats,0
+osm:node/338287510,essen,1,claude,Traditional Austrian and international dishes; kitchen until 22:00,0
+osm:node/2537832053,essen,1,claude,"Traditional dishes, cakes and vegetarian options",0
+osm:node/3280700263,essen,1,claude,"Smash burgers, bowls and weekend brunch",0
+osm:node/3280700263,modern,1,claude,Modern restaurant with urban ambience and design,0
+osm:way/237859111,essen,1,claude,Wirtshaus menu with seasonal specials,0
+osm:way/237859111,gastgarten,1,claude,Shady beer garden,0
+osm:node/1826262496,essen,1,claude,Lunch kitchen 10:00-15:30 with Viennese dishes,0
+osm:node/368276452,essen,1,claude,Known for schnitzel dishes and desserts,0
+osm:node/1467168557,live_musik,1,claude,Calendar lists several live concerts each month,0
+osm:way/1193005532,essen,1,claude,Grilled dishes; kitchen 11:30-20:00,0
+osm:way/1193005532,urig,1,claude,"Gasthaus with boat rental since 1972, traditional concept",0
+osm:way/250559036,essen,1,claude,Plain Viennese cooking by its head chef,0
+osm:node/478688452,essen,1,claude,Brunch and food menu,0
+osm:node/2973708601,essen,1,claude,Traditional Austrian cooking and international dishes,0
+osm:node/2973708601,gastgarten,1,claude,Rooftop terrace in the city centre,0
+osm:node/296854420,essen,1,claude,"Grill dishes, lunch menu and seasonal specials",0
+osm:node/296854420,gastgarten,1,claude,Restaurant with beer garden,0
+osm:node/799513821,essen,1,claude,"Schnitzel, roast pork and lunch",0
+osm:node/799513821,gastgarten,1,claude,Website has a Gastgarten section,0
+osm:node/799513821,urig,1,claude,"Real Viennese Beisl since 1999, a second living room for regulars",0
+osm:node/254904592,essen,1,claude,"Austrian cooking from regional produce, homemade bread",0
+osm:way/32315676,essen,1,claude,Daily dish and hearty cooking with house-brewed beer,0
+osm:node/4249070092,essen,1,claude,Balkan grill dishes by traditional recipes,0
+osm:node/4335062235,essen,1,claude,Hot kitchen all day and lunch menu,0
+osm:node/4335062235,gastgarten,1,claude,Website shows its Gastgarten,0
+osm:way/166750360,urig,1,claude,Family business on the Höhenstraße since 1923,0
+osm:way/166750360,gastgarten,1,claude,Large garden with a view over Vienna,0
+osm:node/1467267709,essen,1,claude,Breakfast and brunch dishes also at lunch,0
+osm:node/10753126633,essen,1,claude,"Austrian, Czech, Slovak, Polish and Hungarian dishes",0
+osm:node/944529379,essen,1,claude,Lunch menus and traditional Viennese cooking,0
+osm:node/1021979986,essen,1,claude,"Viennese and Macedonian dishes, charcoal grill",0
+osm:node/1021979986,gastgarten,1,claude,Quiet Gastgarten,0
+osm:node/1439072547,essen,1,claude,Tarte flambée and schnitzel,0
+osm:node/1439072547,gastgarten,1,claude,Garden for evenings under the stars,0
+osm:node/244497172,essen,1,claude,Daily dish and seasonal regional menu,0
+osm:node/761175368,essen,1,claude,Menu plans and seasonal weeks such as steak weeks,0
+osm:node/8303648274,essen,1,claude,"Hearty cooking from breakfast to evening, monthly specials",0
+osm:node/6831452590,essen,1,claude,"Kitchen 9:00-23:00, breakfast and lunch menu",0
+osm:node/2694283360,essen,1,claude,Viennese home cooking and seasonal menu,0
+osm:node/2694283360,gastgarten,1,claude,Gastgarten in the green,0
+osm:way/640221709,essen,1,claude,Viennese cooking; kitchen until 20:30,0
+osm:way/640221709,urig,1,claude,Family business since 1910,0
+osm:node/2750456220,essen,1,claude,Plant-based kitchen since 1999 with lunch menu,0
+osm:way/164721295,essen,1,claude,Hearty Viennese and Austrian cooking,0
+osm:node/948329570,essen,1,claude,Viennese classics like Tafelspitz and schnitzel,0
+osm:node/948329570,modern,1,claude,Presents a modern take on Viennese Beisl cooking,0
+osm:way/31114028,essen,1,claude,"Breakfast until 14:00, world cuisine until midnight",0
+osm:way/31114028,gastgarten,1,claude,Terrace in the middle of the Naschmarkt,0
+osm:node/4159400489,essen,1,claude,"Austrian classics, international dishes and lunch menu",0
+osm:node/4159400489,modern,1,claude,Modern beer place with an urban character,0
+osm:node/1744315076,essen,1,claude,Austrian home cooking by original recipes,0
+osm:way/26386408,essen,1,claude,Viennese classics with a seasonal menu,0
+osm:way/140585046,urig,1,claude,Gasthaus run by the same family since 1930,0
+osm:node/442056989,essen,1,claude,"Austrian dishes and burgers, also vegan",0
+osm:way/194554318,essen,1,claude,Austrian cooking and weekly lunch menus,0
+osm:way/194554318,gastgarten,1,claude,Quiet Gastgarten among allotment gardens,0
+osm:node/2171977206,essen,1,claude,Seasonal dishes on a changing menu,0
+osm:node/2171977206,urig,1,claude,Describes an urig ambience with crackling fireplaces,0
+osm:way/174865980,essen,1,claude,Homemade Viennese cooking and seasonal dishes,0
+osm:way/174865980,gastgarten,1,claude,Large Gastgarten with a view,0
+osm:node/3956017965,essen,1,claude,"Italian and Viennese cooking, lunch menu",0
+osm:node/3956017965,gastgarten,1,claude,Gastgarten with 60 seats in the warm season,0
+osm:node/6279454539,essen,1,claude,Freshly cooked lunch menu daily,0
+osm:node/6279454539,gastgarten,1,claude,Schanigarten in good weather,0
+osm:node/325148691,essen,1,claude,Viennese schnitzel and homemade pierogi,0
+osm:way/27711412,essen,1,claude,New Viennese cooking from regional produce,0
+osm:way/27711412,gastgarten,1,claude,Garden by the Wienerbergsee,0
+osm:node/1187363211,essen,1,claude,Heuriger buffet and full menu,0
+osm:node/1187363211,gastgarten,1,claude,Garden and vaulted cellar,0
+osm:way/350932762,essen,1,claude,Viennese cooking and pizza; kitchen until shortly before closing,0
+osm:way/350932762,gastgarten,1,claude,Website mentions its Gastgarten,0
+osm:way/182212626,essen,1,claude,Daily lunch dishes; kitchen until 21:30,0
+osm:way/131110125,essen,1,claude,Original Viennese cooking and seasonal dishes,0
+osm:way/131110125,gastgarten,1,claude,Garden and terrace facing the Kahlenberg,0
+osm:way/131110125,urig,1,claude,Long-established Gasthaus with ski-hut atmosphere,0
+osm:node/9521102820,essen,1,claude,Pinsa and a daily lunch dish,0
+osm:node/2662867562,essen,1,claude,"Traditional hearty cooking, schnitzel and breakfast",0
+osm:way/344657319,essen,1,claude,Snacks and Indian dishes such as butter chicken,0
+osm:way/344657319,gastgarten,1,claude,"Open-air bar on the Donauinsel, good weather only",0
+osm:node/448897302,essen,1,claude,Schnitzel and classics; hot kitchen all day,0
+osm:node/309293363,essen,1,claude,Hearty Austrian and international cooking,0
+osm:node/309293363,urig,1,claude,Pub at this address since 1905,0
+osm:node/3186544039,essen,1,claude,Freshly prepared Balkan grill dishes,0
+osm:node/3186544039,gastgarten,1,claude,Covered Gastgarten in summer,0
+osm:node/3186544039,modern,1,claude,"Modern, stylish interior",0
+osm:node/295413458,essen,1,claude,Small changing menu; kitchen 18:00-21:30,0
+osm:node/3014093275,essen,1,claude,"Seasonal dishes, Viennese classics and buffet",0
+osm:node/3014093275,live_musik,1,claude,Live music on Fridays and Saturdays from 18:30,0
+osm:node/3461389414,gastgarten,1,claude,"Sun decks by the water, open in good weather",0
+osm:node/12925441154,essen,1,claude,Viennese home cooking and daily lunch menu,0
+osm:way/298900512,essen,1,claude,Kitchen until 20:30 with lunch and evening menu,0
+osm:node/4256186526,essen,1,claude,"Hot kitchen all day, 11:00-23:00",0
+osm:node/4256186526,gastgarten,1,claude,"Garden among herbs, chestnut trees and vines",0

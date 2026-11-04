@@ -1,73 +1,78 @@
-// "Geschmackstest": like or dislike a handful of sample bars; the answers become
-// the group's preferences (tags and venue types). See domain/taste.ts.
+// "Geschmackstest": a few this-or-that questions; the answers become the group's
+// preferences (tags and venue types). See domain/taste.ts.
 
 import { useMemo, useState } from 'react'
-import { preferencesFrom, sampleBars, type Verdict } from '../domain/taste'
-import { TAG_LABEL, VENUE_TYPE_LABEL, type Bar, type Participant } from '../domain/types'
-import { TYPE_COLOR, TYPE_ICON, TYPE_SHORT } from '../theme'
-import { TagChips, TipBadge } from './BarFacts'
-
-const ROUNDS = 10
+import { preferencesFrom, QUESTIONS, type TasteAnswers } from '../domain/taste'
+import { TAG_LABEL, type Participant } from '../domain/types'
+import { TYPE_ICON, TYPE_SHORT } from '../theme'
 
 interface Props {
-  bars: Bar[]
   onDone: (p: Participant) => void
   onClose: () => void
 }
 
-export default function TasteFinder({ bars, onDone, onClose }: Props) {
-  const [seed] = useState(() => Date.now())
-  const sample = useMemo(() => sampleBars(bars, ROUNDS, seed), [bars, seed])
-  const [verdicts, setVerdicts] = useState<{ bar: Bar; verdict: Verdict }[]>([])
-  const i = verdicts.length
-  const done = i >= sample.length
-  const result = useMemo(() => preferencesFrom(verdicts), [verdicts])
-  const bar = sample[i]
+export default function TasteFinder({ onDone, onClose }: Props) {
+  const [answers, setAnswers] = useState<TasteAnswers>({})
+  const [step, setStep] = useState(0)
+  const done = step >= QUESTIONS.length
+  const result = useMemo(() => preferencesFrom(answers), [answers])
+  const q = QUESTIONS[step]
+  const chosen = q ? answers[q.id] ?? [] : []
 
-  function vote(v: Verdict) {
-    setVerdicts((cur) => [...cur, { bar, verdict: v }])
+  function answer(picked: number[]) {
+    setAnswers((cur) => ({ ...cur, [q.id]: picked }))
+    setStep((s) => s + 1)
   }
 
+  function toggle(i: number) {
+    setAnswers((cur) => {
+      const list = cur[q.id] ?? []
+      return { ...cur, [q.id]: list.includes(i) ? list.filter((x) => x !== i) : [...list, i] }
+    })
+  }
+
+  const empty = !result.likes.length && !result.avoids.length && !result.likedTypes?.length
+
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Geschmackstest">
+    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Geschmackstest"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
       <div className="modal">
         <button type="button" className="icon-btn modal-close" aria-label="Schließen" onClick={onClose}>×</button>
         <h2>✨ Geschmackstest</h2>
         {!done ? (
           <>
-            <p className="hint">Wie gefällt euch dieses Lokal? {i + 1} von {sample.length}</p>
-            <div className="progress"><span style={{ width: `${(i / sample.length) * 100}%` }} /></div>
-            <div className="taste-card" style={{ '--c': TYPE_COLOR[bar.venueType] } as React.CSSProperties}>
-              <div className="taste-hero">
-                <span className="taste-icon" aria-hidden="true">{TYPE_ICON[bar.venueType]}</span>
-                <div>
-                  <h3>{bar.name} <TipBadge bar={bar} /></h3>
-                  <p>{bar.district}. Bezirk · {VENUE_TYPE_LABEL[bar.venueType]}</p>
-                </div>
-              </div>
-              <div className="chips"><TagChips bar={bar} /></div>
-              <p className="muted small">{bar.openingHoursText ?? 'Öffnungszeiten unbekannt'}</p>
+            <p className="hint">Frage {step + 1} von {QUESTIONS.length}</p>
+            <div className="progress"><span style={{ width: `${(step / QUESTIONS.length) * 100}%` }} /></div>
+            <h3 className="taste-q">{q.question}</h3>
+            <div className={`taste-options${q.multi ? ' multi' : ''}`}>
+              {q.options.map((o, i) => (
+                <button key={o.label} type="button" className="taste-option" aria-pressed={q.multi ? chosen.includes(i) : undefined}
+                  onClick={() => (q.multi ? toggle(i) : answer([i]))}>
+                  <span className="taste-icon" aria-hidden="true">{o.icon}</span>
+                  <strong>{o.label}</strong>
+                  {o.hint && <span className="muted small">{o.hint}</span>}
+                </button>
+              ))}
             </div>
             <div className="vote">
-              <button type="button" className="vote-btn no" onClick={() => vote('dislike')}>✕ Nicht meins</button>
-              <button type="button" className="ghost" onClick={() => vote('skip')}>Weiß nicht</button>
-              <button type="button" className="vote-btn yes" onClick={() => vote('like')}>♥ Gefällt mir</button>
+              <button type="button" className="ghost" disabled={step === 0} onClick={() => setStep((s) => s - 1)}>← Zurück</button>
+              {q.multi
+                ? <button type="button" className="primary" onClick={() => answer(chosen)}>Weiter</button>
+                : <button type="button" className="ghost" onClick={() => answer([])}>Egal</button>}
             </div>
           </>
         ) : (
           <>
-            <p>So schätzen wir euren Geschmack ein:</p>
+            <p>So plant ihr:</p>
             <ul className="taste-result">
               {result.likedTypes?.map((t) => <li key={t}>♥ {TYPE_ICON[t]} {TYPE_SHORT[t]}</li>)}
               {result.likes.map((t) => <li key={t}>♥ {TAG_LABEL[t]}</li>)}
-              {result.avoidedTypes?.map((t) => <li key={t} className="avoid">✕ {TYPE_ICON[t]} {TYPE_SHORT[t]}</li>)}
               {result.avoids.map((t) => <li key={t} className="avoid">✕ {TAG_LABEL[t]}</li>)}
-              {!result.likes.length && !result.avoids.length && !result.likedTypes?.length && !result.avoidedTypes?.length &&
-                <li>Noch kein klares Muster. Probiert es nochmal oder wählt Vorlieben selbst.</li>}
+              {empty && <li>Euch ist alles recht. Dann zählt vor allem der Weg.</li>}
             </ul>
-            <p className="hint">„Lieber nicht“ senkt den Rang, entfernt aber nie ein Lokal. Viele Lokale sind noch nicht getaggt; je mehr Tags, desto genauer.</p>
+            <p className="hint">„Lieber nicht“ senkt den Rang, entfernt aber nie ein Lokal. Viele Lokale sind noch nicht getaggt; die zählen neutral.</p>
             <div className="vote">
-              <button type="button" className="ghost" onClick={() => setVerdicts([])}>Nochmal</button>
+              <button type="button" className="ghost" onClick={() => { setAnswers({}); setStep(0) }}>Nochmal</button>
               <button type="button" className="primary" onClick={() => onDone(result)}>Übernehmen</button>
             </div>
           </>

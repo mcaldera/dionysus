@@ -6,6 +6,8 @@ interface Props {
   recs: Recommendation[]
   preferences: Preferences
   departure: number | null
+  /** The solver is still checking how each one fits the rest of the tour. */
+  refining: boolean
   onPreferences: (p: Preferences) => void
   onPreview: (id: string) => void
   onHover: (id: string | null) => void
@@ -15,12 +17,12 @@ const MODES: [Preferences['similarity'], string][] = [
   ['similar', 'Ähnlich'], ['different', 'Etwas anderes'], ['ignore', 'Egal'],
 ]
 
-export default function Recommendations({ recs, preferences, departure, onPreferences, onPreview, onHover }: Props) {
+export default function Recommendations({ recs, preferences, departure, refining, onPreferences, onPreview, onHover }: Props) {
   const liked = new Set<Tag>(preferences.participants.flatMap((p) => p.likes))
   return (
     <section className="card" aria-label="Empfohlen als Nächstes">
       <div className="card-head">
-        <h3>Empfohlen als Nächstes</h3>
+        <h3>Empfohlen als Nächstes {refining && <span className="spinner small-spin" title="Prüfe, wie gut sie in die restliche Tour passen" />}</h3>
         <div className="segmented" role="group" aria-label="Ähnlichkeit">
           {MODES.map(([mode, label]) => (
             <button key={mode} type="button" aria-pressed={preferences.similarity === mode}
@@ -54,6 +56,11 @@ export default function Recommendations({ recs, preferences, departure, onPrefer
                   <span className="rec-meta">
                     <TypePill bar={r.bar} /> <span>{r.bar.district}. Bezirk</span>
                     {departure !== null && <OpenStatus bar={r.bar} at={departure + (r.leg.mode === 'unreachable' ? 0 : r.leg.minutes)} />}
+                    {r.tourExtra !== undefined && (
+                      <span className={`fit${r.tourExtra <= 2 ? ' good' : ''}`} title="So viel länger wird die beste restliche Tour, wenn ihr hierher geht">
+                        Tour {r.tourExtra <= 0.5 ? '±0' : `+${Math.round(r.tourExtra)}`} Min.
+                      </span>
+                    )}
                   </span>
                   <span className="chips"><TagChips bar={r.bar} highlight={liked} max={4} /></span>
                 </span>

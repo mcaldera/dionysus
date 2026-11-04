@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { clock, WEEKDAYS } from '../domain/hours'
-import { TAG_LABEL, TAGS, VENUE_TYPES, type Bar, type Participant, type Tag, type VenueType } from '../domain/types'
+import { ALL_DISTRICTS, TAG_LABEL, TAGS, VENUE_TYPES, type Bar, type Participant, type Tag, type VenueType } from '../domain/types'
 import { TYPE_COLOR, TYPE_ICON, TYPE_SHORT } from '../theme'
 
 export interface Settings {
@@ -10,7 +10,11 @@ export interface Settings {
   walkToleranceMinutes: number
   venueTypes: Set<VenueType>
   officialOnly: boolean
+  /** Districts the tour covers, sorted. */
+  districts: number[]
+  endDistrict: number | null
 }
+
 
 interface Props {
   bars: Bar[]
@@ -28,6 +32,24 @@ function norm(s: string): string {
 
 export default function FilterBar({ bars, settings, onSettings, group, onGroup, onPick, onTaste }: Props) {
   const [query, setQuery] = useState('')
+  const root = useRef<HTMLDivElement>(null)
+
+  // Popovers close on any click outside them, including the map, and on Escape.
+  useEffect(() => {
+    const close = (keep: EventTarget | null) => {
+      root.current?.querySelectorAll('details.popover[open]').forEach((d) => {
+        if (!(keep instanceof Node) || !d.contains(keep)) d.removeAttribute('open')
+      })
+    }
+    const onDown = (e: PointerEvent) => close(e.target)
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close(null) }
+    document.addEventListener('pointerdown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('pointerdown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [])
   const counts = useMemo(() => {
     const c = new Map<VenueType, number>()
     for (const b of bars) c.set(b.venueType, (c.get(b.venueType) ?? 0) + 1)
@@ -46,6 +68,13 @@ export default function FilterBar({ bars, settings, onSettings, group, onGroup, 
     onSettings({ ...settings, venueTypes: next })
   }
 
+  function toggleDistrict(d: number) {
+    const has = settings.districts.includes(d)
+    if (has && settings.districts.length <= 2) return
+    const districts = has ? settings.districts.filter((x) => x !== d) : [...settings.districts, d].sort((a, b) => a - b)
+    onSettings({ ...settings, districts, endDistrict: districts.includes(settings.endDistrict ?? 0) ? settings.endDistrict : null })
+  }
+
   function cycle(tag: Tag) {
     // egal → mag → lieber nicht → egal
     const likes = group.likes.filter((t) => t !== tag)
@@ -58,7 +87,7 @@ export default function FilterBar({ bars, settings, onSettings, group, onGroup, 
   const prefCount = group.likes.length + group.avoids.length + (group.likedTypes?.length ?? 0) + (group.avoidedTypes?.length ?? 0)
 
   return (
-    <div className="topbar-inner">
+    <div className="topbar-inner" ref={root}>
       <div className="brand">
         <span className="logo" aria-hidden="true">🍺</span>
         <h1>Seidl-Tour-Planer</h1>
@@ -94,7 +123,10 @@ export default function FilterBar({ bars, settings, onSettings, group, onGroup, 
       </div>
       <div className="top-actions">
         <details className="popover">
-          <summary>🕒 {WEEKDAYS[settings.weekday].slice(0, 2)} {clock(settings.startMinutes)}</summary>
+          <summary>
+            🕒 {WEEKDAYS[settings.weekday].slice(0, 2)} {clock(settings.startMinutes)}
+            {settings.districts.length < 23 ? ` · ${settings.districts.length} Bezirke` : ''}
+          </summary>
           <div className="popover-body">
             <label>Wochentag
               <select value={settings.weekday} onChange={(e) => onSettings({ ...settings, weekday: Number(e.target.value) })}>
@@ -111,6 +143,22 @@ export default function FilterBar({ bars, settings, onSettings, group, onGroup, 
             <label>Aufenthalt pro Lokal
               <select value={settings.stopMinutes} onChange={(e) => onSettings({ ...settings, stopMinutes: Number(e.target.value) })}>
                 {[10, 15, 20, 30, 45, 60].map((m) => <option key={m} value={m}>{m} Min.</option>)}
+              </select>
+            </label>
+            <div className="district-pick">
+              <span>Bezirke ({settings.districts.length})</span>
+              <div className="district-grid">
+                {ALL_DISTRICTS.map((d) => (
+                  <button key={d} type="button" aria-pressed={settings.districts.includes(d)} onClick={() => toggleDistrict(d)}>{d}</button>
+                ))}
+              </div>
+              <button type="button" className="ghost small" onClick={() => onSettings({ ...settings, districts: ALL_DISTRICTS })}>Alle 23</button>
+            </div>
+            <label>Letzter Bezirk
+              <select value={settings.endDistrict ?? ''}
+                onChange={(e) => onSettings({ ...settings, endDistrict: e.target.value ? Number(e.target.value) : null })}>
+                <option value="">Egal</option>
+                {settings.districts.map((d) => <option key={d} value={d}>{d}. Bezirk</option>)}
               </select>
             </label>
           </div>
