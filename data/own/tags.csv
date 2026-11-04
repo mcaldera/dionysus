@@ -1,0 +1,35 @@
+bar_id,tag,value,source,evidence,reviewed
+osm:node/311820993,essen,1,claude,Website lists pub classics and burgers from its own kitchen,0
+osm:node/139128641,essen,1,claude,Hot kitchen daily until 22:00 with Viennese dishes,0
+osm:node/139128641,gastgarten,1,claude,Website mentions a shady garden used on summer evenings,0
+osm:node/139128641,urig,1,claude,Open since 1991; team rarely changes and regulars value that,0
+osm:node/1776090872,essen,1,claude,Serves burgers and soul food alongside its beer,0
+osm:node/1366488393,gastgarten,1,claude,Website mentions outdoor seating by the Gürtel,0
+osm:node/5901290639,essen,1,claude,Food from breakfast to late snacks; kitchen open until midnight,0
+osm:node/5901290639,gastgarten,1,claude,Website mentions a Gastgarten,0
+osm:node/929228045,essen,1,claude,Gasthaus kitchen with Viennese home cooking and a lunch menu,0
+osm:node/929228045,urig,1,claude,Describes itself as a long-standing traditional Gasthaus without frills,0
+osm:node/2605273046,live_musik,1,claude,Artists' and music café in a Wagner station building; live music focus,0
+osm:node/601411472,essen,1,claude,Serves Viennese Wirtshaus classics alongside fresh tank beer,0
+osm:node/601411472,modern,1,claude,Presents Wirtshaus classics with a modern twist in a revived venue,0
+osm:way/633610319,essen,1,claude,Restaurant in the Prater with its own menu,0
+osm:way/633610319,gastgarten,1,claude,Website highlights a large garden,0
+osm:node/1825985207,essen,1,claude,Viennese cooking with a weekday lunch menu,0
+osm:node/1825985207,gastgarten,1,claude,Website describes it as a restaurant with a Gastgarten,0
+osm:node/419294544,essen,1,claude,Restaurant with Viennese and international dishes; late kitchen on weekends,0
+osm:node/419294544,urig,1,claude,Meeting place since 1973 with vaulted rooms,0
+osm:node/419294544,gastgarten,1,claude,Garden in the inner courtyard,0
+osm:node/1591079266,essen,1,claude,Presents itself as a burger bar,0
+osm:node/334355382,essen,1,claude,Pub food such as burgers and fish and chips,0
+osm:node/7231470885,essen,1,claude,Bar area serves pizza toasts stews and snacks after climbing,0
+osm:node/9609751390,essen,1,claude,Large menu of traditional Austrian dishes,0
+osm:node/1991433140,essen,1,claude,Varied menu including vegan and vegetarian dishes,0
+osm:node/1991433140,urig,1,claude,Family-run with a nostalgic atmosphere,0
+osm:node/1991433140,gastgarten,1,claude,Guests mention a beer garden,0
+osm:node/2563578537,essen,1,claude,Beisl with its own food menu next to the stage,0
+osm:node/2563578537,live_musik,1,claude,Cabaret stage with regular music acts,0
+osm:node/2563578537,gastgarten,1,claude,Website mentions a new Schanigarten,0
+osm:way/30528334,essen,1,claude,Daily set dishes such as schnitzel,0
+osm:node/2507465152,essen,1,claude,Large Wirtshaus menu with platters and seasonal goose,0
+osm:node/9961201853,essen,1,claude,Gasthaus kitchen with seasonal goose menu,0
+osm:node/526684628,essen,1,claude,Full menu from soups to steak dishes,0

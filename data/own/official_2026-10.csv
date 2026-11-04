@@ -1,0 +1,52 @@
+edition,district,name,address,postcode,website,venue_type_guess,notes
+2026-10,1,Ottakringer Zapfmeisterei Bermuda Bräu,"Rabensteig 6, 1010 Wien",1010,www.zapfmeisterei-bermudabraeu.at,beisl_wirtshaus,
+2026-10,1,Stadtboden,"Krugerstraße 8, 1010 Wien",1010,www.stadtboden.at,pub_bar,New in October
+2026-10,2,Mostlandl,"Heinestraße 30, 1020 Wien",1020,www.mostlandl.net,beisl_wirtshaus,
+2026-10,2,Volee,"Rustenschacherallee 9, 1020 Wien",1020,www.volee.at,beisl_wirtshaus,New in October
+2026-10,2,Café-Restaurant Zum Riesenrad,"Zum Riesenradplatz 1, 1020 Wien",1020,www.zumriesenrad.at,tschocherl,
+2026-10,3,Marx Bier und Mehr,"Franzosengraben 3, 1030 Wien",1030,www.marxgastro.wien,beisl_wirtshaus,
+2026-10,3,Mio am Stadtpark,"Landstraßer Hauptstraße 2, 1030 Wien",1030,www.miovienna.at,special,Italian restaurant
+2026-10,4,Wombats Bar,"Rechte Wienzeile 35, 1040 Wien",1040,www.wombats-hostels.com/vienna,special,Hostel bar
+2026-10,5,Wiener Wirtschaft,"Wiedner Hauptstraße 27-29, 1040 Wien",1040,www.wienerwirtschaft.com,beisl_wirtshaus,New in October. Booklet lists it under district 5 but the address is in district 4; unverified
+2026-10,5,Thell Restaurant,"Schönbrunner Straße 30, 1050 Wien",1050,www.thell.restaurant,beisl_wirtshaus,New in October. Entrance in Rüdigergasse
+2026-10,6,Edmund Stehausschank,"Naschmarktstand 975c, 1060 Wien",1060,www.edmund.wien,special,New in October. Market stall
+2026-10,6,Addicted to Rock Bar & Burger,"Getreidemarkt 11, 1060 Wien",1060,www.addictedtoburger.at,pub_bar,
+2026-10,7,Der Dachboden,"Lerchenfelderstraße 1, 1070 Wien",1070,www.dachbodenwien.at,pub_bar,Hotel rooftop bar
+2026-10,7,Replugged,"Lerchenfelderstraße 23, 1070 Wien",1070,www.replugged.at,special,Music venue
+2026-10,7,Cafe Zehnsiebzig,"Burggasse 68, 1070 Wien",1070,www.cafe1070.com,tschocherl,
+2026-10,8,Cafe Anno,"Lerchenfelder Straße 132, 1080 Wien",1080,www.facebook.com/cafe.anno.wien,beisl_wirtshaus,
+2026-10,8,Cafe Carina,"Josefstädter Straße 84, 1080 Wien",1080,www.cafe-carina.at,tschocherl,Music café
+2026-10,8,Kaffee Kunze,"Auersperstraße 19, 1080 Wien",1080,www.kaffeekunze.at,tschocherl,Booklet: daily 10:00-02:00. Address as printed; street is probably Auerspergstraße
+2026-10,9,Charlie P's Irish Pub,"Währingerstraße 3, 1090 Wien",1090,www.charlieps.at,pub_bar,
+2026-10,10,Das Columbus,"Columbusplatz 6, 1100 Wien",1100,www.dascolumbus.at,beisl_wirtshaus,
+2026-10,10,Mabel's No90 British Pub & Cocktailbar,"Laxenburger Straße 90, 1100 Wien",1100,www.mabels.at,pub_bar,
+2026-10,10,Boulderbar Hauptbahnhof,"Maria-Lassnig-Str. 18 Tür 2, 1100 Wien",1100,www.boulderbar.net,special,Boulder gym
+2026-10,11,Weinhaus Hochmayer,"Simmeringer Hauptstr. 42, 1110 Wien",1110,,beisl_wirtshaus,
+2026-10,12,Biergasthof Otto,"Altmannsdorfer Str. 101, 1120 Wien",1120,www.biergasthof-otto.at,beisl_wirtshaus,
+2026-10,12,Soft Rock Cafe,"Meidlinger Hauptstr. 36, 1120 Wien",1120,www.softrock.at,pub_bar,
+2026-10,12,Strasser Bräu,"Schönbrunner Str. 253-255, 1120 Wien",1120,www.strasserbraeu.at,beisl_wirtshaus,
+2026-10,13,Pub Hietzing Das Alt,"Altgasse 18, 1130 Wien",1130,www.das-alt.at,pub_bar,
+2026-10,13,Gasthaus Tirolergarten,"Maxingstraße 13b, 1130 Wien",1130,www.zoovienna.at,beisl_wirtshaus,
+2026-10,14,Edis Weinkeller,"Linzer Straße 91, 1140 Wien",1140,www.edis-weinkeller.at,heuriger,
+2026-10,14,Reigen,"Hadikgasse 62, 1140 Wien",1140,www.reigen.at,special,Music venue
+2026-10,15,Brauhund,"Schweglerstraße 48, 1150 Wien",1150,www.brauhund.com,pub_bar,New in October
+2026-10,15,Café Favorit,"Vogelweidplatz 4, 1150 Wien",1150,www.facebook.com/Cafe-Favorit,tschocherl,
+2026-10,16,Bierosophie,"Gablenzgasse 60 A, 1160 Wien",1160,www.bierosophie.at,beisl_wirtshaus,
+2026-10,16,Blunzenstricker,"Ottakringerstraße 71, 1160 Wien",1160,www.blunzenstricker.at,beisl_wirtshaus,
+2026-10,16,Ottakringer Shop,"Ottakringerstraße 95, 1160 Wien",1160,www.ottakringerbrauerei.at,special,Brewery shop. Booklet ad: Mon-Fri 10:00-18:00; Sat 13:00-18:00
+2026-10,17,Die Kulisse,"Rosensteingasse 39, 1170 Wien",1170,www.kulisse.at,special,Cabaret stage with Beisl
+2026-10,17,Plus Bowling,"Beheimgasse 5-7, 1170 Wien",1170,www.plusbowling.at,special,Bowling alley
+2026-10,17,Marien Beisl,"Mariengasse 17, 1170 Wien",1170,www.marienbeisl.at,beisl_wirtshaus,
+2026-10,18,Anton Frank,"Gymnasiumstraße 25, 1180 Wien",1180,,tschocherl,
+2026-10,18,Wilder Mann,"Währinger Straße 85, 1180 Wien",1180,www.restaurant-wildermann.at,beisl_wirtshaus,
+2026-10,19,Battle Axe,"Glatzgasse 4, 1190 Wien",1190,www.battleaxe.at,pub_bar,Metal bar
+2026-10,19,Neunzehn,"Döblinger Hauptstraße 23-25, 1190 Wien",1190,www.neunzehn1190.at,beisl_wirtshaus,
+2026-10,20,Brigittenauer Stadl,"Griegstraße 1-3, 1200 Wien",1200,www.brigittenauerstadl.at,beisl_wirtshaus,
+2026-10,20,Boulderbar Hannovergasse,"Hannovergasse 21 (Innenhof), 1200 Wien",1200,www.boulderbar.net,special,Boulder gym
+2026-10,21,Schabanack,"Leopoldauer Platz 90, 1210 Wien",1210,www.schabanack.com,beisl_wirtshaus,New in October
+2026-10,21,Leopoldauer Alm,"Wagramer Straße 205, 1210 Wien",1210,www.leopoldaueralm.at,beisl_wirtshaus,
+2026-10,22,Restaurant Sternberg,"Industriestraße 65, 1220 Wien",1220,www.sternberg.at,beisl_wirtshaus,New in October. Booklet: closed Monday
+2026-10,22,Boulderbar Seestadt,"Ilse-Buck-Straße 22, 1220 Wien",1220,www.boulderbar.net,special,Boulder gym
+2026-10,22,Gasthaus Napoleon,"Kagraner Platz 33, 1220 Wien",1220,www.napoleon.wien,beisl_wirtshaus,
+2026-10,22,Mio - A Piece of Neapel,"Wagramer Str. 79/Top 606a, 1220 Wien",1220,www.miovienna.at,special,Italian restaurant
+2026-10,23,Restaurant Karl-Wirt,"Ketzergasse 155, 2380 Perchtoldsdorf",2380,www.karlwirt.at,beisl_wirtshaus,Listed under district 23 despite the Perchtoldsdorf address

@@ -1,0 +1,8 @@
+import { defineConfig } from '@playwright/test'
+
+// End-to-end tests run at 1440 × 900 (SPEC 13).
+export default defineConfig({
+  testDir: 'e2e',
+  use: { baseURL: 'http://localhost:5173', viewport: { width: 1440, height: 900 } },
+  webServer: { command: 'npm run dev', url: 'http://localhost:5173', reuseExistingServer: true },
+})

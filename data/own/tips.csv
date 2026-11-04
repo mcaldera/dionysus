@@ -1,0 +1,49 @@
+name,district,street,source,kind,url
+Pizza Pub,23,,owner,tour idea,
+Wilde Hilde,12,,owner,tour idea,
+Schaumweinhäuschen,13,,owner,tour idea,
+Espresso Flamingo,15,,owner,tour idea,
+Holzis,14,,owner,tour idea,
+Wunderlampe,16,,owner,tour idea,
+Pezzl,17,,owner,tour idea,
+Espresso Babsi,18,,owner,tour idea,
+Unders,19,,owner,tour idea,
+Cafe Haller,20,,owner,tour idea,
+Likörstube Sveceny,21,Brünner Straße 26,owner,tour idea,
+Kagraner Kistl,22,,owner,tour idea,
+Marktstüberl,2,,owner,tour idea,
+Schweden Espresso,1,,owner,tour idea,
+Moped,3,,owner,tour idea,
+Cafe Zipp,11,,owner,tour idea,
+Cafe Impuls,10,,owner,tour idea,
+Cafe U1,4,,owner,tour idea,
+Cafe UKO,5,,owner,tour idea,
+Cafe Habakuk,6,,owner,tour idea,
+Kreisky,7,,owner,tour idea,
+Debakel,8,,owner,tour idea,
+Glashütte,9,,owner,tour idea,
+Cafe Anno,8,,owner,good example,
+Cafe Carina,8,,owner,good example,
+Tee- und Likörstube,22,,Falter 2016 Tschocherl-Report,tschocherl,https://www.falter.at/zeitung/20160608/die-feuchtfroehliche-alkoase
+Aufzug Café,4,Wiedner Gürtel 4,Falter Lokalführer: Wiens neue Tschocherln,tschocherl,https://www.falter.at/lokalfuehrer/wiens-neue-tschocherln
+Klein aber fein,6,Hornbostelgasse 3,Falter Lokalführer: Wiens neue Tschocherln,tschocherl,https://www.falter.at/lokalfuehrer/wiens-neue-tschocherln
+Café Inges Eck,,,Falter Lokalführer: Wiens neue Tschocherln,tschocherl,https://www.falter.at/lokalfuehrer/wiens-neue-tschocherln
+Lindwurmstüberl,,,Falter Lokalführer: Wiens neue Tschocherln,tschocherl,https://www.falter.at/lokalfuehrer/wiens-neue-tschocherln
+Stuwer,2,Stuwerstraße 47,Falter Lokalführer: Wiens neue Tschocherln,tschocherl,https://www.falter.at/lokalfuehrer/wiens-neue-tschocherln
+Krah Krah,1,Rabensteig 8,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien
+Hopferl,1,Naglergasse 13,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien
+Hawidere,15,Ullmannstraße 31,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien
+Fischerbräu,19,Billrothstraße 17,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien
+1516 Brewing Company,1,Schwarzenbergstraße 2,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien
+Känguruh Pub,6,Bürgerspitalgasse 20,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien
+Schnauzer & Beagle Brewery,10,Hasengasse 56,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien
+Wiener Stadtbräu,1,Graben 29a,Falter Lokalführer: Biertrinken,bier,https://www.falter.at/lokalfuehrer/die-besten-lokale-zum-biertrinken-in-wien
+Schmauswaberl,6,Linke Wienzeile 64,1000things: 9 Wiener Beisln,beisl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/
+Café Anzengruber,4,Schleifmühlgasse 19,1000things: 9 Wiener Beisln,beisl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/
+Café Else,2,Heinestraße 36,1000things: 9 Wiener Beisln,beisl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/
+Café Monic,6,Gumpendorfer Straße 69,1000things: 9 Wiener Beisln,tschocherl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/
+Café Weidinger,16,Lerchenfelder Gürtel 1,1000things: 9 Wiener Beisln,beisl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/
+Wunder-Bar,1,Schönlaterngasse 8,1000things: 9 Wiener Beisln,beisl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/
+Café Stadtbahn,18,Gersthofer Straße 47,1000things: 9 Wiener Beisln,beisl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/
+Café Malipop,3,Ungargasse 10,1000things: 9 Wiener Beisln,beisl,https://www.1000thingsmagazine.com/de/a/22113/wiener-beisln-die-auf-euren-besuch-warten/
+Café Bendl,1,,offbeatbudapest.com: bars in Vienna,kultig,https://www.offbeatbudapest.com/vienna-city-guide/where-to-drink-with-the-locals-best-bars-in-vienna/

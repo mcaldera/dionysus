@@ -1,0 +1,23 @@
+name: dionysus
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - openjdk>=21
+  - nodejs=22
+  - osmium-tool
+  - r5py
+  - geopandas
+  - shapely
+  - pyproj
+  - pyosmium
+  - requests
+  - pandas
+  - rapidfuzz
+  - unidecode
+  - psutil
+  - pytest
+  - pypdf
+  - pdfplumber
+  - beautifulsoup4
+  - lxml

@@ -1,0 +1,19 @@
+node_modules
+dist
+*.local
+*.log
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+
+# Pipeline
+data/raw/
+data/interim/
+data/own/website_text/
+__pycache__/
+.pytest_cache/
+
+# Playwright
+test-results/
+playwright-report/
+public/data/travel/parts/
