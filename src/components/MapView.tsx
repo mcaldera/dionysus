@@ -1,6 +1,12 @@
 import * as maplibregl from 'maplibre-gl'
 import type { ExpressionSpecification, GeoJSONSource, MapLayerMouseEvent } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+// MapLibre builds its worker URL at runtime, which Vite can't see, so the production build
+// would lack the worker file and the map would never get its data. Bundle the worker
+// explicitly and tell MapLibre where it is.
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
+
+maplibregl.setWorkerUrl(maplibreWorkerUrl)
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { strongTips } from '../domain/filter'
 import type { Bar } from '../domain/types'
