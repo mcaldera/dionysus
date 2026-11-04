@@ -21,8 +21,8 @@ import { recommend, refine, type Constraints, type Preferences } from './domain/
 import { slotDelta, slotOptions, type Slot } from './domain/solver'
 import { applyTagRows, type TagRow } from './domain/tagRows'
 import { slotTimeline, timeline, type TimelineStop } from './domain/tour'
-import { nearbyFromBar, nearbyFromPoint, walkEstimate, type NearbyResult } from './domain/nearby'
-import { leg, legLabel, legMinutes } from './domain/travel'
+import { nearbyFromBar, nearbyFromPoint, reachFromPoint, walkEstimate, type NearbyResult } from './domain/nearby'
+import { googleMapsDirections, leg, legLabel, legMinutes } from './domain/travel'
 import { ALL_DISTRICTS, VENUE_TYPES, type Bar, type Participant } from './domain/types'
 import { transitPath, walkingPath, type TransitRoute } from './routes'
 import { loadJson, saveJson } from './storage'
@@ -42,6 +42,10 @@ function transitKey(a: Bar, b: Bar, departure: number): string {
 }
 
 type Pair = { a: Bar; b: Bar; mode: 'walk' | 'transit'; departure: number }
+/** Finder with "Öffis" on: ride when that saves more than this many minutes. */
+const FINDER_TOLERANCE = 2
+/** Finder: bars numbered on the map and in the list. */
+const FINDER_LISTED = 15
 /** A tour place: a district with a chosen bar, or still open. */
 type SlotIds = { district: number; barId: string | null }
 
@@ -241,13 +245,21 @@ export default function App() {
   const nearby: NearbyResult[] = useMemo(() => {
     if (!data || !finder) return []
     const o = {
-      maxMinutes, transit: finderTransit, walkToleranceMinutes: plan.walkToleranceMinutes,
+      maxMinutes, transit: finderTransit, walkToleranceMinutes: FINDER_TOLERANCE,
       departure: onlyOpen ? finderMinute : null, includeUnknownHours: openMode === 'open',
     }
     if (selected) return nearbyFromBar(selected, visibleBars, data.matrices, o)
     if (point) return nearbyFromPoint(point, visibleBars, data.matrices, o)
     return []
-  }, [data, finder, selected, point, visibleBars, maxMinutes, finderTransit, plan.walkToleranceMinutes, onlyOpen, openMode, finderMinute])
+  }, [data, finder, selected, point, visibleBars, maxMinutes, finderTransit, onlyOpen, openMode, finderMinute])
+
+  // Finder: the way from your point (location or marker) to the selected bar.
+  const finderRoute = useMemo(() => {
+    if (!data || !finder || !selected || !point) return null
+    const r = reachFromPoint(point, selected, data.bars, data.matrices, { transit: finderTransit, walkToleranceMinutes: FINDER_TOLERANCE })
+    const key = `pt:${point.lat.toFixed(5)},${point.lon.toFixed(5)}>${selected.id}`
+    return { ...r, from: point, to: selected, walkKey: key, transitKey: `${key}@${Math.round(finderMinute / 15) * 15}` }
+  }, [data, finder, selected, point, finderTransit, finderMinute])
 
   const focusStats = useMemo(() => {
     if (!data || focusDistrict === null) return null
@@ -287,7 +299,9 @@ export default function App() {
       } else if (si !== undefined) {
         out.push({ bar, role: 'stop', label: si + 1, closed: closed.has(bar.id) })
       } else if (r !== undefined) {
-        out.push({ bar, role: r < 5 ? 'top' : 'next', label: r < 5 ? r + 1 : undefined })
+        // Numbered like the list: all listed bars in the finder, the top 5 in the tour.
+        const numbered = finder ? FINDER_LISTED : 5
+        out.push({ bar, role: r < numbered ? 'top' : 'next', label: r < numbered ? r + 1 : undefined })
       } else {
         // Fade bars you can't pick next, and districts outside the plan.
         const blocked = finder ? false : swapSlot ? !inSwapDistrict : !included.has(bar.district) || (!!selected
@@ -344,6 +358,51 @@ export default function App() {
     return () => clearTimeout(t)
   }, [wanted, paths, transit])
 
+  // Fetch the real path for the finder route (cached like tour legs).
+  useEffect(() => {
+    if (!finderRoute) return
+    const { from, to } = finderRoute
+    if (finderRoute.mode === 'walk') {
+      if (paths[finderRoute.walkKey]) return
+      const key = finderRoute.walkKey
+      walkingPath(from, to).then((coords) => { if (coords) setPaths((p) => ({ ...p, [key]: coords })) })
+      return
+    }
+    const key = finderRoute.transitKey
+    if (key in transit) {
+      // No transit connection at all: show the walking path instead of a bare arc.
+      if (transit[key] === null && !paths[finderRoute.walkKey]) {
+        const wk = finderRoute.walkKey
+        walkingPath(from, to).then((coords) => { if (coords) setPaths((p) => ({ ...p, [wk]: coords })) })
+      }
+      return
+    }
+    let cancelled = false
+    ;(async () => {
+      let route = await transitPath(from, to, finderMinute).catch(() => undefined)
+      if (route === null && data) {
+        // A point inside a block may not reach the street network; plan from the nearest bar
+        // (bars sit on streets) and walk there first.
+        let near: Bar | null = null
+        let best = Infinity
+        for (const b of data.bars) {
+          const d = (b.lat - from.lat) ** 2 + ((b.lon - from.lon) * 0.67) ** 2
+          if (d < best && b.id !== to.id) { best = d; near = b }
+        }
+        const viaBar = near ? await transitPath(near, to, finderMinute).catch(() => undefined) : null
+        if (near && viaBar) {
+          route = {
+            ...viaBar,
+            segments: [{ coords: [[from.lon, from.lat], [near.lon, near.lat]], kind: 'walk' }, ...viaBar.segments],
+            parts: [{ mode: 'WALK', minutes: walkEstimate(from, near) }, ...viaBar.parts],
+          }
+        }
+      }
+      if (!cancelled && route !== undefined) setTransit((cur) => ({ ...cur, [key]: route }))
+    })()
+    return () => { cancelled = true }
+  }, [finderRoute, paths, transit, finderMinute, data])
+
   const drawLeg = useCallback((a: Bar, b: Bar, mode: 'walk' | 'transit', departure: number | null, live: boolean): Leg[] => {
     if (mode === 'walk') {
       return [{ coords: (live && paths[walkKey(a, b)]) || [[a.lon, a.lat], [b.lon, b.lat]], mode: 'walk' }]
@@ -359,7 +418,23 @@ export default function App() {
 
   // Tour legs; an empty slot is a hollow marker at its district centre with dashed lines to its neighbours.
   const { tourLegs, ghosts } = useMemo(() => {
-    if (finder) return { tourLegs: [] as Leg[], ghosts: [] }
+    if (finder) {
+      if (!finderRoute) return { tourLegs: [] as Leg[], ghosts: [] }
+      const { from, to } = finderRoute
+      if (finderRoute.mode === 'walk') {
+        return { ghosts: [], tourLegs: [{ coords: paths[finderRoute.walkKey] ?? [[from.lon, from.lat], [to.lon, to.lat]], mode: 'walk' } as Leg] }
+      }
+      const route = transit[finderRoute.transitKey]
+      if (route === null) {
+        return { ghosts: [], tourLegs: [{ coords: paths[finderRoute.walkKey] ?? [[from.lon, from.lat], [to.lon, to.lat]], mode: 'walk' } as Leg] }
+      }
+      return {
+        ghosts: [],
+        tourLegs: route
+          ? route.segments.map((sg) => ({ coords: sg.coords, mode: sg.kind === 'ride' ? 'ride' : 'transfer', color: sg.color, line: sg.line }) as Leg)
+          : [{ coords: arc([from.lon, from.lat], [to.lon, to.lat]), mode: route === null ? 'transfer' : 'pending' } as Leg],
+      }
+    }
     if (previewTl) {
       return {
         ghosts: [],
@@ -390,7 +465,16 @@ export default function App() {
       return c ? [{ lon: c.lon, lat: c.lat, label: i + 1 }] : []
     })
     return { tourLegs: legs, ghosts: gh }
-  }, [finder, previewTl, slotViews, districtInfo, drawLeg])
+  }, [finder, finderRoute, paths, transit, previewTl, slotViews, districtInfo, drawLeg])
+
+  // Finder: travel time on the middle of the drawn route.
+  const routeLabel = useMemo(() => {
+    if (!finderRoute) return null
+    const coords = tourLegs.flatMap((l) => l.coords)
+    if (coords.length < 2) return null
+    const [lon, lat] = coords[Math.floor(coords.length / 2)]
+    return { lon, lat, text: `${finderRoute.mode === 'walk' ? '🚶' : '🚋'} ${finderRoute.minutes} Min.` }
+  }, [finderRoute, tourLegs])
 
   const preview: Leg[] = useMemo(() => {
     if (finder && !selected && point && highlighted) {
@@ -693,7 +777,7 @@ export default function App() {
           <MapView bars={mapBars} districts={data.districts} districtLabels={data.districtLabels} viennaMask={data.viennaMask} visitedDistricts={visited}
             tourLegs={tourLegs} recLines={recLines} preview={preview} ghosts={ghosts} highlightId={highlightId} focus={focus}
             focusDistrict={focusDistrict} onSelect={(id) => pick(id, false)}
-            origin={finder ? point : null}
+            origin={finder ? point : null} routeLabel={routeLabel}
             onContextPoint={finder ? (at) => setOrigin({ ...at, label: 'Gewählter Punkt' }) : undefined}
             onBackgroundClick={(d, at) => {
               if (finder && placing) {
@@ -758,10 +842,18 @@ export default function App() {
             <>
               {selected ? (
                 <>
-                  <BarPanel bar={selected} arrival={finderMinute} blockedBy={null} inTour={false}
+                  <BarPanel bar={selected} arrival={finderMinute + (finderRoute?.minutes ?? 0)} blockedBy={null} inTour={false}
                     newestEdition={data.manifest.newestOfficialEdition} tourEmpty={false} busy={false} emptySlot={false}
                     onAdd={() => {}} onReplace={() => {}} onPropose={() => {}} onTemplate={() => {}} onPlan={() => {}}
-                    finder={{ favorite: favorites.includes(selected.id), onFavorite: () => toggleFavorite(selected.id) }}
+                    finder={{
+                      favorite: favorites.includes(selected.id), onFavorite: () => toggleFavorite(selected.id),
+                      route: finderRoute && point ? {
+                        text: `${finderRoute.mode === 'walk' ? '🚶' : '🚋'} ${finderRoute.mode === 'walk' ? 'ca. ' : ''}${finderRoute.minutes} Min. ${finderRoute.mode === 'walk' ? 'zu Fuß' : 'mit Öffis'} von ${point.label}`,
+                        lines: transit[finderRoute.transitKey]?.lines ?? [],
+                        href: googleMapsDirections(point, selected, finderRoute.mode === 'walk'
+                          ? { mode: 'walk', minutes: finderRoute.minutes } : { mode: 'transit', minutes: finderRoute.minutes }),
+                      } : undefined,
+                    }}
                     onClose={clearSelection} onTagChange={changeTag} />
                   <NearbyList title={`Von ${selected.name} aus`} results={nearby} maxMinutes={maxMinutes} transit={finderTransit}
                     departure={onlyOpen ? finderMinute : null} highlightId={highlightId}

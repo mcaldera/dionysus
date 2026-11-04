@@ -6,6 +6,8 @@ import type { Bar } from '../domain/types'
 import { TagChips, TipBadge, TypePill } from './BarFacts'
 
 const BUDGETS = [5, 10, 15, 20, 30]
+/** Bars listed (and numbered on the map). */
+const LISTED = 15
 
 interface StartProps {
   locating: boolean
@@ -71,7 +73,7 @@ interface NearbyProps {
 }
 
 export function NearbyList(p: NearbyProps) {
-  const shown = p.results.slice(0, 15)
+  const shown = p.results.slice(0, LISTED)
   return (
     <section className="card" aria-label="In der Nähe">
       <div className="card-head">

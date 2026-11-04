@@ -159,6 +159,11 @@ test.describe('Beisl-Finder', () => {
     await expect(page.getByTestId('map')).toHaveAttribute('data-ready', '1', { timeout: 30_000 })
     await page.getByTestId('map').click({ button: 'right', position: { x: 500, y: 420 } })
     await expect(page.getByRole('heading', { name: /Gewählter Punkt/ })).toBeVisible()
+    // Picking a bar from the list shows the way there from the point.
+    await page.locator('[aria-label="In der Nähe"] .rec').first().click()
+    await expect(page.locator('.finder-route')).toContainText('von Gewählter Punkt')
+    await expect(page.locator('.finder-route a')).toHaveAttribute('href', /google\.com\/maps\/dir/)
+    await page.keyboard.press('Escape')
     await page.getByRole('button', { name: 'Punkt entfernen' }).click()
     await expect(page.getByRole('heading', { name: /Wo seid ihr/ })).toBeVisible()
   })

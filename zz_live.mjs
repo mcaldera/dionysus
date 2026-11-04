@@ -1,0 +1,12 @@
+import { chromium } from '@playwright/test'
+const b = await chromium.launch()
+const p = await b.newPage({ viewport: { width: 1440, height: 900 } })
+p.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') console.log('CONSOLE', m.type(), m.text().slice(0, 300)) })
+p.on('pageerror', (e) => console.log('PAGEERROR', e.message.slice(0, 400)))
+p.on('requestfailed', (r) => console.log('FAILED', r.url().slice(0, 150), r.failure()?.errorText))
+p.on('response', (r) => { if (r.status() >= 400) console.log('HTTP', r.status(), r.url().slice(0, 150)) })
+await p.goto('https://wiener-durst.mcaldera.workers.dev/', { waitUntil: 'networkidle', timeout: 60000 }).catch((e) => console.log('GOTO', e.message))
+await p.waitForTimeout(5000)
+await p.screenshot({ path: '/tmp/claude-11172/-home-michael-caldera-VScode-z-remove-later-dionysus/3feeddbb-546b-4026-bf40-1dfb4ba303db/scratchpad/live.png' })
+console.log('READY', await p.getByTestId('map').getAttribute('data-ready'))
+await b.close()

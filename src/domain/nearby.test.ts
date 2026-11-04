@@ -43,6 +43,10 @@ describe('nearby', () => {
     expect(walkEstimate(home, bars[1])).toBe(8)
     const r = nearbyFromPoint(home, bars, m, { ...opts, maxMinutes: 9, transit: true })
     expect(r.map((x) => x.bar.id)).toEqual(['own:n0', 'own:n1', 'own:n2'])
+    // Riding must save more than the tolerance; with 5 minutes, bar 1 (8 walk, 4 ride) is walked.
+    const t5 = nearbyFromPoint(home, bars, m, { ...opts, maxMinutes: 30, transit: true, walkToleranceMinutes: 5 })
+    expect(t5.find((x) => x.bar.id === 'own:n1')?.mode).toBe('walk')
+    expect(t5.find((x) => x.bar.id === 'own:n3')).toMatchObject({ mode: 'transit', minutes: 12 })
   })
 })
 
@@ -52,5 +56,14 @@ describe('areaKm2', () => {
     const dLon = 1 / (111.32 * Math.cos((48.2 * Math.PI) / 180))
     const sq: GeoJSON.Polygon = { type: 'Polygon', coordinates: [[[16, 48.2], [16 + dLon, 48.2], [16 + dLon, 48.2 + dLat], [16, 48.2 + dLat], [16, 48.2]]] }
     expect(areaKm2(sq)).toBeCloseTo(1, 2)
+  })
+})
+
+describe('reachFromPoint', () => {
+  it('walks when walking only, rides when transit is clearly faster', async () => {
+    const { reachFromPoint } = await import('./nearby')
+    const home = { lat: 48.2, lon: 16.30 }
+    expect(reachFromPoint(home, bars[3], bars, m, { transit: false, walkToleranceMinutes: 0 })).toEqual({ minutes: 24, mode: 'walk' })
+    expect(reachFromPoint(home, bars[3], bars, m, { transit: true, walkToleranceMinutes: 0 })).toEqual({ minutes: 12, mode: 'transit' })
   })
 })

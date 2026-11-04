@@ -26,7 +26,12 @@ interface Props {
   /** The tour has an empty slot for this bar's district. */
   emptySlot: boolean
   /** Finder mode: no tour actions; a "Merken" toggle instead. */
-  finder?: { favorite: boolean; onFavorite: () => void }
+  finder?: {
+    favorite: boolean
+    onFavorite: () => void
+    /** The way from the finder's point (location or marker) to this bar. */
+    route?: { text: string; lines: string[]; href: string }
+  }
   onClose: () => void
   onTagChange?: (bar: Bar, tag: string, value: 0 | 1) => void
 }
@@ -82,6 +87,12 @@ export default function BarPanel(props: Props) {
             </span>
           )}
         </div>
+        {finder?.route && (
+          <p className="finder-route">
+            <span>{finder.route.text}{finder.route.lines.length ? ` · ${finder.route.lines.join(' → ')}` : ''}</span>
+            <a href={finder.route.href} target="_blank" rel="noreferrer">Route ↗</a>
+          </p>
+        )}
         <div className="chips"><TagChips bar={bar} /></div>
         {bar.tips && bar.tips.length > 0 && (
           <p className="tips">

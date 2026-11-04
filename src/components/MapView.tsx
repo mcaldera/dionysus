@@ -57,6 +57,8 @@ interface Props {
   onContextPoint?: (at: { lat: number; lon: number }) => void
   /** Finder: the free point bars are searched from (home, GPS, click). */
   origin: { lat: number; lon: number } | null
+  /** Finder: the travel time, shown as a pill on the drawn route. */
+  routeLabel?: { lon: number; lat: number; text: string } | null
   /** District picked by a click on empty map: emphasised and zoomed to. */
   focusDistrict: number | null
   onHoverBar: (h: HoverInfo | null) => void
@@ -115,6 +117,7 @@ export default function MapView(props: Props) {
   const ready = useRef(false)
   const hoveredDistrict = useRef<number | null>(null)
   const dwelling = useRef(false)
+  const routePill = useRef<maplibregl.Marker | null>(null)
   const dwellTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const latest = useRef(props)
   useLayoutEffect(() => {
@@ -452,6 +455,24 @@ export default function MapView(props: Props) {
 
   useEffect(update, [props.bars, props.districts, props.districtLabels, props.viennaMask, props.visitedDistricts, props.tourLegs,
     props.recLines, props.preview, props.ghosts, props.origin, props.highlightId])
+
+  // The travel-time pill on the finder route; an HTML marker so it can look like a badge.
+  useEffect(() => {
+    const m = map.current
+    const l = props.routeLabel
+    if (!m || !l) {
+      routePill.current?.remove()
+      routePill.current = null
+      return
+    }
+    if (!routePill.current) {
+      const el = document.createElement('div')
+      el.className = 'route-pill'
+      routePill.current = new maplibregl.Marker({ element: el }).setLngLat([l.lon, l.lat]).addTo(m)
+    }
+    routePill.current.setLngLat([l.lon, l.lat])
+    routePill.current.getElement().textContent = l.text
+  }, [props.routeLabel])
 
   // Focus on a district: emphasise it and zoom so it fills the map left of the panel.
   useEffect(() => {

@@ -71,28 +71,47 @@ export function nearbyFromBar(from: Bar, bars: Bar[], m: Matrices, o: NearbyOpti
 }
 
 /**
- * Bars within the budget from a free point. Walking: straight-line estimate. With transit:
- * also walk to one of the nearest bars and take its travel times from there.
+ * Ways from a free point via its nearest bars (which sit on the street network). Walking is
+ * the better of the straight-line estimate and the walk to a nearby bar plus the real walking
+ * time from there; transit is the walk to a nearby bar plus the transit time from there.
  */
+function fromPoint(p: { lat: number; lon: number }, target: Bar, anchors: { b: Bar; start: number }[], m: Matrices) {
+  let walk = walkEstimate(p, target)
+  let transit = Infinity
+  for (const { b: a, start } of anchors) {
+    const i = a.matrixIndex * m.n + target.matrixIndex
+    if (m.walk[i] !== 255) walk = Math.min(walk, start + m.walk[i])
+    if (m.transitP50[i] !== 255) transit = Math.min(transit, start + m.transitP50[i])
+  }
+  return { walk, transit }
+}
+
+function anchorsOf(p: { lat: number; lon: number }, bars: Bar[]) {
+  return bars.map((b) => ({ b, d: metres(p, b) })).filter((x) => x.d <= ANCHOR_M)
+    .sort((x, y) => x.d - y.d).slice(0, ANCHORS).map(({ b }) => ({ b, start: walkEstimate(p, b) }))
+}
+
+/** Same rule as `leg()`: ride only if it saves more than the tolerance. */
+function choose(w: number, t: number, o: Pick<NearbyOptions, 'transit' | 'walkToleranceMinutes'>) {
+  return o.transit && t + o.walkToleranceMinutes < w ? { minutes: t, mode: 'transit' as const } : { minutes: w, mode: 'walk' as const }
+}
+
+/** Bars within the budget from a free point (home, GPS position, a marker). */
 export function nearbyFromPoint(p: { lat: number; lon: number }, bars: Bar[], m: Matrices, o: NearbyOptions): NearbyResult[] {
+  const anchors = anchorsOf(p, bars)
   const found = new Map<string, { bar: Bar; minutes: number; mode: 'walk' | 'transit' }>()
   for (const b of bars) {
-    const w = walkEstimate(p, b)
-    if (w <= o.maxMinutes) found.set(b.id, { bar: b, minutes: w, mode: 'walk' })
-  }
-  if (o.transit) {
-    const anchors = bars.map((b) => ({ b, d: metres(p, b) })).filter((x) => x.d <= ANCHOR_M)
-      .sort((x, y) => x.d - y.d).slice(0, ANCHORS)
-    for (const { b: a } of anchors) {
-      const start = walkEstimate(p, a)
-      for (const b of bars) {
-        const l = legOrWalk(m, a.matrixIndex, b.matrixIndex, o)
-        if (l.mode === 'unreachable') continue
-        const t = start + l.minutes
-        const cur = found.get(b.id)
-        if (!cur || t < cur.minutes) found.set(b.id, { bar: b, minutes: t, mode: l.mode === 'transit' ? 'transit' : 'walk' })
-      }
-    }
+    const { walk, transit } = fromPoint(p, b, anchors, m)
+    found.set(b.id, { bar: b, ...choose(walk, transit, o) })
   }
   return finish(found, o)
+}
+
+/** Way from a free point to one bar, the same as in nearbyFromPoint. */
+export function reachFromPoint(
+  p: { lat: number; lon: number }, target: Bar, bars: Bar[], m: Matrices,
+  o: Pick<NearbyOptions, 'transit' | 'walkToleranceMinutes'>,
+): { minutes: number; mode: 'walk' | 'transit' } {
+  const { walk, transit } = fromPoint(p, target, anchorsOf(p, bars), m)
+  return choose(walk, transit, o)
 }
