@@ -1,7 +1,7 @@
 // Header: brand, map filter (what you see), search, and the button that opens tour planning.
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { activeFilters, barSources, matchesFilter, SOURCE_KINDS, SOURCE_LABEL, type MapFilter, type SourceKind } from '../domain/filter'
+import { activeFilters, barSources, FORUM_KIND_LABEL, FORUM_KINDS, forumKinds, matchesFilter, SOURCE_KINDS, SOURCE_LABEL, type ForumKind, type MapFilter, type SourceKind } from '../domain/filter'
 import { clock, DAY, WEEKDAYS } from '../domain/hours'
 import { TAG_LABEL, TAGS, VENUE_TYPES, type Bar, type Tag, type VenueType } from '../domain/types'
 import { TYPE_COLOR, TYPE_ICON, TYPE_SHORT } from '../theme'
@@ -53,12 +53,14 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
     const types = new Map<VenueType, number>()
     const tags = new Map<Tag, number>()
     const sources = new Map<SourceKind, number>()
+    const forum = new Map<ForumKind, number>()
     for (const b of bars) {
       types.set(b.venueType, (types.get(b.venueType) ?? 0) + 1)
       for (const t of b.tags) tags.set(t, (tags.get(t) ?? 0) + 1)
       for (const s of barSources(b)) sources.set(s, (sources.get(s) ?? 0) + 1)
+      for (const k of forumKinds(b)) forum.set(k as ForumKind, (forum.get(k as ForumKind) ?? 0) + 1)
     }
-    return { types, tags, sources }
+    return { types, tags, sources, forum }
   }, [bars])
   const visible = useMemo(() => bars.filter((b) => matchesFilter(b, filter)).length, [bars, filter])
   const hits = useMemo(() => {
@@ -118,6 +120,19 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
             </div>
           </section>
           <section>
+            <h4>Laut r/wien</h4>
+            <div className="chips">
+              {FORUM_KINDS.map((k) => (
+                <button key={k} type="button" className="chip toggle" aria-pressed={filter.forumKinds.has(k)}
+                  disabled={!counts.forum.get(k) && !filter.forumKinds.has(k)}
+                  onClick={() => onFilter({ ...filter, forumKinds: toggled(filter.forumKinds, k) })}>
+                  {FORUM_KIND_LABEL[k]} <span className="count">{counts.forum.get(k) ?? 0}</span>
+                </button>
+              ))}
+            </div>
+            <p className="hint small">Meinungen aus Reddit-Threads, getrennt nach dem, wofür ein Lokal gelobt wird. „Rau & kultig“ ist dort meist liebevoll gemeint.</p>
+          </section>
+          <section>
             <h4>Öffnungszeiten</h4>
             <label className="check">
               <input type="checkbox" checked={filter.openAt !== null}
@@ -138,7 +153,7 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
             </div>
           </section>
           <button type="button" className="ghost small" disabled={!active}
-            onClick={() => onFilter({ venueTypes: new Set(VENUE_TYPES), tags: new Set(), sources: new Set(), openAt: null })}>
+            onClick={() => onFilter({ venueTypes: new Set(VENUE_TYPES), tags: new Set(), sources: new Set(), forumKinds: new Set(), openAt: null })}>
             Filter zurücksetzen
           </button>
         </div>

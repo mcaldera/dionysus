@@ -22,7 +22,8 @@ export interface Bar {
   weeklyOpen: [number, number][] | null
   official: string[]
   /** Public lists that recommend the bar. */
-  tips?: { source: string; url: string }[]
+  /** kind: what the source praises, e.g. "rau" for a forum mention of a rough, beloved place. */
+  tips?: { source: string; url: string; kind?: string }[]
   tags: Tag[]
   unreviewedTags: Tag[]
   description?: string

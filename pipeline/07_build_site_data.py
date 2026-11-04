@@ -125,7 +125,8 @@ def main() -> None:
             "weeklyOpen": weekly,
             "official": b["official"],
             # Public tip sources only; the owner's own lists stay private.
-            **({"tips": tips} if (tips := [{"source": t["source"], "url": t["url"]} for t in b.get("tips", [])
+            **({"tips": tips} if (tips := [{"source": t["source"], "url": t["url"], **({"kind": t["kind"]} if t.get("kind") else {})}
+                                          for t in b.get("tips", [])
                                           if t["source"] != "owner" and t["url"]]) else {}),
             "tags": [t for t in TAGS if t in tags],
             "unreviewedTags": [t for t in TAGS if t in unreviewed],

@@ -1,4 +1,5 @@
 import { clock, isOpenAt } from '../domain/hours'
+import { tipLabel } from '../domain/filter'
 import { googleMapsPlace } from '../domain/travel'
 import { VENUE_TYPE_LABEL, type Bar } from '../domain/types'
 import { TYPE_COLOR, TYPE_ICON } from '../theme'
@@ -84,7 +85,7 @@ export default function BarPanel(props: Props) {
           <p className="tips">
             ★ Empfohlen von{' '}
             {bar.tips.map((t, i) => (
-              <span key={t.url}>{i > 0 && ', '}<a href={t.url} target="_blank" rel="noreferrer">{t.source}</a></span>
+              <span key={`${t.url}${t.kind ?? ''}`}>{i > 0 && ', '}<a href={t.url} target="_blank" rel="noreferrer">{tipLabel(t)}</a></span>
             ))}
           </p>
         )}

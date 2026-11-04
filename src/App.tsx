@@ -46,7 +46,7 @@ export default function App() {
     weekday: 5, startMinutes: 11 * 60, stopMinutes: 20, walkToleranceMinutes: 5, districts: ALL_DISTRICTS,
     startDistrict: null, endDistrict: null, venueTypes: new Set(VENUE_TYPES), officialOnly: false, noBacktrack: true,
   })
-  const [filter, setFilter] = useState<MapFilter>({ venueTypes: new Set(VENUE_TYPES), tags: new Set(), sources: new Set(), openAt: null })
+  const [filter, setFilter] = useState<MapFilter>({ venueTypes: new Set(VENUE_TYPES), tags: new Set(), sources: new Set(), forumKinds: new Set(), openAt: null })
   const [group, setGroup] = useState<Participant>({ name: 'Wir', likes: [], avoids: [] })
   const [prefs, setPrefs] = useState<Omit<Preferences, 'participants'>>({ similarity: 'similar', speedVsMatch: 0.5 })
   const [slotIds, setSlotIds] = useState<SlotIds[]>([])

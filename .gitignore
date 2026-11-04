@@ -17,3 +17,7 @@ __pycache__/
 test-results/
 playwright-report/
 public/data/travel/parts/
+
+# Pasted forum threads: other people's text, kept local
+data/own/tips/*
+!data/own/tips/README.txt

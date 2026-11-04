@@ -463,7 +463,7 @@ def merge_tips(bars: list[dict], by_id: dict[str, dict]) -> list[dict]:
             continue
         bar = best[1]
         bar.setdefault("tips", [])
-        if not any(t["source"] == tip["source"] for t in bar["tips"]):
+        if not any(t["source"] == tip["source"] and t.get("kind") == tip["kind"] for t in bar["tips"]):
             bar["tips"].append({"source": tip["source"], "kind": tip["kind"], "url": tip["url"]})
         report.append({**tip, "status": how, "bar": bar["name"], "bar_id": bar["id"]})
     counts: dict[str, int] = {}
