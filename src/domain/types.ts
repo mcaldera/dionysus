@@ -15,6 +15,8 @@ export interface Bar {
   lon: number
   venueType: VenueType
   address?: string
+  /** Overrides the name in the Google Maps link when the plain name finds the wrong place. */
+  mapsQuery?: string
   website?: string
   phone?: string
   wheelchair?: string

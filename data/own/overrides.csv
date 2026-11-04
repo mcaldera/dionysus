@@ -1,3 +1,14 @@
-bar_id,district,hidden,note
-osm:way/130558727,23,,Karl-Wirt: Perchtoldsdorf address; official list counts it for district 23
-osm:node/13606382273,5,,Wiener Wirtschaft: address in district 4; October 2026 booklet lists it under district 5
+bar_id,district,hidden,note,maps_query,address
+osm:way/130558727,23,,Karl-Wirt: Perchtoldsdorf address; official list counts it for district 23,,
+osm:node/13606382273,5,,Wiener Wirtschaft: address in district 4; October 2026 booklet lists it under district 5,,
+osm:node/845973629,,,"Hera: Google Maps finds the hospital for plain ""Hera""",Café Hera,
+osm:node/4224832491,,,Arrigo: no OSM address,,"Landstraßer Hauptstraße 51, 1030 Wien"
+osm:node/2669050201,,,Wein & Co (7.): no OSM address,,"Mariahilfer Str. 36, 1070 Wien"
+osm:node/10163505214,,,Bierhalle am Naschmarkt: no OSM address,,"Naschmarkt Stand 668, 1060 Wien"
+osm:node/11172175421,,,Boba Bar: no OSM address,,"Wagramer Str. 79, 1220 Wien"
+osm:node/11577267821,,,Schnitzel & Ribs Beisl: no OSM address,,"Naschmarkt 59b, 1060 Wien"
+osm:node/11577267833,,,Rafael's Vinothek: no OSM address,,"Naschmarkt 38, 1060 Wien"
+osm:node/11573604635,,1,Cutz Naschmarkt: permanently closed,,
+osm:node/11577267822,,1,"Weineck: wine bar, not found on Google; removed",,
+osm:node/6148340309,,1,Atlas (20.): not findable on Google or the web; removed,,
+osm:node/1439072553,,,Sling: no OSM address,,"Kettenbrückengasse 4, 1040 Wien"

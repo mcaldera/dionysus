@@ -19,7 +19,7 @@ from datetime import datetime
 import geopandas as gpd
 from shapely.geometry import box, mapping
 
-from common import INTERIM, OWN, PUBLIC_DATA, RAW, log
+from common import INTERIM, OWN, PUBLIC_DATA, RAW, load_overrides, log
 
 TAGS = ["essen", "urig", "modern", "preiswert", "gehoben", "gastgarten", "lang_offen", "live_musik", "absteige"]
 TAGS_HEADER = ["bar_id", "tag", "value", "source", "evidence", "reviewed"]
@@ -92,6 +92,7 @@ def main() -> None:
     travel = json.loads((PUBLIC_DATA / "travel" / "manifest.json").read_text(encoding="utf-8"))
     index = {bar_id: i for i, bar_id in enumerate(travel["order"])}
 
+    overrides = load_overrides()
     rows = load_tag_rows()
     by_bar: dict[str, list[dict]] = {}
     for r in rows:
@@ -99,6 +100,11 @@ def main() -> None:
 
     bars = []
     for b in src["bars"]:
+        o = overrides.get(b["id"], {})
+        if o.get("hidden") == "1":
+            continue
+        if o.get("address"):
+            b["address"] = o["address"]
         if b["id"] not in index:
             raise SystemExit(f"{b['name']} ({b['id']}) has no matrix index; re-run 06_travel_matrix.py")
         weekly = hours.get(b["id"], {}).get("weeklyOpen")
@@ -126,6 +132,7 @@ def main() -> None:
             "venueType": b["venueType"],
             **{k: v for k, v in {
                 "address": b.get("address"),
+                "mapsQuery": overrides.get(b["id"], {}).get("maps_query"),
                 "website": website(b.get("website")),
                 "phone": b.get("phone"),
                 "wheelchair": b.get("wheelchair"),

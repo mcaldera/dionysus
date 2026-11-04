@@ -59,6 +59,9 @@ interface Props {
   onHoverDistrict: (h: { district: number; x: number; y: number } | null) => void
 }
 
+/** How long the mouse must stay in a district before the others are greyed out. */
+const HOVER_DWELL_MS = 1300
+
 const BAR_LAYERS = ['bars-other', 'bars-next', 'bars-top', 'bars-stop', 'bars-selected']
 const empty: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] }
 const typeColor = ['match', ['get', 'type'], ...Object.entries(TYPE_COLOR).flat(), '#888888'] as unknown as string
@@ -107,6 +110,8 @@ export default function MapView(props: Props) {
   const map = useRef<maplibregl.Map | null>(null)
   const ready = useRef(false)
   const hoveredDistrict = useRef<number | null>(null)
+  const dwelling = useRef(false)
+  const dwellTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const latest = useRef(props)
   useLayoutEffect(() => {
     latest.current = props
@@ -133,6 +138,15 @@ export default function MapView(props: Props) {
   function setDistrictHover(d: number | null) {
     if (d === hoveredDistrict.current) return
     hoveredDistrict.current = d
+    // Hovering only outlines the district; staying a while also greys out the rest.
+    if (dwellTimer.current) clearTimeout(dwellTimer.current)
+    dwelling.current = false
+    if (d != null) {
+      dwellTimer.current = setTimeout(() => {
+        dwelling.current = true
+        emphasise()
+      }, HOVER_DWELL_MS)
+    }
     emphasise()
   }
 
@@ -147,10 +161,18 @@ export default function MapView(props: Props) {
     const focused = latest.current.focusDistrict
     const d = focused ?? hoveredDistrict.current
     const strong = focused !== null
+    // A hovered district greys out the others only after the dwell time.
+    const dims = strong || dwelling.current
     const is: ExpressionSpecification = ['==', ['get', 'district'], d ?? -1]
-    m.setPaintProperty('districts-dim', 'fill-opacity', d == null ? 0 : ['case', is, 0, strong ? 0.34 : 0.16])
-    // Outside Vienna darkens like the other districts.
-    m.setPaintProperty('outside-dim', 'fill-opacity', d == null ? 0 : strong ? 0.34 : 0.16)
+    // The other districts and everything outside Vienna darken together. The darkened districts
+    // are picked by filter and the opacity is a plain number, because MapLibre only animates
+    // plain values; a per-feature expression would switch instantly while the outside fades.
+    const darkness = d == null || !dims ? 0 : strong ? 0.34 : 0.2
+    // Re-target only while darkening: a fade-out keeps its old selection, else the next district
+    // would pop out at once while the rest fades.
+    if (d != null && darkness > 0) m.setFilter('districts-dim', ['!=', ['get', 'district'], d])
+    m.setPaintProperty('districts-dim', 'fill-opacity', darkness)
+    m.setPaintProperty('outside-dim', 'fill-opacity', darkness)
     m.setFilter('districts-shadow', ['==', ['get', 'district'], strong ? d : -1])
     m.setFilter('districts-glow', ['==', ['get', 'district'], d ?? -1])
     m.setPaintProperty('districts-glow', 'line-opacity', strong ? 0.95 : 0.6)
@@ -399,6 +421,7 @@ export default function MapView(props: Props) {
       emphasise()
     })
     return () => {
+      if (dwellTimer.current) clearTimeout(dwellTimer.current)
       ready.current = false
       m.remove()
       map.current = null

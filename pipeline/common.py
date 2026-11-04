@@ -94,5 +94,9 @@ def apply_overrides(bars: list[dict], overrides: dict[str, dict]) -> list[dict]:
                 continue
             if o.get("district"):
                 b["district"] = int(o["district"])
+            if o.get("address"):
+                b["address"] = o["address"]
+            if o.get("maps_query"):
+                b["mapsQuery"] = o["maps_query"]
         out.append(b)
     return out

@@ -48,8 +48,12 @@ export function googleMapsDirections(
 }
 
 /** Search by name plus address; without an address, the district's postcode (1200 for the
- *  20th) keeps Google from picking a same-named place elsewhere in Vienna. */
-export function googleMapsPlace(bar: { name: string; address?: string; district: number }): string {
+ *  20th) keeps Google from picking a same-named place elsewhere in Vienna. The viewport at
+ *  the bar's coordinates biases the result further; `mapsQuery` overrides the name. */
+export function googleMapsPlace(
+  bar: { name: string; address?: string; district: number; lat: number; lon: number; mapsQuery?: string },
+): string {
   const where = bar.address ?? `${1000 + bar.district * 10} Wien`
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${bar.name}, ${where}`)}`
+  const query = encodeURIComponent(`${bar.mapsQuery ?? bar.name}, ${where}`)
+  return `https://www.google.com/maps/search/${query}/@${bar.lat},${bar.lon},18z`
 }
