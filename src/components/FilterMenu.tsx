@@ -4,7 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { activeFilters, barSources, includeWeak, matchesFilter, SOURCE_KINDS, SOURCE_LABEL, TIP_KIND_LABEL, TIP_KINDS, tipKinds, type MapFilter, type SourceKind, type TipKind } from '../domain/filter'
 import { clock, DAY, WEEKDAYS } from '../domain/hours'
 import { TAG_LABEL, TAGS, VENUE_TYPES, type Bar, type Tag, type VenueType } from '../domain/types'
-import { TYPE_COLOR, TYPE_ICON, TYPE_SHORT } from '../theme'
+import { TYPE_COLOR, TYPE_SHORT } from '../theme'
+import Icon, { TypeIcon } from './Icon'
 
 interface Props {
   bars: Bar[]
@@ -82,15 +83,15 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
   return (
     <div className="topbar-inner" ref={root}>
       <div className="brand">
-        <span className="logo" aria-hidden="true">🍺</span>
-        <h1>Seidl-Tour-Planer</h1>
+        <span className="logo" aria-hidden="true"><Icon name="beer" size={17} /></span>
+        <h1>Wiener Durst</h1>
       </div>
       <div className="mode-tabs" role="tablist" aria-label="Modus">
-        <button type="button" role="tab" aria-selected={mode === 'finder'} onClick={() => onMode('finder')}>🔎 Beisl-Finder</button>
-        <button type="button" role="tab" aria-selected={mode === 'tour'} onClick={() => onMode('tour')}>🗺 Seidl-Tour</button>
+        <button type="button" role="tab" aria-selected={mode === 'finder'} onClick={() => onMode('finder')}>Beisl-Finder</button>
+        <button type="button" role="tab" aria-selected={mode === 'tour'} onClick={() => onMode('tour')}>Seidl-Tour</button>
       </div>
       <details className="popover filter-menu">
-        <summary>⚲ Filter{active ? <span className="badge-count">{active}</span> : null} <span className="caret">▾</span></summary>
+        <summary><Icon name="sliders" size={15} /> Filter{active ? <span className="badge-count">{active}</span> : null} <Icon name="chevron-down" size={14} className="caret" /></summary>
         <div className="popover-body filter-body">
           <p className="hint small">Filtert, was ihr auf der Karte und in den Vorschlägen seht. Die Tourplanung nutzt ihre eigenen Einstellungen. · {visible} von {bars.length} Lokalen</p>
           <section>
@@ -100,7 +101,7 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
                 <button key={t} type="button" className="type-toggle" aria-pressed={filter.venueTypes.has(t)}
                   style={{ '--c': TYPE_COLOR[t] } as React.CSSProperties}
                   onClick={() => onFilter({ ...filter, venueTypes: toggled(filter.venueTypes, t) })}>
-                  <span className="dot" /> {TYPE_ICON[t]} {TYPE_SHORT[t]} <span className="count">{counts.types.get(t) ?? 0}</span>
+                  <span className="dot" /> <TypeIcon type={t} /> {TYPE_SHORT[t]} <span className="count">{counts.types.get(t) ?? 0}</span>
                 </button>
               ))}
             </div>
@@ -138,7 +139,7 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
                 <button key={k} type="button" className="chip toggle" aria-pressed={filter.sources.has(k)}
                   disabled={!counts.sources.get(k) && !filter.sources.has(k)}
                   onClick={() => onFilter({ ...filter, sources: toggled(filter.sources, k) })}>
-                  {k === 'offiziell' ? '★ ' : '☆ '}{SOURCE_LABEL[k]} <span className="count">{counts.sources.get(k) ?? 0}</span>
+                  {SOURCE_LABEL[k]} <span className="count">{counts.sources.get(k) ?? 0}</span>
                 </button>
               ))}
             </div>
@@ -181,7 +182,7 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
         </div>
       </details>
       <div className="search">
-        <span className="search-icon" aria-hidden="true">⌕</span>
+        <span className="search-icon"><Icon name="search" size={15} /></span>
         <input type="search" placeholder="Lokal suchen" aria-label="Lokal suchen" value={query}
           onChange={(e) => setQuery(e.target.value)} />
         {hits.length > 0 && (
@@ -189,7 +190,7 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
             {hits.map((b) => (
               <li key={b.id}>
                 <button type="button" onClick={() => { onPick(b.id); setQuery('') }}>
-                  <span aria-hidden="true">{TYPE_ICON[b.venueType]}</span> {b.name} <span className="muted">{b.district}.</span>
+                  <TypeIcon type={b.venueType} /> {b.name} <span className="muted">{b.district}.</span>
                 </button>
               </li>
             ))}

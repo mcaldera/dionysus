@@ -4,7 +4,8 @@
 import { useMemo, useState } from 'react'
 import { preferencesFrom, QUESTIONS, type TasteAnswers } from '../domain/taste'
 import { TAG_LABEL, type Participant } from '../domain/types'
-import { TYPE_ICON, TYPE_SHORT } from '../theme'
+import { TYPE_SHORT } from '../theme'
+import Icon, { TypeIcon, type IconName } from './Icon'
 
 interface Props {
   onDone: (p: Participant) => void
@@ -37,8 +38,8 @@ export default function TasteFinder({ onDone, onClose }: Props) {
     <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Geschmackstest"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
       <div className="modal">
-        <button type="button" className="icon-btn modal-close" aria-label="Schließen" onClick={onClose}>×</button>
-        <h2>✨ Geschmackstest</h2>
+        <button type="button" className="icon-btn modal-close" aria-label="Schließen" onClick={onClose}><Icon name="x" size={18} /></button>
+        <h2>Geschmackstest</h2>
         {!done ? (
           <>
             <p className="hint">Frage {step + 1} von {QUESTIONS.length}</p>
@@ -48,14 +49,14 @@ export default function TasteFinder({ onDone, onClose }: Props) {
               {q.options.map((o, i) => (
                 <button key={o.label} type="button" className="taste-option" aria-pressed={q.multi ? chosen.includes(i) : undefined}
                   onClick={() => (q.multi ? toggle(i) : answer([i]))}>
-                  <span className="taste-icon" aria-hidden="true">{o.icon}</span>
+                  <span className="taste-icon"><Icon name={o.icon as IconName} size={28} /></span>
                   <strong>{o.label}</strong>
                   {o.hint && <span className="muted small">{o.hint}</span>}
                 </button>
               ))}
             </div>
             <div className="vote">
-              <button type="button" className="ghost" disabled={step === 0} onClick={() => setStep((s) => s - 1)}>← Zurück</button>
+              <button type="button" className="ghost" disabled={step === 0} onClick={() => setStep((s) => s - 1)}>Zurück</button>
               {q.multi
                 ? <button type="button" className="primary" onClick={() => answer(chosen)}>Weiter</button>
                 : <button type="button" className="ghost" onClick={() => answer([])}>Egal</button>}
@@ -65,9 +66,9 @@ export default function TasteFinder({ onDone, onClose }: Props) {
           <>
             <p>So plant ihr:</p>
             <ul className="taste-result">
-              {result.likedTypes?.map((t) => <li key={t}>♥ {TYPE_ICON[t]} {TYPE_SHORT[t]}</li>)}
-              {result.likes.map((t) => <li key={t}>♥ {TAG_LABEL[t]}</li>)}
-              {result.avoids.map((t) => <li key={t} className="avoid">✕ {TAG_LABEL[t]}</li>)}
+              {result.likedTypes?.map((t) => <li key={t}><Icon name="heart" size={13} filled /> <TypeIcon type={t} size={13} /> {TYPE_SHORT[t]}</li>)}
+              {result.likes.map((t) => <li key={t}><Icon name="heart" size={13} filled /> {TAG_LABEL[t]}</li>)}
+              {result.avoids.map((t) => <li key={t} className="avoid"><Icon name="x" size={13} /> {TAG_LABEL[t]}</li>)}
               {empty && <li>Euch ist alles recht. Dann zählt vor allem der Weg.</li>}
             </ul>
             <p className="hint">„Lieber nicht“ senkt den Rang, entfernt aber nie ein Lokal. Viele Lokale sind noch nicht getaggt; die zählen neutral.</p>

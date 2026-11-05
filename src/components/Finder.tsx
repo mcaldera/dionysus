@@ -4,6 +4,7 @@ import { clock, openUntil } from '../domain/hours'
 import type { NearbyResult } from '../domain/nearby'
 import type { Bar } from '../domain/types'
 import { TagChips, TipBadge, TypePill } from './BarFacts'
+import Icon, { ModeIcon } from './Icon'
 
 const BUDGETS = [5, 10, 15, 20, 30]
 /** Bars listed (and numbered on the map). */
@@ -22,26 +23,26 @@ interface StartProps {
 export function FinderStart(p: StartProps) {
   return (
     <section className="card welcome" aria-label="Beisl-Finder">
-      <h2>Wo seid ihr? 🍻</h2>
+      <h2>Wo seid ihr?</h2>
       <p>Wir zeigen, was in eurer Nähe gerade offen hat.</p>
       <div className="plan-modes">
         <button type="button" className="plan-mode" disabled={p.locating} onClick={p.onLocate}>
-          <strong>📍 Meinen Standort verwenden</strong>
+          <strong><Icon name="navigation" /> Meinen Standort verwenden</strong>
           <span>{p.locating ? 'Suche den Standort …' : 'Euer Browser fragt um Erlaubnis; der Standort bleibt auf eurem Gerät.'}</span>
         </button>
         <button type="button" className={`plan-mode${p.placing ? ' active' : ''}`} onClick={p.onPlace}>
-          <strong>🎯 Punkt auf der Karte setzen</strong>
+          <strong><Icon name="crosshair" /> Punkt auf der Karte setzen</strong>
           <span>{p.placing ? 'Jetzt auf die Karte klicken …' : 'Zum Beispiel euer Zuhause. Auch mit Rechtsklick auf die Karte.'}</span>
         </button>
         <div className="plan-mode static">
-          <strong>🍺 Von einem Lokal aus</strong>
+          <strong><Icon name="beer" /> Von einem Lokal aus</strong>
           <span>Klickt ein Lokal an: Wir zeigen, was von dort in ein paar Minuten erreichbar ist, egal in welchem Bezirk.</span>
         </div>
       </div>
       {p.locateError && <p className="warn small">{p.locateError}</p>}
       {p.favorites.length > 0 && (
         <>
-          <h4 className="sub">♥ Eure Merkliste</h4>
+          <h4 className="sub">Eure Merkliste</h4>
           <ul className="fav-list">
             {p.favorites.map((b) => (
               <li key={b.id}>
@@ -78,7 +79,7 @@ export function NearbyList(p: NearbyProps) {
     <section className="card" aria-label="In der Nähe">
       <div className="card-head">
         <h3>{p.title}</h3>
-        {p.onClear && <button type="button" className="icon-btn" aria-label="Punkt entfernen" onClick={p.onClear}>×</button>}
+        {p.onClear && <button type="button" className="icon-btn" aria-label="Punkt entfernen" onClick={p.onClear}><Icon name="x" size={18} /></button>}
       </div>
       <div className="finder-controls">
         <div className="segmented" role="group" aria-label="Höchstens Minuten">
@@ -87,13 +88,13 @@ export function NearbyList(p: NearbyProps) {
           ))}
         </div>
         <div className="segmented" role="group" aria-label="Wie hinkommen">
-          <button type="button" aria-pressed={!p.transit} onClick={() => p.onTransit(false)}>🚶 zu Fuß</button>
-          <button type="button" aria-pressed={p.transit} onClick={() => p.onTransit(true)}>🚶+🚋 Öffis</button>
+          <button type="button" aria-pressed={!p.transit} onClick={() => p.onTransit(false)}><Icon name="walk" size={14} /> zu Fuß</button>
+          <button type="button" aria-pressed={p.transit} onClick={() => p.onTransit(true)}><Icon name="tram" size={14} /> + Öffis</button>
         </div>
       </div>
       <div className="finder-summary">
         <span className="hint small">{p.results.length} Lokale in {p.maxMinutes} Min.{p.departure !== null ? ', nicht sicher geschlossen' : ''}</span>
-        {p.results.length > 1 && <button type="button" className="ghost small" onClick={p.onSurprise}>🎲 Überrasch mich</button>}
+        {p.results.length > 1 && <button type="button" className="ghost small" onClick={p.onSurprise}><Icon name="shuffle" size={14} /> Überrasch mich</button>}
       </div>
       {p.results.length === 0 ? (
         <p className="hint">Nichts in dieser Zeit. Mehr Minuten oder Öffis versuchen?</p>
@@ -116,7 +117,7 @@ export function NearbyList(p: NearbyProps) {
                     </span>
                     <span className="chips"><TagChips bar={r.bar} max={4} /></span>
                   </span>
-                  <span className={`leg-pill ${r.mode}`}>{r.mode === 'walk' ? '🚶' : '🚋'} {r.minutes}<small>Min.</small></span>
+                  <span className={`leg-pill ${r.mode}`}><ModeIcon mode={r.mode} size={13} /> {r.minutes}<small>min</small></span>
                 </button>
               </li>
             )

@@ -2,7 +2,8 @@
 
 import type { DistrictStats } from '../domain/districtStats'
 import { TAG_LABEL, type Tag } from '../domain/types'
-import { TYPE_COLOR, TYPE_ICON, TYPE_SHORT } from '../theme'
+import { TYPE_COLOR, TYPE_SHORT } from '../theme'
+import Icon, { TypeIcon } from './Icon'
 
 interface Props {
   name: string
@@ -24,8 +25,8 @@ export default function DistrictCard({ name, stats: s, atLabel, onPick, onClose 
   return (
     <section className="card district-card district-float" aria-label={`Bezirk ${name}`}>
       <div className="card-head">
-        <h3>📍 {name}</h3>
-        <button type="button" className="icon-btn" aria-label="Bezirk schließen" onClick={onClose}>×</button>
+        <h3>{name}</h3>
+        <button type="button" className="icon-btn" aria-label="Bezirk schließen" onClick={onClose}><Icon name="x" size={16} /></button>
       </div>
       <div className="stat-tiles">
         <div><strong>{s.count}</strong><span>Lokale</span></div>
@@ -37,7 +38,7 @@ export default function DistrictCard({ name, stats: s, atLabel, onPick, onClose 
       <ul className="type-bars">
         {s.byType.map((t) => (
           <li key={t.type}>
-            <span className="type-bar-label">{TYPE_ICON[t.type]} {TYPE_SHORT[t.type]}</span>
+            <span className="type-bar-label"><TypeIcon type={t.type} /> {TYPE_SHORT[t.type]}</span>
             <span className="type-bar-track"><span style={{ width: `${(t.count / max) * 100}%`, background: TYPE_COLOR[t.type] }} /></span>
             <span className="type-bar-value">{t.count} <span className="muted">· {pct(t.count / s.count)}</span></span>
           </li>
@@ -47,12 +48,12 @@ export default function DistrictCard({ name, stats: s, atLabel, onPick, onClose 
       <ul className="facts-list">
         {s.medianNearestWalk !== null && (
           <li title="Für jedes Lokal der Fußweg zum nächstgelegenen anderen; der typische Wert">
-            🚶 Bis zum nächsten Lokal meist <strong>{s.medianNearestWalk} Min.</strong>
+            <Icon name="walk" size={13} /> Bis zum nächsten Lokal meist <strong>{s.medianNearestWalk} Min.</strong>
           </li>
         )}
         {s.medianPairWalk !== null && (
           <li title="Fußweg zwischen zwei beliebigen Lokalen des Bezirks; der typische Wert">
-            🚶 Quer durch den Bezirk meist <strong>{s.medianPairWalk} Min.</strong>
+            <Icon name="walk" size={13} /> Quer durch den Bezirk meist <strong>{s.medianPairWalk} Min.</strong>
           </li>
         )}
       </ul>

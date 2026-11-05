@@ -3,20 +3,14 @@
 
 import type { VenueType } from './domain/types'
 
+// Checked with the dataviz palette validator: lightness band, chroma, contrast on light map
+// tiles, and colour-vision-deficiency separation between all types (icons: components/Icon.tsx).
 export const TYPE_COLOR: Record<VenueType, string> = {
-  pub_bar: '#e8890c',
-  tschocherl: '#8b5cf6',
-  beisl_wirtshaus: '#16a34a',
-  heuriger: '#be123c',
-  special: '#2563eb',
-}
-
-export const TYPE_ICON: Record<VenueType, string> = {
-  pub_bar: '🍺',
-  tschocherl: '☕',
-  beisl_wirtshaus: '🍽️',
-  heuriger: '🍷',
-  special: '✨',
+  pub_bar: '#E2711D',
+  tschocherl: '#7B61FF',
+  beisl_wirtshaus: '#1E9E6A',
+  heuriger: '#B5175E',
+  special: '#2F6FEB',
 }
 
 export const TYPE_SHORT: Record<VenueType, string> = {

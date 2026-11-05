@@ -4,7 +4,8 @@ import type { SwapOption } from '../domain/solver'
 import type { SlotView } from '../domain/tour'
 import { googleMapsDirections, legLabel } from '../domain/travel'
 import type { TransitRoute } from '../routes'
-import { TYPE_COLOR, TYPE_ICON } from '../theme'
+import { TYPE_COLOR } from '../theme'
+import Icon, { ModeIcon, TypeIcon } from './Icon'
 import { TypePill } from './BarFacts'
 
 interface Props {
@@ -71,24 +72,24 @@ export default function TourPanel(p: Props) {
       </div>
       <div className="progress" aria-hidden="true"><span style={{ width: `${pct}%` }} /></div>
       {slots.length === 0 ? (
-        <p className="hint">Noch keine Lokale. Wählt eines aus und klickt „Zur Tour hinzufügen“, oder plant oben mit „🗺 Tour planen“.</p>
+        <p className="hint">Noch keine Lokale. Wählt eines aus und klickt „Zur Tour hinzufügen“, oder plant oben mit „Tour planen“.</p>
       ) : (
         <>
           <div className="tour-actions">
             {(filled.length < districtCount || empty > 0) && (
               <button type="button" className="primary small-btn" disabled={!!p.busy} onClick={p.onFinish}
                 title="Behält die Reihenfolge, füllt leere Plätze und plant fehlende Bezirke dazu">
-                ✨ Tour fertig planen
+                <Icon name="sparkles" size={14} /> Tour fertig planen
               </button>
             )}
             <button type="button" className="ghost small" disabled={!!p.busy} onClick={p.onOptimize}
-              title="Fixierte Lokale (📌) bleiben, alle anderen und die Reihenfolge werden neu gewählt. Ein fixiertes erstes Lokal bleibt der Start.">
-              ↻ Optimieren{pinnedCount ? ` (${pinnedCount} 📌)` : ''}
+              title="Fixierte Lokale bleiben, alle anderen und die Reihenfolge werden neu gewählt. Ein fixiertes erstes Lokal bleibt der Start.">
+              <Icon name="rotate" size={14} /> Optimieren{pinnedCount ? ` · ${pinnedCount} fixiert` : ''}
             </button>
             <button type="button" className="ghost small" disabled={!!p.busy} onClick={p.onClearAll}>Alles löschen</button>
           </div>
           {p.busy && <p className="hint"><span className="spinner small-spin" /> {p.busy}</p>}
-          <p className="hint small drag-hint">Zeilen mit ⠿ ziehen, um die Reihenfolge zu ändern.</p>
+          <p className="hint small drag-hint">Zeilen am Griff ziehen, um die Reihenfolge zu ändern.</p>
           <ol className="timeline">
             {slots.map((sl, i) => {
               const s = sl.stop
@@ -118,7 +119,7 @@ export default function TourPanel(p: Props) {
                   {s && s.legIn && !sl.afterGap && (
                     <div className={`leg ${s.legIn.mode}`}>
                       <span>
-                        {s.legIn.mode === 'walk' ? '🚶' : '🚋'}{' '}
+                        <ModeIcon mode={s.legIn.mode} size={13} />{' '}
                         {route?.lines.length ? <><LineBadges route={route} /> · </> : null}
                         {legLabel(s.legIn)}
                         {route?.alternatives.length ? (
@@ -127,40 +128,40 @@ export default function TourPanel(p: Props) {
                           </span>
                         ) : null}
                       </span>
-                      <a href={googleMapsDirections(slots[i - 1].stop!.bar, s.bar, s.legIn)} target="_blank" rel="noreferrer">Route ↗</a>
+                      <a href={googleMapsDirections(slots[i - 1].stop!.bar, s.bar, s.legIn)} target="_blank" rel="noreferrer">Route <Icon name="arrow-up-right" size={12} /></a>
                     </div>
                   )}
                   {i > 0 && s && sl.afterGap && <div className="leg gap"><span>┊ Weg hängt vom offenen Bezirk ab</span></div>}
                   <div className="stop">
-                    <span className="grip" aria-hidden="true" title="Ziehen zum Verschieben">⠿</span>
+                    <span className="grip" title="Ziehen zum Verschieben"><Icon name="grip" size={14} /></span>
                     <span className="time">{s ? `${sl.approx ? '≈' : ''}${clock(s.arrival)}` : '–'}</span>
                     {s ? (
                       <>
                         <span className="stop-dot" style={{ background: TYPE_COLOR[s.bar.venueType] }}>{i + 1}</span>
                         <button type="button" className="link stop-name" onClick={() => p.onSelect(s.bar.id)}>
-                          {s.bar.name} <span className="muted">{TYPE_ICON[s.bar.venueType]} {s.bar.district}.</span>
+                          {s.bar.name} <span className="muted"><TypeIcon type={s.bar.venueType} /> {s.bar.district}.</span>
                         </button>
                         <button type="button" className={`icon-btn pin${isPinned ? ' on' : ''}`} aria-pressed={isPinned}
                           aria-label={`${s.bar.name} fixieren`} title={isPinned ? 'Fixiert: bleibt beim Optimieren' : 'Fixieren: bleibt beim Optimieren'}
-                          onClick={() => p.onTogglePin(s.bar.id)}>📌</button>
+                          onClick={() => p.onTogglePin(s.bar.id)}><Icon name="pushpin" size={15} filled={isPinned} /></button>
                         <button type="button" className={`icon-btn${swapping ? ' on' : ''}`} aria-label={`${s.bar.name} tauschen`}
-                          title="Anderes Lokal in diesem Bezirk" onClick={() => p.onSwap(swapping ? null : i)}>⇄</button>
+                          title="Anderes Lokal in diesem Bezirk" onClick={() => p.onSwap(swapping ? null : i)}><Icon name="arrow-left-right" size={15} /></button>
                         <button type="button" className="icon-btn" aria-label={`${s.bar.name} leeren`}
-                          title="Lokal entfernen, Platz behalten" onClick={() => p.onClear(i)}>⌫</button>
+                          title="Lokal entfernen, Platz behalten" onClick={() => p.onClear(i)}><Icon name="eraser" size={15} /></button>
                       </>
                     ) : (
                       <>
                         <span className="stop-dot hollow">{i + 1}</span>
                         <span className="stop-name empty">{p.districtName(sl.district)} <span className="muted">· offen</span></span>
                         <button type="button" className={`icon-btn${swapping ? ' on' : ''}`} aria-label={`Vorschläge für ${sl.district}. Bezirk`}
-                          title="Passende Lokale für diesen Platz" onClick={() => p.onSwap(swapping ? null : i)}>⇄</button>
+                          title="Passende Lokale für diesen Platz" onClick={() => p.onSwap(swapping ? null : i)}><Icon name="arrow-left-right" size={15} /></button>
                       </>
                     )}
                     <button type="button" className="icon-btn" aria-label={`Platz ${i + 1} löschen`}
-                      title="Platz löschen; die folgenden rücken nach" onClick={() => p.onRemove(i)}>×</button>
+                      title="Platz löschen; die folgenden rücken nach" onClick={() => p.onRemove(i)}><Icon name="x" size={16} /></button>
                   </div>
-                  {s?.closedOnArrival && <div className="warn small stop-note">⚠ Bei Ankunft geschlossen</div>}
-                  {back ? <div className="warn small stop-note">↩ Gleiche Linie hin und zurück ({rides(route).at(-1)!.line})</div> : null}
+                  {s?.closedOnArrival && <div className="warn small stop-note"><Icon name="warn" size={13} /> Bei Ankunft geschlossen</div>}
+                  {back ? <div className="warn small stop-note"><Icon name="undo" size={13} /> Gleiche Linie hin und zurück ({rides(route).at(-1)!.line})</div> : null}
                   {swapping && p.swap && (
                     <div className="swap-list">
                       <p className="hint small">

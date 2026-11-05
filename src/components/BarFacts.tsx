@@ -4,12 +4,13 @@
 import { strongTips, tipLabel } from '../domain/filter'
 import { clock, isOpenAt, openUntil } from '../domain/hours'
 import { TAG_LABEL, type Bar, type Tag } from '../domain/types'
-import { TYPE_COLOR, TYPE_ICON, TYPE_SHORT } from '../theme'
+import { TYPE_COLOR, TYPE_SHORT } from '../theme'
+import Icon, { TypeIcon } from './Icon'
 
 export function TypePill({ bar }: { bar: Bar }) {
   return (
     <span className="type-pill" style={{ '--c': TYPE_COLOR[bar.venueType] } as React.CSSProperties}>
-      <span aria-hidden="true">{TYPE_ICON[bar.venueType]}</span> {TYPE_SHORT[bar.venueType]}
+      <TypeIcon type={bar.venueType} /> {TYPE_SHORT[bar.venueType]}
     </span>
   )
 }
@@ -42,5 +43,5 @@ export function TagChips({ bar, highlight, max }: { bar: Bar; highlight?: Set<Ta
 export function TipBadge({ bar }: { bar: Bar }) {
   const tips = strongTips(bar)
   if (!tips.length) return null
-  return <span className="tip-badge" title={tips.map(tipLabel).join(', ')}>★ Tipp</span>
+  return <span className="tip-badge" title={tips.map(tipLabel).join(', ')}><Icon name="star" size={11} filled /> Tipp</span>
 }

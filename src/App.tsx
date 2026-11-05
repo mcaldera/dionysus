@@ -3,6 +3,7 @@ import { OpenStatus, TagChips, TipBadge, TypePill } from './components/BarFacts'
 import BarPanel from './components/BarPanel'
 import DistrictCard from './components/DistrictCard'
 import FilterMenu, { type AppMode } from './components/FilterMenu'
+import Icon, { ModeIcon } from './components/Icon'
 import { FinderStart, NearbyList } from './components/Finder'
 import Footer from './components/Footer'
 import MapView, { type HoverInfo, type Leg, type MapBar } from './components/MapView'
@@ -474,7 +475,7 @@ export default function App() {
     const coords = tourLegs.flatMap((l) => l.coords)
     if (coords.length < 2) return null
     const [lon, lat] = coords[Math.floor(coords.length / 2)]
-    return { lon, lat, text: `${finderRoute.mode === 'walk' ? '🚶' : '🚋'} ${finderRoute.minutes} Min.` }
+    return { lon, lat, text: `${finderRoute.minutes} min · ${finderRoute.mode === 'walk' ? 'zu Fuß' : 'Öffis'}` }
   }, [finderRoute, tourLegs])
 
   const preview: Leg[] = useMemo(() => {
@@ -734,7 +735,7 @@ export default function App() {
           actions={finder ? (
             <>
               <details className="popover">
-                <summary>🕒 {finderTime === null ? `Jetzt · ${WEEKDAYS[finderDay].slice(0, 2)} ${clock(now)}` : finderLabel}</summary>
+                <summary><Icon name="clock" size={14} /> {finderTime === null ? `Jetzt · ${WEEKDAYS[finderDay].slice(0, 2)} ${clock(now)}` : finderLabel}</summary>
                 <div className="popover-body">
                   <label className="check">
                     <input type="radio" name="finder-time" checked={finderTime === null} onChange={() => setFinderTime(null)} /> Jetzt
@@ -769,7 +770,7 @@ export default function App() {
           ) : (
             <>
               <span className="plan-summary">{planSummary}</span>
-              <button type="button" className="accent-btn" onClick={() => setPlanOpen(true)}>🗺 Tour planen</button>
+              <button type="button" className="accent-btn" onClick={() => setPlanOpen(true)}><Icon name="route" size={15} /> Tour planen</button>
             </>
           )} />
       </header>
@@ -804,9 +805,9 @@ export default function App() {
                   <span className="muted small"> · Klick übernimmt</span>
                 </div>
               ) : hoverPointWalk !== null ? (
-                <div className="hover-leg">🚶 ca. {hoverPointWalk} Min. zu Fuß von {point?.label}</div>
+                <div className="hover-leg"><ModeIcon mode="walk" /> ca. {hoverPointWalk} Min. zu Fuß von {point?.label}</div>
               ) : hoverLeg && (
-                <div className="hover-leg">{hoverLeg.mode === 'walk' ? '🚶' : '🚋'} {legLabel(hoverLeg)} von {hoverFrom?.name}</div>
+                <div className="hover-leg"><ModeIcon mode={hoverLeg.mode} /> {legLabel(hoverLeg)} von {hoverFrom?.name}</div>
               )}
               <div className="chips"><TagChips bar={hovered} max={4} /> <OpenStatus bar={hovered} at={hoverPointWalk !== null ? finderMinute + hoverPointWalk : hoverArrival} /></div>
             </div>
@@ -814,15 +815,15 @@ export default function App() {
           {hd && hoverDistrict && (
             <div className="district-tip" style={{ left: hoverDistrict.x + 14, top: hoverDistrict.y + 14 }}>
               <strong>{hoverDistrict.district}. {hd.name}</strong>
-              <span>{hd.count} Lokale{visited.has(hoverDistrict.district) ? ' · ✓ in der Tour' : ''}
+              <span>{hd.count} Lokale{visited.has(hoverDistrict.district) ? ' · in der Tour' : ''}
                 {!included.has(hoverDistrict.district) ? ' · nicht in der Planung' : ''}</span>
             </div>
           )}
           {focusDistrict !== null && (
             <div className="district-focus" role="status">
               <strong>{districtName(focusDistrict)}</strong>
-              <span>{districtInfo.get(focusDistrict)?.count ?? 0} Lokale{visited.has(focusDistrict) ? ' · ✓ in der Tour' : ''}</span>
-              <button type="button" className="icon-btn" aria-label="Bezirksfokus beenden" onClick={() => setFocusDistrict(null)}>×</button>
+              <span>{districtInfo.get(focusDistrict)?.count ?? 0} Lokale{visited.has(focusDistrict) ? ' · in der Tour' : ''}</span>
+              <button type="button" className="icon-btn" aria-label="Bezirksfokus beenden" onClick={() => setFocusDistrict(null)}><Icon name="x" size={16} /></button>
             </div>
           )}
           {districtCard}
@@ -855,7 +856,8 @@ export default function App() {
                     finder={{
                       favorite: favorites.includes(selected.id), onFavorite: () => toggleFavorite(selected.id),
                       route: finderRoute && point ? {
-                        text: `${finderRoute.mode === 'walk' ? '🚶' : '🚋'} ${finderRoute.mode === 'walk' ? 'ca. ' : ''}${finderRoute.minutes} Min. ${finderRoute.mode === 'walk' ? 'zu Fuß' : 'mit Öffis'} von ${point.label}`,
+                        mode: finderRoute.mode,
+                        text: `${finderRoute.mode === 'walk' ? 'ca. ' : ''}${finderRoute.minutes} Min. ${finderRoute.mode === 'walk' ? 'zu Fuß' : 'mit Öffis'} von ${point.label}`,
                         lines: transit[finderRoute.transitKey]?.lines ?? [],
                         href: googleMapsDirections(point, selected, finderRoute.mode === 'walk'
                           ? { mode: 'walk', minutes: finderRoute.minutes } : { mode: 'transit', minutes: finderRoute.minutes }),
@@ -868,7 +870,7 @@ export default function App() {
                     onHover={setHighlightId} onSurprise={surprise} />
                 </>
               ) : point ? (
-                <NearbyList title={`📍 ${point.label}`} results={nearby} maxMinutes={maxMinutes} transit={finderTransit}
+                <NearbyList title={point.label} results={nearby} maxMinutes={maxMinutes} transit={finderTransit}
                   departure={onlyOpen ? finderMinute : null} highlightId={highlightId}
                   onMaxMinutes={setMaxMinutes} onTransit={setFinderTransit} onPick={(id) => pick(id, true)}
                   onHover={setHighlightId} onSurprise={surprise} onClear={() => setPoint(null)} />

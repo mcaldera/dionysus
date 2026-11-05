@@ -8,7 +8,7 @@ async function pick(page: Page, query: string) {
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByRole('heading', { name: 'Seidl-Tour-Planer' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Wiener Durst' })).toBeVisible()
   await expect(page.getByTestId('map')).toBeVisible({ timeout: 30_000 })
   // New visitors start in the Beisl-Finder; these tests are about the tour planner.
   await page.getByRole('tab', { name: /Seidl-Tour/ }).click()
@@ -41,9 +41,9 @@ test('attribution is visible', async ({ page }) => {
 })
 
 test('taste quiz in the plan dialog sets preferences', async ({ page }) => {
-  await page.locator('.topbar').getByRole('button', { name: '🗺 Tour planen' }).click()
+  await page.locator('.topbar').getByRole('button', { name: 'Tour planen' }).click()
   const plan = page.getByRole('dialog', { name: 'Tour planen' })
-  await plan.getByRole('button', { name: '✨ Geschmackstest' }).click()
+  await plan.getByRole('button', { name: 'Geschmackstest' }).click()
   const dialog = page.getByRole('dialog', { name: 'Geschmackstest' })
   await dialog.getByRole('button', { name: /Altes Beisl/ }).click()
   for (let i = 0; i < 6; i++) await dialog.getByRole('button', { name: 'Egal' }).click()
@@ -57,7 +57,7 @@ test('taste quiz in the plan dialog sets preferences', async ({ page }) => {
 test('a click on empty map closes the bar and the filter menu', async ({ page }) => {
   await pick(page, 'Blunzenstricker')
   await expect(page.getByRole('heading', { name: 'Blunzenstricker', level: 2 })).toBeVisible()
-  await page.getByText('⚲ Filter').click()
+  await page.locator('.filter-menu summary').click()
   const hint = page.getByText(/Filtert, was ihr auf der Karte/)
   await expect(hint).toBeVisible()
   await page.keyboard.press('Escape')
@@ -65,7 +65,7 @@ test('a click on empty map closes the bar and the filter menu', async ({ page })
   // Zoom out until the map's top-left area is outside Vienna, then click there.
   for (let i = 0; i < 4; i++) await page.getByRole('button', { name: 'Zoom out' }).click()
   await page.waitForTimeout(600)
-  await page.getByText('⚲ Filter').click()
+  await page.locator('.filter-menu summary').click()
   await expect(hint).toBeVisible()
   await page.getByTestId('map').click({ position: { x: 40, y: 400 } })
   await expect(hint).toBeHidden()
@@ -73,7 +73,7 @@ test('a click on empty map closes the bar and the filter menu', async ({ page })
 })
 
 test('the map filter narrows what is shown', async ({ page }) => {
-  await page.getByText('⚲ Filter').click()
+  await page.locator('.filter-menu summary').click()
   const count = page.getByText(/· \d+ von \d+ Lokalen/)
   const before = await count.textContent()
   await page.getByRole('button', { name: /Fachpresse/ }).click()
@@ -89,7 +89,7 @@ test('empty template: fill one slot, clear one, then plan the rest', async ({ pa
   await page.getByRole('button', { name: 'In den offenen Platz setzen' }).click()
   await expect(page.locator('.timeline > li')).toHaveCount(23)
   await expect(page.locator('.timeline .empty-slot')).toHaveCount(22)
-  await page.getByRole('button', { name: '✨ Tour fertig planen' }).click()
+  await page.getByRole('button', { name: 'Tour fertig planen' }).click()
   await expect(page.locator('.timeline .empty-slot')).toHaveCount(0, { timeout: 30_000 })
   await expect(page.locator('.timeline .stop-name', { hasText: 'Blunzenstricker' })).toBeVisible()
   // Clearing keeps the place; deleting removes it.
@@ -102,7 +102,7 @@ test('empty template: fill one slot, clear one, then plan the rest', async ({ pa
 test('"Tour fertig planen" covers all included districts', async ({ page }) => {
   await pick(page, 'Blunzenstricker')
   await page.getByRole('button', { name: 'Zur Tour hinzufügen' }).click()
-  await page.getByRole('button', { name: '✨ Tour fertig planen' }).click()
+  await page.getByRole('button', { name: 'Tour fertig planen' }).click()
   await expect(page.locator('.timeline > li')).toHaveCount(23, { timeout: 30_000 })
   await expect(page.getByText(/23 von 23 Bezirken/)).toBeVisible()
   // The prefix stays first.
@@ -150,7 +150,7 @@ test.describe('Beisl-Finder', () => {
     expect(await items.count()).toBeGreaterThan(5)
     // No tour actions here; a Merkliste instead.
     await expect(page.getByRole('button', { name: 'Zur Tour hinzufügen' })).toHaveCount(0)
-    await page.getByRole('button', { name: '♡ Merken' }).click()
+    await page.getByRole('button', { name: 'Merken' }).click()
     await page.keyboard.press('Escape')
     await expect(page.getByRole('heading', { name: /Eure Merkliste/ })).toBeVisible()
   })

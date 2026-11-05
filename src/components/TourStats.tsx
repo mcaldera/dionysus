@@ -4,7 +4,8 @@ import { clock, duration } from '../domain/hours'
 import type { SlotView } from '../domain/tour'
 import { TAG_LABEL, TAGS, VENUE_TYPES, type Tag } from '../domain/types'
 import type { TransitRoute } from '../routes'
-import { TYPE_COLOR, TYPE_ICON, TYPE_SHORT } from '../theme'
+import { TYPE_COLOR, TYPE_SHORT } from '../theme'
+import Icon, { TypeIcon } from './Icon'
 
 // Travel modes in a fixed order; colours checked with the dataviz palette validator
 // (adjacent pairs separable under colour-vision deficiency). Unknown is grey with hatching.
@@ -89,7 +90,7 @@ export default function TourStats({ slots, routes, stopMinutes }: Props) {
           <h4>Lokaltypen</h4>
           <ul className="type-counts">
             {types.map(([t, n]) => (
-              <li key={t}><span className="dot" style={{ background: TYPE_COLOR[t] }} /> {TYPE_ICON[t]} {TYPE_SHORT[t]} <strong>{n}</strong></li>
+              <li key={t}><span className="dot" style={{ background: TYPE_COLOR[t] }} /> <TypeIcon type={t} /> {TYPE_SHORT[t]} <strong>{n}</strong></li>
             ))}
           </ul>
         </>
@@ -103,7 +104,7 @@ export default function TourStats({ slots, routes, stopMinutes }: Props) {
           </div>
         </>
       )}
-      {closed > 0 && <p className="warn small">⚠ {closed} Lokal{closed > 1 ? 'e' : ''} bei Ankunft geschlossen</p>}
+      {closed > 0 && <p className="warn small"><Icon name="warn" size={14} /> {closed} Lokal{closed > 1 ? 'e' : ''} bei Ankunft geschlossen</p>}
       <p className="hint small">Klickt ein Lokal auf der Karte an, um Details und Vorschläge zu sehen.</p>
     </section>
   )

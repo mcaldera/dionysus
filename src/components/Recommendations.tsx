@@ -1,6 +1,7 @@
 import type { Preferences, Recommendation } from '../domain/recommend'
 import type { Tag } from '../domain/types'
 import { OpenStatus, TagChips, TipBadge, TypePill } from './BarFacts'
+import { ModeIcon } from './Icon'
 
 interface Props {
   recs: Recommendation[]
@@ -33,11 +34,11 @@ export default function Recommendations({ recs, preferences, departure, refining
         </div>
       </div>
       <label className="slider">
-        <span>⚡ Schneller</span>
+        <span>Schneller</span>
         <input type="range" min={0} max={1} step={0.05} value={preferences.speedVsMatch}
           aria-label="Schneller oder passender"
           onChange={(e) => onPreferences({ ...preferences, speedVsMatch: Number(e.target.value) })} />
-        <span>Passender 🎯</span>
+        <span>Passender</span>
       </label>
       {recs.length === 0 ? (
         <p className="hint">Keine passenden Lokale. Filter lockern?</p>
@@ -65,7 +66,7 @@ export default function Recommendations({ recs, preferences, departure, refining
                   <span className="chips"><TagChips bar={r.bar} highlight={liked} max={4} /></span>
                 </span>
                 <span className={`leg-pill ${r.leg.mode}`}>
-                  {r.leg.mode === 'walk' ? '🚶' : '🚋'} {r.leg.mode === 'unreachable' ? '–' : r.leg.minutes}<small>Min.</small>
+                  <ModeIcon mode={r.leg.mode} size={13} /> {r.leg.mode === 'unreachable' ? '–' : r.leg.minutes}<small>min</small>
                 </span>
               </button>
             </li>

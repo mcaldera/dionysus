@@ -3,7 +3,8 @@
 
 import { clock, WEEKDAYS } from '../domain/hours'
 import { ALL_DISTRICTS, TAG_LABEL, TAGS, VENUE_TYPES, type Participant, type Tag, type VenueType } from '../domain/types'
-import { TYPE_COLOR, TYPE_ICON, TYPE_SHORT } from '../theme'
+import { TYPE_COLOR, TYPE_SHORT } from '../theme'
+import Icon, { TypeIcon, type IconName } from './Icon'
 
 export interface PlanSettings {
   weekday: number
@@ -20,10 +21,10 @@ export interface PlanSettings {
   noBacktrack: boolean
 }
 
-const WALK_MODES: [number, string, string][] = [
-  [10, '🚶 Lieber zu Fuß', 'Gehen, solange es höchstens 10 Min. länger dauert'],
-  [5, '⚖️ Ausgewogen', 'Gehen, solange es höchstens 5 Min. länger dauert'],
-  [0, '🚋 Am schnellsten', 'Immer das Schnellere'],
+const WALK_MODES: [number, IconName, string, string][] = [
+  [10, 'walk', 'Lieber zu Fuß', 'Gehen, solange es höchstens 10 Min. länger dauert'],
+  [5, 'scale', 'Ausgewogen', 'Gehen, solange es höchstens 5 Min. länger dauert'],
+  [0, 'tram', 'Am schnellsten', 'Immer das Schnellere'],
 ]
 
 interface Props {
@@ -74,8 +75,8 @@ export default function PlanDialog(p: Props) {
     <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Tour planen"
       onClick={(e) => { if (e.target === e.currentTarget) p.onClose() }}>
       <div className="modal plan-modal">
-        <button type="button" className="icon-btn modal-close" aria-label="Schließen" onClick={p.onClose}>×</button>
-        <h2>🗺 Tour planen</h2>
+        <button type="button" className="icon-btn modal-close" aria-label="Schließen" onClick={p.onClose}><Icon name="x" size={18} /></button>
+        <h2>Tour planen</h2>
         <div className="plan-grid">
           <section>
             <h4>Wann</h4>
@@ -102,9 +103,9 @@ export default function PlanDialog(p: Props) {
           <section>
             <h4>Wege</h4>
             <div className="segmented wide" role="group" aria-label="Gehen oder Öffis">
-              {WALK_MODES.map(([tol, label, hint]) => (
+              {WALK_MODES.map(([tol, icon, label, hint]) => (
                 <button key={tol} type="button" title={hint} aria-pressed={plan.walkToleranceMinutes === tol}
-                  onClick={() => onPlan({ ...plan, walkToleranceMinutes: tol })}>{label}</button>
+                  onClick={() => onPlan({ ...plan, walkToleranceMinutes: tol })}><Icon name={icon} size={14} /> {label}</button>
               ))}
             </div>
             <label className="check">
@@ -144,7 +145,7 @@ export default function PlanDialog(p: Props) {
               {VENUE_TYPES.map((t) => (
                 <button key={t} type="button" className="type-toggle light" aria-pressed={plan.venueTypes.has(t)}
                   style={{ '--c': TYPE_COLOR[t] } as React.CSSProperties} onClick={() => toggleType(t)}>
-                  <span className="dot" /> {TYPE_ICON[t]} {TYPE_SHORT[t]}
+                  <span className="dot" /> <TypeIcon type={t} /> {TYPE_SHORT[t]}
                 </button>
               ))}
             </div>
@@ -161,16 +162,16 @@ export default function PlanDialog(p: Props) {
                 const state = group.likes.includes(t) ? 'like' : group.avoids.includes(t) ? 'avoid' : 'none'
                 return (
                   <button key={t} type="button" className={`chip pref-${state}`} onClick={() => cycle(t)}>
-                    {state === 'like' ? '♥ ' : state === 'avoid' ? '✕ ' : ''}{TAG_LABEL[t]}
+                    {state === 'like' ? <Icon name="heart" size={12} filled /> : state === 'avoid' ? <Icon name="x" size={12} /> : null} {TAG_LABEL[t]}
                   </button>
                 )
               })}
             </div>
             {group.likedTypes?.length ? (
-              <p className="hint small">Aus dem Geschmackstest: {group.likedTypes.map((t) => `♥ ${TYPE_SHORT[t]}`).join(', ')}</p>
+              <p className="hint small">Aus dem Geschmackstest: {group.likedTypes.map((t) => TYPE_SHORT[t]).join(', ')}</p>
             ) : null}
             <div className="field-row">
-              <button type="button" className="ghost small" onClick={p.onTaste}>✨ Geschmackstest</button>
+              <button type="button" className="ghost small" onClick={p.onTaste}><Icon name="sparkles" size={14} /> Geschmackstest</button>
               <button type="button" className="ghost small" onClick={() => onGroup({ name: group.name, likes: [], avoids: [] })}>Zurücksetzen</button>
             </div>
           </section>
@@ -178,10 +179,10 @@ export default function PlanDialog(p: Props) {
         <div className="plan-actions">
           {p.tourEmpty ? (
             <>
-              <button type="button" className="primary" disabled={p.busy} onClick={p.onPropose}>✨ Komplette Tour vorschlagen</button>
+              <button type="button" className="primary" disabled={p.busy} onClick={p.onPropose}><Icon name="sparkles" size={15} /> Komplette Tour vorschlagen</button>
               <button type="button" className="ghost" onClick={p.onTemplate}
                 title="Ein leerer Platz pro Bezirk; ihr füllt die Lokale, die ihr kennt, und lasst den Rest planen">
-                📋 Leere Vorlage
+                <Icon name="clipboard" size={15} /> Leere Vorlage
               </button>
               <span className="hint small">oder schließen und Schritt für Schritt Lokale auf der Karte anklicken</span>
             </>

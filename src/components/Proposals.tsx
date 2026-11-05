@@ -4,6 +4,7 @@ import { duration } from '../domain/hours'
 import type { TimelineStop } from '../domain/tour'
 import type { Participant } from '../domain/types'
 import { match } from '../domain/recommend'
+import Icon from './Icon'
 
 export interface ProposalState {
   title: string
@@ -27,7 +28,7 @@ export default function Proposals({ state, participants, districtName, active, o
     <section className="card" aria-label="Tourvorschläge">
       <div className="card-head">
         <h3>{state.title}</h3>
-        <button type="button" className="icon-btn" aria-label="Vorschläge schließen" onClick={onClose}>×</button>
+        <button type="button" className="icon-btn" aria-label="Vorschläge schließen" onClick={onClose}><Icon name="x" size={18} /></button>
       </div>
       {state.running && (
         <>
@@ -56,11 +57,11 @@ export default function Proposals({ state, participants, districtName, active, o
                   </span>
                 </div>
                 <div className="proposal-stats">
-                  <span title="Von der Ankunft im ersten bis zum Aufbruch aus dem letzten Lokal">⏱ {duration(last.departure - first.arrival)}</span>
-                  <span title="Reine Wegzeit">🧭 {duration(travel)} unterwegs</span>
-                  <span>🚶 {walks} · 🚋 {rides}</span>
-                  {liked !== null && <span className="liked-count">♥ {liked} passend</span>}
-                  {closed > 0 && <span className="warn">⚠ {closed} zu</span>}
+                  <span title="Von der Ankunft im ersten bis zum Aufbruch aus dem letzten Lokal"><Icon name="timer" size={13} /> {duration(last.departure - first.arrival)}</span>
+                  <span title="Reine Wegzeit"><Icon name="compass" size={13} /> {duration(travel)} unterwegs</span>
+                  <span><Icon name="walk" size={13} /> {walks} · <Icon name="tram" size={13} /> {rides}</span>
+                  {liked !== null && <span className="liked-count"><Icon name="heart" size={12} filled /> {liked} passend</span>}
+                  {closed > 0 && <span className="warn"><Icon name="warn" size={13} /> {closed} zu</span>}
                 </div>
                 <button type="button" className="primary small-btn" onClick={() => onApply(i)}>Übernehmen</button>
               </div>
@@ -69,7 +70,7 @@ export default function Proposals({ state, participants, districtName, active, o
         })}
       </ol>
       {state.tours.length > 0 && (
-        <p className="hint small">Danach könnt ihr jedes Lokal tauschen (⇄) oder fixieren (📌) und neu optimieren.</p>
+        <p className="hint small">Danach könnt ihr jedes Lokal tauschen oder fixieren und neu optimieren.</p>
       )}
     </section>
   )

@@ -1,5 +1,5 @@
 import * as maplibregl from 'maplibre-gl'
-import type { ExpressionSpecification, GeoJSONSource, MapLayerMouseEvent } from 'maplibre-gl'
+import type { AllPaintProperties, ExpressionSpecification, GeoJSONSource, MapLayerMouseEvent } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 // MapLibre builds its worker URL at runtime, which Vite can't see, so the production build
 // would lack the worker file and the map would never get its data. Bundle the worker
@@ -12,8 +12,34 @@ import { strongTips } from '../domain/filter'
 import type { Bar } from '../domain/types'
 import { TYPE_COLOR } from '../theme'
 
-const STYLE = 'https://tiles.openfreemap.org/styles/liberty'
+// A calm monochrome base map, so the bar colours carry the information.
+const STYLE = 'https://tiles.openfreemap.org/styles/positron'
 const FONT = ['Noto Sans Bold']
+
+// Positron alone is too flat to read streets, parks and water, so lift its layers to muted but
+// distinct tones: warm-grey land, white streets with grey casings, sage green, soft blue water.
+const BASEMAP: Record<string, Partial<Record<keyof AllPaintProperties, string>>> = {
+  background: { 'background-color': '#e2ddd3' },
+  landuse_residential: { 'fill-color': '#dcd7cc' },
+  park: { 'fill-color': '#bcd3a9' },
+  landcover_wood: { 'fill-color': '#aec89b' },
+  water: { 'fill-color': '#93b8cf' },
+  waterway: { 'line-color': '#82abc4' },
+  building: { 'fill-color': '#d1cabd', 'fill-outline-color': '#b8af9f' },
+  highway_path: { 'line-color': '#faf9f6' },
+  highway_minor: { 'line-color': '#ffffff' },
+  highway_major_casing: { 'line-color': '#aaa194' },
+  highway_major_inner: { 'line-color': '#ffffff' },
+  highway_major_subtle: { 'line-color': '#b8b0a3' },
+  highway_motorway_casing: { 'line-color': '#9d9483' },
+  highway_motorway_bridge_casing: { 'line-color': '#9d9483' },
+  tunnel_motorway_casing: { 'line-color': '#b5ad9f' },
+  railway: { 'line-color': '#9a9387' },
+  railway_transit: { 'line-color': '#a9a296' },
+  railway_service: { 'line-color': '#a9a296' },
+  'highway-name-minor': { 'text-color': '#5e5953' },
+  'highway-name-major': { 'text-color': '#4a4641' },
+}
 
 export type Role = 'selected' | 'stop' | 'top' | 'next' | 'other'
 
@@ -111,7 +137,7 @@ function lines(items: { coords: [number, number][]; mode?: string; color?: strin
     type: 'FeatureCollection',
     features: items.filter((i) => i.coords.length > 1).map((i) => ({
       type: 'Feature',
-      properties: { mode: i.mode ?? '', color: i.color ?? '#dc2626', line: i.line ?? '' },
+      properties: { mode: i.mode ?? '', color: i.color ?? '#e5484d', line: i.line ?? '' },
       geometry: { type: 'LineString', coordinates: i.coords },
     })),
   }
@@ -193,11 +219,11 @@ export default function MapView(props: Props) {
     m.setFilter('districts-shadow', ['==', ['get', 'district'], strong ? d : -1])
     m.setFilter('districts-glow', ['==', ['get', 'district'], d ?? -1])
     m.setPaintProperty('districts-glow', 'line-opacity', strong ? 0.95 : 0.6)
-    m.setPaintProperty('districts-line', 'line-color', ['case', is, '#3b2414', '#8a6a48'])
+    m.setPaintProperty('districts-line', 'line-color', ['case', is, '#121110', '#a29c93'])
     m.setPaintProperty('districts-line', 'line-width', ['case', is, strong ? 3 : 2.4, 1.3])
     m.setPaintProperty('districts-fill', 'fill-opacity', ['case',
-      is, ['case', ['==', ['get', 'visited'], 1], 0.3, strong ? 0.04 : 0.08],
-      ['==', ['get', 'visited'], 1], 0.18, 0])
+      is, ['case', ['==', ['get', 'visited'], 1], 0.16, strong ? 0.03 : 0.06],
+      ['==', ['get', 'visited'], 1], 0.07, 0])
     m.setPaintProperty('bars-other', 'circle-opacity', ['case',
       ['==', ['get', 'dim'], 1], 0.28,
       strong ? ['case', is, 0.95, 0.22] : 0.9])
@@ -220,16 +246,20 @@ export default function MapView(props: Props) {
     m.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left')
 
     m.on('load', () => {
+      for (const [layer, paint] of Object.entries(BASEMAP)) {
+        if (!m.getLayer(layer)) continue
+        for (const [prop, value] of Object.entries(paint)) m.setPaintProperty(layer, prop as keyof AllPaintProperties, value)
+      }
       m.addSource('outside', { type: 'geojson', data: empty })
       m.addSource('districts', { type: 'geojson', data: empty, promoteId: 'district' })
       // Outside Vienna: a permanent light wash, so the city stands out; darkens with district focus.
       m.addLayer({
         id: 'outside-wash', type: 'fill', source: 'outside',
-        paint: { 'fill-color': '#ece7e0', 'fill-opacity': 0.72 },
+        paint: { 'fill-color': '#f4f2ed', 'fill-opacity': 0.75 },
       })
       m.addLayer({
         id: 'outside-dim', type: 'fill', source: 'outside',
-        paint: { 'fill-color': '#1c1410', 'fill-opacity': 0, 'fill-opacity-transition': { duration: 300, delay: 0 } },
+        paint: { 'fill-color': '#121110', 'fill-opacity': 0, 'fill-opacity-transition': { duration: 300, delay: 0 } },
       })
       m.addSource('district-labels', { type: 'geojson', data: empty })
       m.addSource('tour', { type: 'geojson', data: empty })
@@ -242,21 +272,21 @@ export default function MapView(props: Props) {
       m.addLayer({
         id: 'districts-fill', type: 'fill', source: 'districts',
         paint: {
-          'fill-color': ['case', ['==', ['get', 'visited'], 1], '#f59e0b', '#7c4a1e'],
+          'fill-color': ['case', ['==', ['get', 'visited'], 1], '#D4FF3A', '#121110'],
           'fill-opacity': ['case',
             ['boolean', ['feature-state', 'hover'], false], ['case', ['==', ['get', 'visited'], 1], 0.3, 0.08],
-            ['==', ['get', 'visited'], 1], 0.18, 0],
+            ['==', ['get', 'visited'], 1], 0.07, 0],
         },
       })
       m.addLayer({
         id: 'districts-dim', type: 'fill', source: 'districts',
-        paint: { 'fill-color': '#1c1410', 'fill-opacity': 0, 'fill-opacity-transition': { duration: 300, delay: 0 } },
+        paint: { 'fill-color': '#121110', 'fill-opacity': 0, 'fill-opacity-transition': { duration: 300, delay: 0 } },
       })
       // Soft drop shadow under the focused district, so it looks lifted off the map.
       m.addLayer({
         id: 'districts-shadow', type: 'line', source: 'districts', filter: ['==', ['get', 'district'], -1],
         layout: { 'line-join': 'round' },
-        paint: { 'line-color': '#1c1410', 'line-width': 18, 'line-blur': 16, 'line-opacity': 0.45, 'line-translate': [0, 7] },
+        paint: { 'line-color': '#121110', 'line-width': 18, 'line-blur': 16, 'line-opacity': 0.45, 'line-translate': [0, 7] },
       })
       m.addLayer({
         id: 'districts-casing', type: 'line', source: 'districts',
@@ -265,14 +295,14 @@ export default function MapView(props: Props) {
       m.addLayer({
         id: 'districts-line', type: 'line', source: 'districts',
         paint: {
-          'line-color': ['case', ['boolean', ['feature-state', 'hover'], false], '#3b2414', '#8a6a48'],
+          'line-color': ['case', ['boolean', ['feature-state', 'hover'], false], '#121110', '#a29c93'],
           'line-width': ['case', ['boolean', ['feature-state', 'hover'], false], 2.6, 1.3],
         },
       })
       m.addLayer({
         id: 'districts-glow', type: 'line', source: 'districts', filter: ['==', ['get', 'district'], -1],
         layout: { 'line-join': 'round' },
-        paint: { 'line-color': '#fbbf24', 'line-width': 8, 'line-blur': 5, 'line-opacity': 0.6 },
+        paint: { 'line-color': '#D4FF3A', 'line-width': 9, 'line-blur': 5, 'line-opacity': 0.6 },
       })
       m.addLayer({
         id: 'district-labels', type: 'symbol', source: 'district-labels',
@@ -283,11 +313,11 @@ export default function MapView(props: Props) {
           'text-font': FONT,
           'text-size': ['interpolate', ['linear'], ['zoom'], 10, 13, 14, 20],
         },
-        paint: { 'text-color': '#6b4a2b', 'text-opacity': 0.55, 'text-halo-color': '#ffffff', 'text-halo-width': 2 },
+        paint: { 'text-color': '#4a4641', 'text-opacity': 0.55, 'text-halo-color': '#ffffff', 'text-halo-width': 2 },
       })
       m.addLayer({
         id: 'rec-lines', type: 'line', source: 'rec-lines',
-        paint: { 'line-color': '#c2410c', 'line-width': 1.5, 'line-dasharray': [1.5, 2], 'line-opacity': 0.7 },
+        paint: { 'line-color': '#121110', 'line-width': 1.2, 'line-dasharray': [1.5, 2], 'line-opacity': 0.45 },
       })
       m.addLayer({
         id: 'tour-casing', type: 'line', source: 'tour', layout: { 'line-cap': 'round', 'line-join': 'round' },
@@ -299,12 +329,12 @@ export default function MapView(props: Props) {
         m.addLayer({
           id: `${source}-walk`, type: 'line', source, filter: ['==', ['get', 'mode'], 'walk'],
           layout: { 'line-cap': 'round', 'line-join': 'round' },
-          paint: { 'line-color': '#3b2414', 'line-width': 4.5, 'line-opacity': opacity },
+          paint: { 'line-color': '#121110', 'line-width': 4, 'line-opacity': opacity },
         })
         m.addLayer({
           id: `${source}-transfer`, type: 'line', source, filter: ['==', ['get', 'mode'], 'transfer'],
           layout: { 'line-cap': 'round', 'line-join': 'round' },
-          paint: { 'line-color': '#3b2414', 'line-width': 3, 'line-dasharray': [0.6, 1.6], 'line-opacity': opacity },
+          paint: { 'line-color': '#121110', 'line-width': 2.5, 'line-dasharray': [0.6, 1.6], 'line-opacity': opacity },
         })
         m.addLayer({
           id: `${source}-ride`, type: 'line', source, filter: ['==', ['get', 'mode'], 'ride'],
@@ -314,12 +344,12 @@ export default function MapView(props: Props) {
         m.addLayer({
           id: `${source}-pending`, type: 'line', source, filter: ['==', ['get', 'mode'], 'pending'],
           layout: { 'line-cap': 'round', 'line-join': 'round' },
-          paint: { 'line-color': '#dc2626', 'line-width': 3, 'line-dasharray': [1, 1.6], 'line-opacity': 0.7 * opacity },
+          paint: { 'line-color': '#e5484d', 'line-width': 2.5, 'line-dasharray': [1, 1.6], 'line-opacity': 0.75 * opacity },
         })
         m.addLayer({
           id: `${source}-gap`, type: 'line', source, filter: ['==', ['get', 'mode'], 'gap'],
           layout: { 'line-cap': 'round' },
-          paint: { 'line-color': '#7a6a5c', 'line-width': 2.5, 'line-dasharray': [1.5, 2], 'line-opacity': opacity },
+          paint: { 'line-color': '#827d76', 'line-width': 2, 'line-dasharray': [1.5, 2], 'line-opacity': opacity },
         })
         m.addLayer({
           id: `${source}-lines`, type: 'symbol', source, filter: ['==', ['get', 'mode'], 'ride'],
@@ -339,12 +369,12 @@ export default function MapView(props: Props) {
 
       m.addLayer({
         id: 'ghosts', type: 'circle', source: 'ghosts',
-        paint: { 'circle-radius': 12, 'circle-color': '#ffffff', 'circle-opacity': 0.85, 'circle-stroke-color': '#7a6a5c', 'circle-stroke-width': 2.5 },
+        paint: { 'circle-radius': 12, 'circle-color': '#ffffff', 'circle-opacity': 0.9, 'circle-stroke-color': '#827d76', 'circle-stroke-width': 1.5 },
       })
       m.addLayer({
         id: 'ghost-labels', type: 'symbol', source: 'ghosts',
         layout: { 'text-field': ['get', 'label'], 'text-font': FONT, 'text-size': 12, 'text-allow-overlap': true },
-        paint: { 'text-color': '#7a6a5c' },
+        paint: { 'text-color': '#827d76' },
       })
       m.addLayer({
         id: 'origin-halo', type: 'circle', source: 'origin',
@@ -378,36 +408,39 @@ export default function MapView(props: Props) {
       m.addLayer({
         id: 'bars-stop', type: 'circle', source: 'bars', filter: ['==', ['get', 'role'], 'stop'],
         paint: {
-          'circle-radius': 12, 'circle-color': hollow('#3b2414'),
-          'circle-stroke-color': ['case', ['==', ['get', 'closed'], 1], '#3b2414', '#fbbf24'],
+          // Tour stops: ink discs with a lime ring.
+          'circle-radius': 12, 'circle-color': hollow('#121110'),
+          'circle-stroke-color': ['case', ['==', ['get', 'closed'], 1], '#121110', '#D4FF3A'],
           'circle-stroke-width': 3,
         },
       })
       m.addLayer({
         id: 'bars-top', type: 'circle', source: 'bars', filter: ['==', ['get', 'role'], 'top'],
         paint: {
-          'circle-radius': 13, 'circle-color': hollow('#c2410c'),
-          'circle-stroke-color': ['case', ['==', ['get', 'closed'], 1], '#c2410c', '#ffffff'],
-          'circle-stroke-width': 3,
+          // Numbered suggestions: white discs, ink outline and numerals.
+          'circle-radius': 12, 'circle-color': '#ffffff',
+          'circle-stroke-color': '#121110',
+          'circle-stroke-width': ['case', ['==', ['get', 'closed'], 1], 1.5, 2],
         },
       })
       m.addLayer({
         id: 'bars-highlight', type: 'circle', source: 'bars', filter: ['==', ['get', 'id'], ''],
-        paint: { 'circle-radius': 20, 'circle-color': 'rgba(194,65,12,0.15)', 'circle-stroke-color': '#c2410c', 'circle-stroke-width': 2.5 },
+        paint: { 'circle-radius': 19, 'circle-color': 'rgba(212,255,58,0.35)', 'circle-stroke-color': '#121110', 'circle-stroke-width': 1.5 },
       })
       m.addLayer({
         id: 'bars-selected-ring', type: 'circle', source: 'bars', filter: ['==', ['get', 'role'], 'selected'],
-        paint: { 'circle-radius': 21, 'circle-color': 'rgba(17,24,39,0.12)', 'circle-stroke-color': '#111827', 'circle-stroke-width': 3 },
+        paint: { 'circle-radius': 20, 'circle-color': 'rgba(212,255,58,0.28)', 'circle-stroke-color': '#121110', 'circle-stroke-width': 1.5 },
       })
       m.addLayer({
         id: 'bars-selected', type: 'circle', source: 'bars', filter: ['==', ['get', 'role'], 'selected'],
-        paint: { 'circle-radius': 11, 'circle-color': '#111827', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 3 },
+        paint: { 'circle-radius': 11, 'circle-color': '#D4FF3A', 'circle-stroke-color': '#121110', 'circle-stroke-width': 2.5 },
       })
       m.addLayer({
         id: 'bars-labels', type: 'symbol', source: 'bars',
         filter: ['all', ['in', ['get', 'role'], ['literal', ['top', 'stop', 'selected']]], ['!=', ['get', 'label'], '']],
         layout: { 'text-field': ['get', 'label'], 'text-font': FONT, 'text-size': 12.5, 'text-allow-overlap': true },
-        paint: { 'text-color': ['case', ['==', ['get', 'closed'], 1], '#111827', '#ffffff'] },
+        // Ink on the white suggestion and lime selection discs, white on the ink tour stops.
+        paint: { 'text-color': ['case', ['all', ['==', ['get', 'role'], 'stop'], ['!=', ['get', 'closed'], 1]], '#ffffff', '#121110'] },
       })
 
       m.on('click', (e) => {
