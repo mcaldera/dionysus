@@ -18,6 +18,8 @@ export interface PlanSettings {
   endDistrict: number | null
   venueTypes: Set<VenueType>
   officialOnly: boolean
+  /** In districts with bars from "Meine Lokale", plan only with those. */
+  mineFirst: boolean
   noBacktrack: boolean
 }
 
@@ -33,6 +35,8 @@ interface Props {
   group: Participant
   onGroup: (p: Participant) => void
   districtName: (d: number) => string
+  /** Districts with at least one bar from "Meine Lokale". */
+  mineDistricts: number
   tourEmpty: boolean
   busy: boolean
   onTaste: () => void
@@ -153,10 +157,15 @@ export default function PlanDialog(p: Props) {
               <input type="checkbox" checked={plan.officialOnly} onChange={(e) => onPlan({ ...plan, officialOnly: e.target.checked })} />
               Nur offizielle Partnerlokale
             </label>
+            <label className="check">
+              <input type="checkbox" checked={plan.mineFirst && p.mineDistricts > 0} disabled={p.mineDistricts === 0}
+                onChange={(e) => onPlan({ ...plan, mineFirst: e.target.checked })} />
+              Meine Lokale zuerst{p.mineDistricts > 0 ? ` (in ${p.mineDistricts} ${p.mineDistricts === 1 ? 'Bezirk' : 'Bezirken'} nur diese)` : ': noch keine gemerkt'}
+            </label>
           </section>
           <section>
             <h4>Vorlieben</h4>
-            <p className="hint small">Klicken: mag → lieber nicht → egal. „Lieber nicht“ senkt den Rang, entfernt aber kein Lokal.</p>
+            <p className="hint small">Klicken wechselt: mag → lieber nicht → egal.</p>
             <div className="chips">
               {TAGS.map((t) => {
                 const state = group.likes.includes(t) ? 'like' : group.avoids.includes(t) ? 'avoid' : 'none'
@@ -184,11 +193,9 @@ export default function PlanDialog(p: Props) {
                 title="Ein leerer Platz pro Bezirk; ihr füllt die Lokale, die ihr kennt, und lasst den Rest planen">
                 <Icon name="clipboard" size={15} /> Leere Vorlage
               </button>
-              <span className="hint small">oder schließen und Schritt für Schritt Lokale auf der Karte anklicken</span>
             </>
           ) : (
             <>
-              <span className="hint small">Änderungen gelten für die nächsten Planungsschritte („Fertig planen“, „Optimieren“).</span>
               <button type="button" className="primary" onClick={p.onClose}>Fertig</button>
             </>
           )}

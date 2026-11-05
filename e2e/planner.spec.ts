@@ -1,6 +1,11 @@
 import { expect, test, type Page } from '@playwright/test'
 
 // Map markers are drawn on a canvas, so bars are picked through the search box.
+async function fromPlanDialog(page: Page, button: RegExp) {
+  await page.locator('.topbar').getByRole('button', { name: 'Tour planen' }).click()
+  await page.getByRole('dialog', { name: 'Tour planen' }).getByRole('button', { name: button }).click()
+}
+
 async function pick(page: Page, query: string) {
   await page.getByRole('searchbox', { name: 'Lokal suchen' }).fill(query)
   await page.locator('.search-hits button').first().click()
@@ -37,7 +42,6 @@ test('adding a bar updates the tour and its district leaves the recommendations'
 
 test('attribution is visible', async ({ page }) => {
   await expect(page.getByText('© OpenStreetMap-Mitwirkende (ODbL)')).toBeVisible()
-  await expect(page.getByText('Kein offizielles Angebot der Ottakringer Brauerei.')).toBeVisible()
 })
 
 test('taste quiz in the plan dialog sets preferences', async ({ page }) => {
@@ -58,7 +62,7 @@ test('a click on empty map closes the bar and the filter menu', async ({ page })
   await pick(page, 'Blunzenstricker')
   await expect(page.getByRole('heading', { name: 'Blunzenstricker', level: 2 })).toBeVisible()
   await page.locator('.filter-menu summary').click()
-  const hint = page.getByText(/Filtert, was ihr auf der Karte/)
+  const hint = page.locator('.filter-menu .popover-body')
   await expect(hint).toBeVisible()
   await page.keyboard.press('Escape')
   await expect(hint).toBeHidden()
@@ -73,16 +77,18 @@ test('a click on empty map closes the bar and the filter menu', async ({ page })
 })
 
 test('the map filter narrows what is shown', async ({ page }) => {
+  await pick(page, 'Blunzenstricker')
   await page.locator('.filter-menu summary').click()
-  const count = page.getByText(/· \d+ von \d+ Lokalen/)
-  const before = await count.textContent()
   await page.getByRole('button', { name: /Fachpresse/ }).click()
-  await expect(count).not.toHaveText(before ?? '')
-  await expect(page.locator('.badge-count')).toHaveText('1')
+  await expect(page.locator('.filter-menu .badge-count')).toHaveText('1')
+  // Recommendations come only from bars the press recommends.
+  const recs = page.locator('.recs li')
+  await expect(recs.first()).toBeVisible()
+  for (const li of await recs.all()) await expect(li.locator('.tip-badge')).toHaveCount(1)
 })
 
 test('empty template: fill one slot, clear one, then plan the rest', async ({ page }) => {
-  await page.getByRole('button', { name: /Leere Vorlage/ }).click()
+  await fromPlanDialog(page, /Leere Vorlage/)
   await expect(page.locator('.timeline > li')).toHaveCount(23)
   await expect(page.locator('.timeline .empty-slot')).toHaveCount(23)
   await pick(page, 'Blunzenstricker')
@@ -110,7 +116,7 @@ test('"Tour fertig planen" covers all included districts', async ({ page }) => {
 })
 
 test('proposals can be applied and a stop swapped', async ({ page }) => {
-  await page.getByRole('button', { name: /Komplette Tour vorschlagen/ }).click()
+  await fromPlanDialog(page, /Komplette Tour vorschlagen/)
   await expect(page.locator('.proposal')).toHaveCount(3, { timeout: 60_000 })
   await page.locator('.proposal').first().getByRole('button', { name: 'Übernehmen' }).click()
   await expect(page.locator('.timeline > li')).toHaveCount(23)
@@ -125,7 +131,7 @@ test('proposals can be applied and a stop swapped', async ({ page }) => {
 })
 
 test('stops can be reordered by drag and drop', async ({ page }) => {
-  await page.getByRole('button', { name: /Komplette Tour vorschlagen/ }).click()
+  await fromPlanDialog(page, /Komplette Tour vorschlagen/)
   await expect(page.locator('.proposal')).toHaveCount(3, { timeout: 60_000 })
   await page.locator('.proposal').first().getByRole('button', { name: 'Übernehmen' }).click()
   const names = page.locator('.timeline .stop-name')
@@ -140,7 +146,7 @@ test.describe('Beisl-Finder', () => {
   })
 
   test('a bar shows what is reachable from it, in any district', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /Wo seid ihr/ })).toBeVisible()
+    await expect(page.locator('.panel .card')).toHaveCount(0)
     await pick(page, 'Café Bendl')
     await expect(page.getByRole('heading', { name: 'Von Café Bendl aus' })).toBeVisible()
     const items = page.locator('[aria-label="In der Nähe"] .recs li')
@@ -148,23 +154,58 @@ test.describe('Beisl-Finder', () => {
     await page.getByRole('button', { name: '30′' }).click()
     await page.getByRole('button', { name: /Öffis/ }).click()
     expect(await items.count()).toBeGreaterThan(5)
-    // No tour actions here; a Merkliste instead.
+    // No tour actions here.
     await expect(page.getByRole('button', { name: 'Zur Tour hinzufügen' })).toHaveCount(0)
-    await page.getByRole('button', { name: 'Merken' }).click()
+    // Another bar from the list: its details and the way there, while the list stays at Café Bendl.
+    await items.first().locator('button').click()
+    await expect(page.locator('.finder-route')).toContainText('von Café Bendl')
+    await expect(page.getByRole('heading', { name: 'Von Café Bendl aus' })).toBeVisible()
     await page.keyboard.press('Escape')
-    await expect(page.getByRole('heading', { name: /Eure Merkliste/ })).toBeVisible()
+    await expect(page.locator('.bar-card')).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: 'Von Café Bendl aus' })).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.panel .card')).toHaveCount(0)
+  })
+
+  test('"Meine Lokale" keeps hearted bars and filters the map to them', async ({ page }) => {
+    await pick(page, 'Café Bendl')
+    await page.getByRole('button', { name: 'Merken' }).click()
+    await expect(page.getByRole('button', { name: 'Gemerkt' })).toBeVisible()
+    await page.locator('.my-bars summary').click()
+    await expect(page.locator('.my-bars .fav-list li')).toHaveCount(1)
+    await page.getByLabel('Nur meine Lokale auf der Karte').check()
+    // Only the one bar is left to reach from anywhere.
+    await expect(page.locator('[aria-label="In der Nähe"]')).toContainText('Nichts in dieser Zeit')
+    await page.reload()
+    await expect(page.locator('.my-bars .badge-count')).toHaveText('1')
+  })
+
+  test('a shared link offers its list', async ({ page }) => {
+    await page.goto('/#meine=n46823888')
+    await page.getByRole('button', { name: 'Zu meinen Lokalen' }).click()
+    await expect(page.locator('.my-bars .badge-count')).toHaveText('1')
+    expect(page.url()).not.toContain('meine=')
   })
 
   test('a right-click sets a point to search from', async ({ page }) => {
     await expect(page.getByTestId('map')).toHaveAttribute('data-ready', '1', { timeout: 30_000 })
     await page.getByTestId('map').click({ button: 'right', position: { x: 500, y: 420 } })
     await expect(page.getByRole('heading', { name: /Gewählter Punkt/ })).toBeVisible()
-    // Picking a bar from the list shows the way there from the point.
+    // Picking a bar from the list shows the way there from the point; the list stays at the point.
     await page.locator('[aria-label="In der Nähe"] .rec').first().click()
     await expect(page.locator('.finder-route')).toContainText('von Gewählter Punkt')
     await expect(page.locator('.finder-route a')).toHaveAttribute('href', /google\.com\/maps\/dir/)
+    await expect(page.getByRole('heading', { name: /Gewählter Punkt/ })).toBeVisible()
+    // A click on empty map steps back to the point's list; a second one clears the point.
+    await page.getByTestId('map').click({ position: { x: 40, y: 400 } })
+    await expect(page.locator('.bar-card')).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: /Gewählter Punkt/ })).toBeVisible()
+    await page.getByTestId('map').click({ position: { x: 40, y: 400 } })
+    await expect(page.locator('.panel .card')).toHaveCount(0)
+    // Escape clears a point as well.
+    await page.getByTestId('map').click({ button: 'right', position: { x: 500, y: 420 } })
+    await expect(page.getByRole('heading', { name: /Gewählter Punkt/ })).toBeVisible()
     await page.keyboard.press('Escape')
-    await page.getByRole('button', { name: 'Punkt entfernen' }).click()
-    await expect(page.getByRole('heading', { name: /Wo seid ihr/ })).toBeVisible()
+    await expect(page.locator('.panel .card')).toHaveCount(0)
   })
 })

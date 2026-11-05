@@ -10,7 +10,6 @@ export default function Footer() {
       <span>Fußwege: FOSSGIS OSRM</span>
       <span>Öffi-Strecken: <a href="https://transitous.org/sources/" target="_blank" rel="noreferrer">Transitous</a></span>
       <span>Tags sind subjektive Einschätzungen.</span>
-      <span>Kein offizielles Angebot der Ottakringer Brauerei.</span>
     </footer>
   )
 }

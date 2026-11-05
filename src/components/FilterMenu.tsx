@@ -1,7 +1,7 @@
 // Header: brand, map filter (what you see), search, and the button that opens tour planning.
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { activeFilters, barSources, includeWeak, matchesFilter, SOURCE_KINDS, SOURCE_LABEL, TIP_KIND_LABEL, TIP_KINDS, tipKinds, type MapFilter, type SourceKind, type TipKind } from '../domain/filter'
+import { activeFilters, barSources, includeWeak, SOURCE_KINDS, SOURCE_LABEL, TIP_KIND_LABEL, TIP_KINDS, tipKinds, type MapFilter, type SourceKind, type TipKind } from '../domain/filter'
 import { clock, DAY, WEEKDAYS } from '../domain/hours'
 import { TAG_LABEL, TAGS, VENUE_TYPES, type Bar, type Tag, type VenueType } from '../domain/types'
 import { TYPE_COLOR, TYPE_SHORT } from '../theme'
@@ -70,7 +70,6 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
     }
     return { types, tags, sources, kinds }
   }, [bars, weak])
-  const visible = useMemo(() => bars.filter((b) => matchesFilter(b, filter)).length, [bars, filter])
   const hits = useMemo(() => {
     const q = norm(query.trim())
     if (q.length < 2) return []
@@ -93,7 +92,6 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
       <details className="popover filter-menu">
         <summary><Icon name="sliders" size={15} /> Filter{active ? <span className="badge-count">{active}</span> : null} <Icon name="chevron-down" size={14} className="caret" /></summary>
         <div className="popover-body filter-body">
-          <p className="hint small">Filtert, was ihr auf der Karte und in den Vorschlägen seht. Die Tourplanung nutzt ihre eigenen Einstellungen. · {visible} von {bars.length} Lokalen</p>
           <section>
             <h4>Lokaltypen</h4>
             <div className="chips">
@@ -117,7 +115,6 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
                 </button>
               ))}
             </div>
-            <p className="hint small">Viele Lokale sind noch nicht getaggt; „Essen“ und „Gastgarten“ sind am vollständigsten.</p>
           </section>
           <section>
             <h4>Empfohlen als</h4>
@@ -130,7 +127,6 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
                 </button>
               ))}
             </div>
-            <p className="hint small">Wofür Fachpresse, Stadtmagazine und Reddit-Threads ein Lokal empfehlen. „Rau & kultig“ ist meist liebevoll gemeint.</p>
           </section>
           <section>
             <h4>Empfohlen von</h4>
@@ -172,7 +168,7 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
             <label className="check">
               <input type="checkbox" checked={filter.includeUnknownHours} disabled={filter.openAt === null}
                 onChange={(e) => onFilter({ ...filter, includeUnknownHours: e.target.checked })} />
-              Auch Lokale ohne bekannte Öffnungszeiten (etwa ein Drittel)
+              Auch Lokale ohne bekannte Öffnungszeiten
             </label>
           </section>}
           <button type="button" className="ghost small" disabled={!active}

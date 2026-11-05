@@ -2,18 +2,18 @@
 // by name only, so it stays free of React.
 
 import {
-  ArrowLeftRight, ArrowUpRight, Ban, Beer, Check, ChevronDown, Clock3, ClipboardList, Coffee, Coins, Compass, Crosshair,
-  Dices, Eraser, Footprints, Gem, Guitar, Heart, Hourglass, Map as MapIcon, MapPin, Martini, MessageCircle, Moon,
+  ArrowLeftRight, ArrowUpRight, Ban, Beer, ChartColumn, Check, ChevronDown, Clock3, ClipboardList, Coffee, Coins, Compass, Crosshair,
+  Dices, Eraser, Footprints, Gem, Guitar, Heart, Hourglass, Link, LocateFixed, Map as MapIcon, MapPin, Martini, MessageCircle, Moon,
   Navigation, Pin, RotateCw, Route, Scale, Search, Shuffle, SlidersHorizontal, Sofa, Sparkles, Star, Sun, Target, Timer,
   TramFront, Trees, TriangleAlert, Undo2, Utensils, UtensilsCrossed, Wine, X, Zap, GripVertical, type LucideIcon,
 } from 'lucide-react'
 import type { VenueType } from '../domain/types'
 
 const ICONS = {
-  'arrow-left-right': ArrowLeftRight, 'arrow-up-right': ArrowUpRight, ban: Ban, beer: Beer, check: Check,
+  'arrow-left-right': ArrowLeftRight, 'arrow-up-right': ArrowUpRight, ban: Ban, beer: Beer, chart: ChartColumn, check: Check,
   'chevron-down': ChevronDown, clock: Clock3, clipboard: ClipboardList, coffee: Coffee, coins: Coins, compass: Compass,
   crosshair: Crosshair, dices: Dices, eraser: Eraser, walk: Footprints, gem: Gem, guitar: Guitar, heart: Heart,
-  hourglass: Hourglass, map: MapIcon, pin: MapPin, martini: Martini, talk: MessageCircle, moon: Moon, navigation: Navigation,
+  hourglass: Hourglass, link: Link, locate: LocateFixed, map: MapIcon, pin: MapPin, martini: Martini, talk: MessageCircle, moon: Moon, navigation: Navigation,
   pushpin: Pin, rotate: RotateCw, route: Route, scale: Scale, search: Search, shuffle: Shuffle, sliders: SlidersHorizontal,
   sofa: Sofa, sparkles: Sparkles, star: Star, sun: Sun, target: Target, timer: Timer, tram: TramFront, trees: Trees,
   warn: TriangleAlert, undo: Undo2, utensils: Utensils, dish: UtensilsCrossed, wine: Wine, x: X, zap: Zap, grip: GripVertical,

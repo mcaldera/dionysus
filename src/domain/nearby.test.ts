@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { areaKm2 } from './districtStats'
-import { nearbyFromBar, nearbyFromPoint, walkEstimate } from './nearby'
+import { nearbyFromBar, nearbyFromPoint, reachFromBar, walkEstimate } from './nearby'
 import type { Matrices } from './travel'
 import type { Bar } from './types'
 
@@ -23,6 +23,11 @@ const opts = { maxMinutes: 10, transit: false, walkToleranceMinutes: 0, departur
 describe('nearby', () => {
   it('walking only keeps the budget, any district', () => {
     expect(nearbyFromBar(bars[0], bars, m, opts).map((r) => r.bar.id)).toEqual(['own:n1'])
+  })
+
+  it('the way to one bar matches the list', () => {
+    expect(reachFromBar(bars[0], bars[2], m, { transit: false, walkToleranceMinutes: 0 })).toEqual({ minutes: 16, mode: 'walk' })
+    expect(reachFromBar(bars[0], bars[2], m, { transit: true, walkToleranceMinutes: 0 })).toEqual({ minutes: 8, mode: 'transit' })
   })
 
   it('with transit reaches further', () => {

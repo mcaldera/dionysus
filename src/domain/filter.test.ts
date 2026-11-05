@@ -31,4 +31,11 @@ describe('recommendation kinds', () => {
     expect(matchesFilter(b, { ...filter, tipKinds: new Set(['urig']) })).toBe(true)
     expect(tipLabel(b.tips![0])).toBe('r/wien · urig & klassisch')
   })
+
+  it('"Meine Lokale" keeps only the listed bars', () => {
+    const b = bar([])
+    expect(matchesFilter(b, { ...filter, mine: new Set(['own:y']) })).toBe(false)
+    expect(matchesFilter(b, { ...filter, mine: new Set(['own:x']) })).toBe(true)
+    expect(matchesFilter(b, { ...filter, mine: null })).toBe(true)
+  })
 })

@@ -105,7 +105,6 @@ export default function TourStats({ slots, routes, stopMinutes }: Props) {
         </>
       )}
       {closed > 0 && <p className="warn small"><Icon name="warn" size={14} /> {closed} Lokal{closed > 1 ? 'e' : ''} bei Ankunft geschlossen</p>}
-      <p className="hint small">Klickt ein Lokal auf der Karte an, um Details und Vorschläge zu sehen.</p>
     </section>
   )
 }

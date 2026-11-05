@@ -20,3 +20,10 @@ export const TYPE_SHORT: Record<VenueType, string> = {
   heuriger: 'Heuriger',
   special: 'Besonders',
 }
+
+// The selected bar on the map: a pale beer-foam yellow, apart from every type colour, outlined in ink.
+export const SELECT_COLOR = '#FFE08F'
+export const SELECT_HALO = 'rgba(255, 214, 112, 0.42)'
+
+/** The heart on bars in "Meine Lokale". */
+export const MINE_COLOR = '#E5546E'
