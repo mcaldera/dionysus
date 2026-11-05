@@ -21,7 +21,7 @@ Clicking a bar shows its details and highlights recommended next bars on the map
 ### Out of scope for the first version
 
 - Live transit data, delays or disruptions
-- Mobile layout (must not crash on a phone, but needn't be good)
+- ~~Mobile layout~~ *Added by the owner on 2026-11-05: up to 900 px wide, a full-screen map with a bottom sheet (`Panel.tsx`, `PHONE` in `useMedia.ts`).*
 - Accounts, a backend or a database
 - Bike, taxi or car routing
 - Paid placement of any kind
@@ -525,7 +525,7 @@ The site is public, so before deployment:
 - **Credits in the footer:** "© OpenStreetMap-Mitwirkende (ODbL)", "OpenFreeMap © OpenMapTiles", "Fahrplandaten: Wiener Linien (CC BY)", plus any S-Bahn and boundary sources used, and a link to transitous.org/sources for drawn transit routes.
 - **Bar data:** `bars.json` contains OSM data and is public, so offer it under ODbL. Keep OSM and own data separate in the repository (each tag's `source`, `tags.csv`). The [OSM Foundation guideline](https://osmfoundation.org/wiki/Community_Guidelines/Collective_Database_Guideline_Guideline) treats own data as independent only if a property is entirely from OSM or entirely from elsewhere, and merging a private bar list into OSM data may bring it under share-alike. This matters mainly for any future commercial version.
 - **Tags as opinion:** show "Tags sind subjektive Einschätzungen." plus a way to request a correction or removal, and act on requests.
-- **Not official:** show "Kein offizielles Angebot der Ottakringer Brauerei." Don't use its logo or branding. Write own descriptions rather than copying the booklet.
+- **Not official:** don't use the Ottakringer logo or branding. *The footer line "Kein offizielles Angebot der Ottakringer Brauerei." was removed by the owner on 2026-11-05.* Write own descriptions rather than copying the booklet.
 - **Legal notice:** the owner must check whether Austrian law (§ 25 MedienG) requires a notice with name and place of residence for a private site. The source checked doesn't settle this. **Ask the owner before publishing personal details.**
 - **Privacy:** no analytics or cookies in the first version. Check whether the host or font loading requires a privacy note.
 

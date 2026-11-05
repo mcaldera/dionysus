@@ -71,7 +71,6 @@ export default function TasteFinder({ onDone, onClose }: Props) {
               {result.avoids.map((t) => <li key={t} className="avoid"><Icon name="x" size={13} /> {TAG_LABEL[t]}</li>)}
               {empty && <li>Euch ist alles recht. Dann zählt vor allem der Weg.</li>}
             </ul>
-            <p className="hint">„Lieber nicht“ senkt den Rang, entfernt aber nie ein Lokal. Viele Lokale sind noch nicht getaggt; die zählen neutral.</p>
             <div className="vote">
               <button type="button" className="ghost" onClick={() => { setAnswers({}); setStep(0) }}>Nochmal</button>
               <button type="button" className="primary" onClick={() => onDone(result)}>Übernehmen</button>

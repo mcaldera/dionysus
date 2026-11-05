@@ -69,9 +69,6 @@ export default function Proposals({ state, participants, districtName, active, o
           )
         })}
       </ol>
-      {state.tours.length > 0 && (
-        <p className="hint small">Danach könnt ihr jedes Lokal tauschen oder fixieren und neu optimieren.</p>
-      )}
     </section>
   )
 }

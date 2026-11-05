@@ -1,0 +1,10 @@
+// Cloudflare Workers deployment: a static site, served from the Vite build output.
+{
+  "name": "wiener-durst",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist"
+  },
+  // Branch builds run `wrangler preview`, which needs this block; it may stay empty.
+  "previews": {}
+}

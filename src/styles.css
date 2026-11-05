@@ -18,6 +18,8 @@
   --ok-bg: #e5f3ea;
   --warn: #c2342f;
   --warn-bg: #fbe9e8;
+  --mine: #e5546e;
+  --mine-soft: #fde8ec;
   --radius-lg: 18px;
   --radius: 12px;
   --shadow: 0 1px 2px rgba(18, 17, 16, 0.05), 0 16px 40px -18px rgba(18, 17, 16, 0.28);
@@ -59,7 +61,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pop { from { opacity: 0; transform: translateY(4px); } }
 
-.app { display: grid; grid-template-rows: auto 1fr auto; height: 100vh; }
+.app { display: grid; grid-template-rows: auto 1fr auto; height: 100vh; height: 100dvh; }
 
 /* ---------- Header ---------- */
 .topbar {
@@ -179,7 +181,10 @@ label.check input { accent-color: var(--ink); width: 15px; height: 15px; }
   position: absolute; top: 12px; right: 12px; bottom: 12px; width: 410px; overflow-y: auto; display: flex;
   flex-direction: column; gap: 10px; padding-right: 2px; scrollbar-width: thin; z-index: 2;
 }
-.panel > * { flex: none; }
+.panel > * { flex: none; pointer-events: auto; }
+/* The empty part of the column belongs to the map. */
+.panel { pointer-events: none; }
+.panel.with-fabs { bottom: 128px; }
 .card {
   background: var(--surface); backdrop-filter: blur(18px) saturate(1.3); border-radius: var(--radius-lg);
   box-shadow: var(--shadow); padding: 1.05rem 1.15rem; border: 1px solid var(--line);
@@ -290,6 +295,10 @@ button.chip { cursor: pointer; }
   display: grid; place-items: center; flex: none; width: 24px; height: 24px; border-radius: 50%;
   background: var(--solid); color: var(--ink); border: 1.5px solid var(--ink); font-family: var(--mono); font-weight: 600; font-size: 11.5px;
 }
+.rec-type {
+  display: grid; place-items: center; flex: none; width: 26px; height: 26px; border-radius: 50%; margin-top: -1px;
+  background: color-mix(in srgb, var(--c) 14%, #fff); color: var(--c);
+}
 .rec-main { display: flex; flex-direction: column; gap: 0.25rem; flex: 1; min-width: 0; }
 .rec-title { display: flex; align-items: center; gap: 0.4rem; }
 .rec-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -313,12 +322,26 @@ button.chip { cursor: pointer; }
 .fav-list { list-style: none; margin: 0.3rem 0 0; padding: 0; display: grid; gap: 0.25rem; }
 .fav-list .link { font-weight: 600; text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
 
+/* Meine Lokale */
+.my-bars summary .heart, .import-banner .heart { color: var(--mine); }
+.my-bars .badge-count { background: var(--mine); color: #fff; }
+.my-bars .fav-list { max-height: 18rem; overflow-y: auto; }
+.my-bars .fav-list li { display: flex; align-items: center; gap: 0.45rem; }
+.my-bars .fav-list .link { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.my-bars .fav-list .icon-btn { width: 24px; height: 24px; }
+.mine-btn.on { background: var(--mine-soft); border-color: transparent; }
+.mine-btn.on .icon, .mine-btn:hover .icon { color: var(--mine); }
+.import-banner {
+  position: absolute; top: 12px; left: 50%; transform: translateX(calc(-50% - 217px)); z-index: 4; display: flex; align-items: center;
+  gap: 0.6rem; padding: 0.35rem 0.4rem 0.35rem 0.95rem; border-radius: 999px; background: var(--solid); border: 1px solid var(--line);
+  box-shadow: var(--shadow); white-space: nowrap; font-size: 13px; animation: pop 0.2s ease-out;
+}
+
 /* ---------- Tour ---------- */
 .totals { font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
 .progress { height: 3px; border-radius: 999px; background: var(--line); overflow: hidden; margin-bottom: 0.8rem; }
 .progress span { display: block; height: 100%; background: var(--ink); border-radius: 999px; transition: width 0.3s; }
 .tour-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem; }
-.drag-hint { margin: -0.2rem 0 0.4rem; font-size: 12px; }
 .timeline { list-style: none; margin: 0; padding: 0; }
 .timeline li { border-radius: 12px; }
 .timeline .stop { display: flex; align-items: center; gap: 0.45rem; padding: 0.25rem 0.2rem; border-radius: 10px; }
@@ -426,7 +449,7 @@ button.chip { cursor: pointer; }
   border-radius: 12px; font-size: 11.5px; color: var(--ink-2);
 }
 .map-legend > div { display: flex; flex-wrap: wrap; gap: 0.3rem 0.85rem; }
-.map-legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+.map-legend span { display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap; }
 .type-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
 .lg { display: inline-block; width: 20px; height: 0; border-top: 3px solid var(--ink); border-radius: 2px; }
 .lg.ride { border-top-color: #e3000f; }
@@ -435,6 +458,38 @@ button.chip { cursor: pointer; }
 .reach-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #e2711d; }
 .reach-dot.in { box-shadow: 0 0 0 2px #fff, 0 0 0 3px var(--line-strong); }
 .reach-dot.out { opacity: 0.28; }
+/* Finder: round map buttons (set a point, use my location) and a short note while placing. */
+.map-fabs { position: absolute; z-index: 3; display: grid; gap: 10px; transition: bottom 0.28s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.fab {
+  display: grid; place-items: center; width: 46px; height: 46px; padding: 0; border-radius: 50%; cursor: pointer;
+  background: var(--solid); color: var(--ink-2); border: 1px solid var(--line);
+  box-shadow: 0 1px 2px rgba(18, 17, 16, 0.08), 0 6px 18px -6px rgba(18, 17, 16, 0.3); transition: color 0.15s, border-color 0.15s;
+}
+.fab:hover { color: var(--ink); border-color: var(--line-strong); }
+.fab:disabled { cursor: progress; }
+/* Blue like the point on the map. */
+.fab.on { color: #2563eb; border-color: rgba(37, 99, 235, 0.4); }
+.map-toast {
+  position: absolute; top: 12px; left: 50%; transform: translateX(calc(-50% - 217px)); z-index: 4; display: flex; align-items: center;
+  gap: 0.5rem; padding: 0.35rem 0.4rem 0.35rem 0.95rem; border-radius: 999px; background: var(--ink); color: var(--paper);
+  box-shadow: var(--shadow); font-size: 13px; animation: pop 0.2s ease-out;
+}
+.map-toast .icon-btn { width: 26px; height: 26px; color: var(--paper); }
+.map-toast .icon-btn:hover { background: rgba(255, 255, 255, 0.14); }
+.map-toast.warn { background: var(--warn-bg); color: var(--warn); border: 1px solid rgba(194, 52, 47, 0.2); }
+.map-toast.warn .icon-btn { color: var(--warn); }
+.finder-start p { line-height: 1.8; }
+.inline-chip {
+  display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.02rem 0.55rem; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line-strong); background: var(--solid); font-size: 13px; font-weight: 550; line-height: 1.5;
+}
+.inline-chip:hover { border-color: var(--ink); }
+.inline-chip .icon { color: #2563eb; }
+.stats-btn {
+  display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.25rem 0.7rem; border: 0; border-radius: 999px; cursor: pointer;
+  background: rgba(255, 255, 255, 0.14); color: var(--paper); font-size: 12.5px; font-weight: 550;
+}
+.stats-btn[aria-pressed='true'] { background: var(--paper); color: var(--ink); }
 .route-pill {
   padding: 0.22rem 0.65rem; border-radius: 999px; background: var(--ink); color: var(--paper); font-family: var(--mono);
   font-weight: 500; font-size: 12px; box-shadow: 0 4px 14px rgba(18, 17, 16, 0.3); white-space: nowrap; pointer-events: none;
@@ -442,6 +497,8 @@ button.chip { cursor: pointer; }
 }
 .maplibregl-ctrl-group { border-radius: 12px !important; box-shadow: var(--shadow-sm) !important; border: 1px solid var(--line) !important; }
 .maplibregl-ctrl-attrib { font-size: 10.5px; }
+/* Desktop credits are in the footer. */
+@media (min-width: 901px) { .maplibregl-ctrl-bottom-left .maplibregl-ctrl-attrib { display: none; } }
 
 /* ---------- Modals: plan dialog, taste quiz ---------- */
 .modal-backdrop {
@@ -508,15 +565,73 @@ button.chip { cursor: pointer; }
 }
 .footer a { color: var(--muted); }
 
-/* Must not crash on a phone; needn't be good (SPEC 1). */
+/* ---------- Phones and small tablets (PHONE in useMedia.ts) ----------
+   The map fills the screen; the panel becomes a bottom sheet (Panel.tsx); the header packs into two rows:
+   brand, modes and Meine Lokale, then filter, search and the mode's own control. */
 @media (max-width: 900px) {
-  .app { height: auto; }
-  .planner { display: grid; grid-template-rows: 60vh auto; }
-  .map-wrap { position: relative; }
-  .panel { position: static; width: auto; padding: 12px; }
-  .top-actions { margin-left: 0; }
-  .search input, .search input:focus { width: 100%; }
-  .district-focus { transform: translateX(-50%); }
+  .app { grid-template-rows: auto 1fr; }
+  .topbar { padding: 0.45rem 0.6rem; }
+  .topbar-inner { gap: 0.4rem; }
+  .topbar-inner::after { content: ''; flex-basis: 100%; order: 4; }
+  .brand { order: 1; margin-right: 0; }
+  .brand h1 { display: none; }
+  .mode-tabs { order: 2; }
+  .mode-tabs button { padding: 0.3rem 0.75rem; }
+  .top-actions { display: contents; }
+  .top-actions > * { order: 7; }
+  .top-actions > .my-bars { order: 3; margin-left: auto; }
+  .my-bars .label { display: none; }
+  .filter-menu { order: 5; }
+  .search { order: 6; flex: 1 1 0; min-width: 0; position: static; }
+  .search-icon { display: none; }
+  .search input, .search input:focus { width: 100%; padding-left: 0.85rem; }
+  /* Popovers and search hits span the header's width instead of hanging off their buttons. */
+  .popover { position: static; }
+  .popover-body, .filter-menu .popover-body, .search-hits {
+    left: 0.6rem; right: 0.6rem; top: calc(100% + 4px); width: auto; min-width: 0; max-height: 70dvh; overflow-y: auto;
+  }
+  .popover-body.wide { min-width: 0; }
+  .popover-body .open-modes { justify-self: start; }
+  .accent-btn, .popover summary { padding: 0.38rem 0.75rem; }
+
+  .maplibregl-ctrl-top-left { display: none; }
+  .map-legend { top: 8px; bottom: auto; left: 8px; right: 8px; padding: 0.3rem 0.6rem; font-size: 11px; }
+  .map-legend > div { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .map-legend > div + div { display: none; }
+  .district-focus, .import-banner, .map-toast { top: 44px; left: 8px; right: 8px; transform: none; }
+  .map-toast { border-radius: 16px; }
+  .map-toast span { flex: 1; }
+  .district-focus { gap: 0.5rem; }
+  .district-focus { justify-content: space-between; }
+  .import-banner { white-space: normal; border-radius: 16px; }
+  .import-banner span { flex: 1; }
+
+  .panel.sheet {
+    pointer-events: auto; top: auto; left: 0; right: 0; bottom: 0; width: auto; padding: 0; gap: 0; overflow: hidden; z-index: 4;
+    background: var(--paper); border-radius: 20px 20px 0 0; border-top: 1px solid var(--line);
+    box-shadow: 0 -12px 32px -14px rgba(18, 17, 16, 0.35); transition: height 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .panel.sheet.dragging { transition: none; }
+  .sheet-handle { flex: none; display: grid; place-items: center; height: 26px; cursor: grab; touch-action: none; }
+  .sheet-handle span { width: 40px; height: 5px; border-radius: 999px; background: var(--faint); }
+  .sheet-body {
+    flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 10px;
+    padding: 0 10px calc(10px + env(safe-area-inset-bottom));
+  }
+  .sheet-body > * { flex: none; }
+  .sheet .card { box-shadow: none; backdrop-filter: none; background: var(--solid); }
+  .sheet .district-float { position: static; width: auto; max-height: none; animation: none; }
+  .sheet .footer { background: none; border: 0; padding: 0.4rem 0.3rem 0.2rem; }
+  .bar-name { font-size: 1.5rem; }
+  /* Bigger targets for fingers. */
+  .rec { padding: 0.75rem 0.35rem; }
+  .icon-btn { width: 36px; height: 36px; }
+
+  .modal-backdrop { padding: 0.5rem; }
+  .modal { padding: 1.15rem; border-radius: 20px; }
+  .modal.plan-modal { max-height: 94dvh; }
+  .district-grid { grid-template-columns: repeat(8, 1fr); }
+  .stat-tiles { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 1500px) {
   .type-toggle .count { display: none; }

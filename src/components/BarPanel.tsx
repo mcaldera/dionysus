@@ -8,28 +8,27 @@ import { OpenStatus, TagChips } from './BarFacts'
 import TagEditor from './TagEditor'
 
 interface Props {
-  bar: Bar | null
+  bar: Bar
   /** Planned arrival (minute of week) if the bar were added now. */
   arrival: number | null
   blockedBy: Bar | null
   inTour: boolean
   newestEdition: string | null
-  /** The tour has no stops yet: offer planning from scratch. */
+  /** The tour has no stops yet: offer tours starting here. */
   tourEmpty: boolean
   busy: boolean
   onAdd: () => void
   /** Put this bar in place of `blockedBy`. */
   onReplace: () => void
-  /** Propose complete tours, from this bar or (without a bar) from anywhere. */
+  /** Propose complete tours starting at this bar. */
   onPropose: () => void
-  onTemplate: () => void
-  onPlan: () => void
   /** The tour has an empty slot for this bar's district. */
   emptySlot: boolean
-  /** Finder mode: no tour actions; a "Merken" toggle instead. */
+  /** In "Meine Lokale"; the heart toggles it, in both modes. */
+  mine: boolean
+  onMine: () => void
+  /** Finder mode: no tour actions. */
   finder?: {
-    favorite: boolean
-    onFavorite: () => void
     /** The way from the finder's point (location or marker) to this bar. */
     route?: { mode: 'walk' | 'transit'; text: string; lines: string[]; href: string }
   }
@@ -43,30 +42,7 @@ function editionLabel(e: string): string {
 }
 
 export default function BarPanel(props: Props) {
-  const { bar, arrival, blockedBy, inTour, newestEdition, tourEmpty, busy, onAdd, onReplace, onPropose, onTemplate, onPlan, emptySlot, finder, onClose, onTagChange } = props
-  if (!bar) {
-    return (
-      <section className="card welcome" aria-label="Ausgewähltes Lokal">
-        <h2>Prost.</h2>
-        <p>Wie möchtet ihr planen?</p>
-        <div className="plan-modes">
-          <button type="button" className="plan-mode" disabled={busy} onClick={onPropose}>
-            <strong><Icon name="sparkles" /> Komplette Tour vorschlagen</strong>
-            <span>Ihr bekommt sofort drei ganze Routen und tauscht dann einzelne Lokale.</span>
-          </button>
-          <button type="button" className="plan-mode" onClick={onTemplate}>
-            <strong><Icon name="clipboard" /> Leere Vorlage</strong>
-            <span>Ein Platz pro Bezirk. Füllt die Lokale, die ihr kennt, und lasst den Rest planen.</span>
-          </button>
-          <div className="plan-mode static">
-            <strong><Icon name="walk" /> Schritt für Schritt</strong>
-            <span>Klickt ein Lokal auf der Karte an oder sucht oben nach einem Namen. Dann zeigen wir die besten nächsten Lokale.</span>
-          </div>
-        </div>
-        <p className="hint">Startzeit, Bezirke, Wege und Vorlieben: <button type="button" className="link inline" onClick={onPlan}>Tour planen</button>. Was ihr auf der Karte seht, steuert oben links der Filter.</p>
-      </section>
-    )
-  }
+  const { bar, arrival, blockedBy, inTour, newestEdition, tourEmpty, busy, onAdd, onReplace, onPropose, emptySlot, mine, onMine, finder, onClose, onTagChange } = props
   const open = arrival === null ? null : isOpenAt(bar.weeklyOpen, arrival)
   return (
     <section className="card bar-card" aria-label="Ausgewähltes Lokal">
@@ -109,11 +85,7 @@ export default function BarPanel(props: Props) {
           {arrival !== null && <><dt>Ankunft</dt><dd>{clock(arrival)}{open === false && <strong className="warn"> · geschlossen</strong>}</dd></>}
         </dl>
         <div className="actions">
-          {finder ? (
-            <button type="button" className={finder.favorite ? 'primary' : 'ghost'} aria-pressed={finder.favorite} onClick={finder.onFavorite}>
-              <Icon name="heart" size={14} filled={finder.favorite} /> {finder.favorite ? 'Gemerkt' : 'Merken'}
-            </button>
-          ) : (<>
+          {!finder && (<>
           {inTour ? (
             <span className="in-tour"><Icon name="check" size={15} /> In eurer Tour</span>
           ) : (
@@ -129,10 +101,13 @@ export default function BarPanel(props: Props) {
             </button>
           )}
           </>)}
+          <button type="button" className={`ghost mine-btn${mine ? ' on' : ''}`} aria-pressed={mine} onClick={onMine}
+            title={mine ? 'Aus „Meine Lokale“ entfernen' : 'Zu „Meine Lokale“ hinzufügen'}>
+            <Icon name="heart" size={14} filled={mine} /> {mine ? 'Gemerkt' : 'Merken'}
+          </button>
           {bar.website && <a className="ghost" href={bar.website} target="_blank" rel="noreferrer">Website</a>}
           <a className="ghost" href={googleMapsPlace(bar)} target="_blank" rel="noreferrer">In Google Maps ansehen</a>
         </div>
-        {!finder && blockedBy && !inTour && <p className="hint">Im {bar.district}. Bezirk habt ihr schon {blockedBy.name}; dieses Lokal kommt an seine Stelle.</p>}
         {import.meta.env.DEV && onTagChange && <TagEditor bar={bar} onChange={onTagChange} />}
       </div>
     </section>

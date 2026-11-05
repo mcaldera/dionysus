@@ -8,9 +8,8 @@ import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&ur
 
 maplibregl.setWorkerUrl(maplibreWorkerUrl)
 import { useEffect, useLayoutEffect, useRef } from 'react'
-import { strongTips } from '../domain/filter'
 import type { Bar } from '../domain/types'
-import { TYPE_COLOR } from '../theme'
+import { MINE_COLOR, SELECT_COLOR, SELECT_HALO, TYPE_COLOR } from '../theme'
 
 // A calm monochrome base map, so the bar colours carry the information.
 const STYLE = 'https://tiles.openfreemap.org/styles/positron'
@@ -51,6 +50,8 @@ export interface MapBar {
   closed?: boolean
   /** Fade it: a bar is selected and this one isn't relevant to it. */
   dim?: boolean
+  /** In "Meine Lokale": drawn with a heart. */
+  mine?: boolean
 }
 
 export interface Leg {
@@ -95,12 +96,14 @@ interface Props {
   focusDistrict: number | null
   onHoverBar: (h: HoverInfo | null) => void
   onHoverDistrict: (h: { district: number; x: number; y: number } | null) => void
+  /** Pixels covered by the panel (desktop: right) or the bottom sheet (phone), kept clear when moving the map. */
+  inset: { right: number; bottom: number }
 }
 
 /** How long the mouse must stay in a district before the others are greyed out. */
 const HOVER_DWELL_MS = 1300
 
-const BAR_LAYERS = ['bars-other', 'bars-next', 'bars-top', 'bars-stop', 'bars-selected']
+const BAR_LAYERS = ['bars-other', 'bars-next', 'bars-top', 'bars-stop', 'bars-selected', 'bars-mine']
 const empty: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] }
 const typeColor = ['match', ['get', 'type'], ...Object.entries(TYPE_COLOR).flat(), '#888888'] as unknown as string
 
@@ -115,11 +118,32 @@ function barsGeoJson(bars: MapBar[]): GeoJSON.FeatureCollection {
       geometry: { type: 'Point', coordinates: [m.bar.lon, m.bar.lat] },
       properties: {
         id: m.bar.id, role: m.role, type: m.bar.venueType, district: m.bar.district, label: m.label != null ? String(m.label) : '',
-        closed: m.closed ? 1 : 0, dim: m.dim ? 1 : 0,
-        rich: m.bar.tags.length + strongTips(m.bar).length > 1 ? 1 : 0,
+        closed: m.closed ? 1 : 0, dim: m.dim ? 1 : 0, mine: m.mine ? 1 : 0,
       },
     })),
   }
+}
+
+/** A small heart with a white rim, drawn once for the "Meine Lokale" symbol layer. */
+function heartImage(): ImageData {
+  const size = 48
+  const c = document.createElement('canvas')
+  c.width = c.height = size
+  const g = c.getContext('2d')!
+  g.beginPath()
+  g.moveTo(24, 41)
+  g.bezierCurveTo(6, 29, 4, 19, 8, 13)
+  g.bezierCurveTo(12, 7, 21, 7, 24, 14)
+  g.bezierCurveTo(27, 7, 36, 7, 40, 13)
+  g.bezierCurveTo(44, 19, 42, 29, 24, 41)
+  g.closePath()
+  g.lineJoin = 'round'
+  g.lineWidth = 6
+  g.strokeStyle = '#ffffff'
+  g.stroke()
+  g.fillStyle = MINE_COLOR
+  g.fill()
+  return g.getImageData(0, 0, size, size)
 }
 
 function districtsGeoJson(fc: GeoJSON.FeatureCollection, visited: Set<number>): GeoJSON.FeatureCollection {
@@ -240,10 +264,12 @@ export default function MapView(props: Props) {
       style: STYLE,
       center: [16.373, 48.208],
       zoom: 11.6,
-      attributionControl: { compact: true },
+      // Compact credits, bottom left; CSS shows them on phones only, where the footer is hidden.
+      attributionControl: false,
     })
     map.current = m
     m.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left')
+    m.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left')
 
     m.on('load', () => {
       for (const [layer, paint] of Object.entries(BASEMAP)) {
@@ -388,9 +414,8 @@ export default function MapView(props: Props) {
       m.addLayer({
         id: 'bars-other', type: 'circle', source: 'bars', filter: ['==', ['get', 'role'], 'other'],
         paint: {
-          'circle-radius': ['interpolate', ['linear'], ['zoom'],
-            11, ['case', ['==', ['get', 'rich'], 1], 3.4, 2.6],
-            15, ['case', ['==', ['get', 'rich'], 1], 7, 5.5]],
+          // One size for all: the data has no popularity measure worth drawing.
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 2.9, 15, 6],
           'circle-color': typeColor,
           'circle-opacity': ['case', ['==', ['get', 'dim'], 1], 0.28, 0.9],
           'circle-stroke-color': '#ffffff',
@@ -425,22 +450,33 @@ export default function MapView(props: Props) {
       })
       m.addLayer({
         id: 'bars-highlight', type: 'circle', source: 'bars', filter: ['==', ['get', 'id'], ''],
-        paint: { 'circle-radius': 19, 'circle-color': 'rgba(212,255,58,0.35)', 'circle-stroke-color': '#121110', 'circle-stroke-width': 1.5 },
+        paint: { 'circle-radius': 17, 'circle-color': SELECT_HALO, 'circle-stroke-color': '#121110', 'circle-stroke-width': 1.5 },
       })
       m.addLayer({
         id: 'bars-selected-ring', type: 'circle', source: 'bars', filter: ['==', ['get', 'role'], 'selected'],
-        paint: { 'circle-radius': 20, 'circle-color': 'rgba(212,255,58,0.28)', 'circle-stroke-color': '#121110', 'circle-stroke-width': 1.5 },
+        paint: { 'circle-radius': 19, 'circle-color': SELECT_HALO, 'circle-stroke-color': 'rgba(18,17,16,0.55)', 'circle-stroke-width': 1 },
       })
       m.addLayer({
         id: 'bars-selected', type: 'circle', source: 'bars', filter: ['==', ['get', 'role'], 'selected'],
-        paint: { 'circle-radius': 11, 'circle-color': '#D4FF3A', 'circle-stroke-color': '#121110', 'circle-stroke-width': 2.5 },
+        paint: { 'circle-radius': 10, 'circle-color': SELECT_COLOR, 'circle-stroke-color': '#121110', 'circle-stroke-width': 2.5 },
       })
       m.addLayer({
         id: 'bars-labels', type: 'symbol', source: 'bars',
         filter: ['all', ['in', ['get', 'role'], ['literal', ['top', 'stop', 'selected']]], ['!=', ['get', 'label'], '']],
         layout: { 'text-field': ['get', 'label'], 'text-font': FONT, 'text-size': 12.5, 'text-allow-overlap': true },
-        // Ink on the white suggestion and lime selection discs, white on the ink tour stops.
+        // Ink on the white suggestion and yellow selection discs, white on the ink tour stops.
         paint: { 'text-color': ['case', ['all', ['==', ['get', 'role'], 'stop'], ['!=', ['get', 'closed'], 1]], '#ffffff', '#121110'] },
+      })
+      m.addImage('heart', heartImage(), { pixelRatio: 2 })
+      m.addLayer({
+        id: 'bars-mine', type: 'symbol', source: 'bars', filter: ['==', ['get', 'mine'], 1],
+        layout: {
+          'icon-image': 'heart', 'icon-allow-overlap': true, 'icon-ignore-placement': true,
+          'icon-size': ['interpolate', ['linear'], ['zoom'], 11, 0.6, 15, 0.85],
+          // Above-right of the dot, so the type colour stays visible.
+          'icon-offset': [9, -9],
+        },
+        paint: { 'icon-opacity': ['case', ['==', ['get', 'dim'], 1], 0.45, 1] },
       })
 
       m.on('click', (e) => {
@@ -478,6 +514,8 @@ export default function MapView(props: Props) {
         setDistrictHover(null)
         latest.current.onHoverDistrict(null)
       })
+      // Credits start folded to their ⓘ button rather than as a banner over the map.
+      container.current?.querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show')
       ready.current = true
       // For tests and tools: the map now has its sources, layers and handlers.
       if (container.current) container.current.dataset.ready = '1'
@@ -526,12 +564,18 @@ export default function MapView(props: Props) {
       else if (Array.isArray(c)) c.forEach(walk)
     }
     walk((f.geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon).coordinates)
-    m.fitBounds(b, { padding: { top: 70, bottom: 70, left: 70, right: 480 }, duration: 800, maxZoom: 15.5 })
+    const { right, bottom } = latest.current.inset
+    m.fitBounds(b, { padding: { top: 70, bottom: 70 + bottom, left: 70, right: 70 + right }, duration: 800, maxZoom: 15.5 })
   }, [props.focusDistrict, props.districts])
 
   useEffect(() => {
     if (props.focus && map.current) {
-      map.current.easeTo({ center: [props.focus.lon, props.focus.lat], zoom: Math.max(map.current.getZoom(), 13.5), duration: 700 })
+      // Centre the bar in the part of the map that the panel or sheet leaves free.
+      const { right, bottom } = latest.current.inset
+      map.current.easeTo({
+        center: [props.focus.lon, props.focus.lat], zoom: Math.max(map.current.getZoom(), 13.5), duration: 700,
+        offset: [-right / 2, -bottom / 2],
+      })
     }
   }, [props.focus])
 

@@ -115,3 +115,11 @@ export function reachFromPoint(
   const { walk, transit } = fromPoint(p, target, anchorsOf(p, bars), m)
   return choose(walk, transit, o)
 }
+
+/** Way from one bar to another, the same as in nearbyFromBar; a walking estimate if the matrix has none. */
+export function reachFromBar(
+  from: Bar, target: Bar, m: Matrices, o: Pick<NearbyOptions, 'transit' | 'walkToleranceMinutes'>,
+): { minutes: number; mode: 'walk' | 'transit' } {
+  const l = legOrWalk(m, from.matrixIndex, target.matrixIndex, { ...o, maxMinutes: 0, departure: null })
+  return l.mode === 'unreachable' ? { minutes: walkEstimate(from, target), mode: 'walk' } : { minutes: legMinutes(l), mode: l.mode }
+}

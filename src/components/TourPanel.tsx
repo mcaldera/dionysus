@@ -89,7 +89,6 @@ export default function TourPanel(p: Props) {
             <button type="button" className="ghost small" disabled={!!p.busy} onClick={p.onClearAll}>Alles löschen</button>
           </div>
           {p.busy && <p className="hint"><span className="spinner small-spin" /> {p.busy}</p>}
-          <p className="hint small drag-hint">Zeilen am Griff ziehen, um die Reihenfolge zu ändern.</p>
           <ol className="timeline">
             {slots.map((sl, i) => {
               const s = sl.stop
@@ -164,10 +163,7 @@ export default function TourPanel(p: Props) {
                   {back ? <div className="warn small stop-note"><Icon name="undo" size={13} /> Gleiche Linie hin und zurück ({rides(route).at(-1)!.line})</div> : null}
                   {swapping && p.swap && (
                     <div className="swap-list">
-                      <p className="hint small">
-                        {s ? `Statt ${s.bar.name}: andere` : 'Passende'} Lokale im {sl.district}. Bezirk, nach Weg zwischen den Nachbarn.
-                        Auf der Karte zeigt jeder Punkt im Bezirk beim Drüberfahren die Zeit.
-                      </p>
+                      <p className="hint small">{s ? `Statt ${s.bar.name}` : 'Für den offenen Platz'} im {sl.district}. Bezirk:</p>
                       {p.swap.options.length === 0 && <p className="hint">Keine passenden Lokale. Filter lockern?</p>}
                       <ol className="recs">
                         {p.swap.options.map((o, k) => (
