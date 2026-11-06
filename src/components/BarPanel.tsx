@@ -120,7 +120,9 @@ export default function BarPanel(props: Props) {
         </div>
         {similar && similar.length > 0 && onPickSimilar && (
           <div className="similar">
-            <h3>Ähnliche Lokale</h3>
+            <h3 title="Nach dem ganzen Profil: Stil, Publikum, Getränke, Merkmale und Beschreibung. Der Atlas zeigt dieselben Unterschiede auf zwei Dimensionen verkürzt, deshalb liegt dort nicht jedes ähnliche Lokal auch nah.">
+              Ähnliche Lokale <span className="similar-why">nach Profil</span>
+            </h3>
             <ul>
               {similar.slice(0, SIMILAR_SHOWN).map((b, i) => (
                 <li key={b.id}>

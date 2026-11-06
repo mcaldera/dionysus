@@ -3,7 +3,7 @@ import { OpenStatus, TagChips, TipBadge, TypePill } from './components/BarFacts'
 import BarPanel from './components/BarPanel'
 import DistrictCard from './components/DistrictCard'
 import FilterMenu, { type AppMode } from './components/FilterMenu'
-import Atlas, { type AtlasColor } from './components/Atlas'
+import Atlas from './components/Atlas'
 import Icon, { ModeIcon } from './components/Icon'
 import { MapButtons, MapToast, NearbyList } from './components/Finder'
 import Footer from './components/Footer'
@@ -325,7 +325,6 @@ export default function App() {
     ? proposalTimelines[Math.min(activeProposal, proposalTimelines.length - 1)] : null
   const mapTl = previewTl ?? tl
 
-  const [atlasColor, setAtlasColor] = useState<AtlasColor>('type')
   // The Atlas data is only fetched once the Atlas is opened.
   const [atlasData, setAtlasData] = useState<AtlasData | null>(null)
   useEffect(() => {
@@ -978,7 +977,6 @@ export default function App() {
           {!phone && !atlas && districtCard}
           {atlas && (
             <Atlas data={atlasData} bars={visibleBars} byIndex={byIndex} selectedId={selectedId} highlightId={highlightId} mine={mineSet}
-              color={atlasColor} onColor={setAtlasColor}
               inset={phone ? { right: 0, bottom: sheetHeight } : { right: PANEL_INSET, bottom: 0 }}
               onSelect={(id) => pick(id, false)} onBackground={clearSelection} />
           )}

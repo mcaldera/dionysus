@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { barTraits, radarLayout, territoryColors, type AtlasData } from './atlas'
+import { barTraits, overlayColor, overlayRanks, radarLayout, territoryColors, type AtlasData } from './atlas'
 import type { Bar } from './types'
 
 const bar = (i: number, vec: number[]) => ({ id: `b${i}`, matrixIndex: i, profile: { vec, similar: [] } }) as unknown as Bar
@@ -37,5 +37,19 @@ describe('atlas', () => {
     const c = territoryColors(data, 1)
     expect(c[0].split(' ')[0]).toBe(c[1].split(' ')[0])
     expect(c[0].split(' ')[0]).not.toBe(c[2].split(' ')[0])
+  })
+
+  it('puts the precomputed most similar bars first, in their order', () => {
+    const bars = [bar(0, [127, 0]), bar(1, [120, 30]), bar(2, [0, 127]), bar(3, [-127, 0])]
+    const base: [number, number][] = [[0.5, 0.5], [0.9, 0.5], [0.1, 0.5], [0.5, 0.9]]
+    expect(radarLayout(base, bars, 0, [3]).rank.slice(1)).toEqual([2, 3, 1])
+  })
+
+  it('ranks overlay values 0-1 with ties sharing a rank, and colours them', () => {
+    const r = overlayRanks(data, [undefined, undefined, undefined, undefined], 'ruhig_laut')
+    expect(r).toEqual([0.5, 0.5, 0.5, 0.5])
+    const pop = overlayRanks(data, [10, 40, 40, 90].map((popularity) => ({ popularity }) as Bar), 'popularity')
+    expect(pop).toEqual([0, 0.5, 0.5, 1])
+    expect(overlayColor(null)).toBe(overlayColor(0.5))
   })
 })

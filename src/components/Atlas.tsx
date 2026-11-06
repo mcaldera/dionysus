@@ -5,11 +5,10 @@
 // Data: public/data/atlas.json (pipeline/private/similarity.py).
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { barTraits, LAYOUT_LABEL, radarLayout, STYLE_SCALES, territoryColors, type AtlasData, type AtlasLayout } from '../domain/atlas'
+import { barTraits, LAYOUT_LABEL, OVERLAYS, overlayColor, overlayRanks, radarLayout, STYLE_SCALES, territoryColors,
+  type AtlasData, type AtlasLayout, type AtlasOverlay } from '../domain/atlas'
 import { VENUE_TYPES, type Bar } from '../domain/types'
 import { MINE_COLOR, SELECT_COLOR, TYPE_COLOR, TYPE_SHORT } from '../theme'
-
-export type AtlasColor = 'type' | 'popularity' | 'satisfaction'
 
 interface Props {
   data: AtlasData | null
@@ -21,8 +20,6 @@ interface Props {
   highlightId: string | null
   /** "Meine Lokale", ringed in their colour. */
   mine: Set<string>
-  color: AtlasColor
-  onColor: (c: AtlasColor) => void
   /** Space taken by the panel, in pixels. */
   inset: { right: number; bottom: number }
   onSelect: (id: string) => void
@@ -38,20 +35,6 @@ const MORPH_MS = 950
 const RINGS = [10, 50, 200]
 const LABEL_SIZE = [22, 17, 13.5, 11]
 
-/** Light to dark green for 0-100 scores; grey when unknown. */
-function ramp(v: number | undefined): string {
-  if (v == null) return '#c9c4bb'
-  const t = Math.max(0, Math.min(1, v / 100))
-  const mix = (a: number, b: number) => Math.round(a + (b - a) * t)
-  return `rgb(${mix(178, 12)}, ${mix(214, 84)}, ${mix(196, 62)})`
-}
-
-function fill(bar: Bar, color: AtlasColor): string {
-  if (color === 'popularity') return ramp(bar.popularity)
-  if (color === 'satisfaction') return ramp(bar.satisfaction)
-  return TYPE_COLOR[bar.venueType]
-}
-
 /** A stable pseudo-random delay per bar, so the dots fade in like a cloud forming (0-500 ms). */
 const entryDelay = (i: number) => (i * 7919) % 500
 const svgXY = ([x, y]: [number, number]): [number, number] => [PAD + x * (SIZE - 2 * PAD), PAD + (1 - y) * (SIZE - 2 * PAD)]
@@ -65,8 +48,17 @@ function loadLayout(): AtlasLayout {
   }
 }
 
+function loadOverlay(): AtlasOverlay {
+  try {
+    const v = localStorage.getItem('atlasOverlay')
+    return OVERLAYS.find((o) => o.key === v)?.key ?? 'gebiete'
+  } catch {
+    return 'gebiete'
+  }
+}
+
 export default function Atlas(p: Props) {
-  const { data, bars, byIndex, selectedId, highlightId, mine, color, onColor, inset, onSelect, onBackground } = p
+  const { data, bars, byIndex, selectedId, highlightId, mine, inset, onSelect, onBackground } = p
   const svg = useRef<SVGSVGElement>(null)
   const [view, setView] = useState({ x: 0, y: 0, k: 1 })
   const [layout, setLayoutState] = useState<AtlasLayout>(loadLayout)
@@ -76,6 +68,11 @@ export default function Atlas(p: Props) {
   const [morphing, setMorphing] = useState(false)
   const drag = useRef<{ x: number; y: number; vx: number; vy: number; moved: boolean } | null>(null)
 
+  const [overlay, setOverlayState] = useState<AtlasOverlay>(loadOverlay)
+  const setOverlay = (o: AtlasOverlay) => {
+    setOverlayState(o)
+    try { localStorage.setItem('atlasOverlay', o) } catch { /* private mode */ }
+  }
   const setLayout = (l: AtlasLayout) => {
     setLayoutState(l)
     try { localStorage.setItem('atlasLayout', l) } catch { /* private mode */ }
@@ -84,8 +81,12 @@ export default function Atlas(p: Props) {
   const atlasBars = useMemo(() => (data ? data.bars.map((i) => byIndex.get(i)) : []), [data, byIndex])
   const visible = useMemo(() => new Set(bars.map((b) => b.id)), [bars])
   const center = useMemo(() => atlasBars.findIndex((b) => b?.id === selectedId), [atlasBars, selectedId])
-  const radar = useMemo(() => (data && center >= 0 ? radarLayout(data.layouts[layout], atlasBars, center) : null),
-    [data, layout, atlasBars, center])
+  const radar = useMemo(() => {
+    if (!data || center < 0) return null
+    const at = new Map(atlasBars.map((b, i) => [b?.matrixIndex, i]))
+    const top = (atlasBars[center]?.profile?.similar ?? []).map((m) => at.get(m)).filter((i): i is number => i !== undefined)
+    return radarLayout(data.layouts[layout], atlasBars, center, top)
+  }, [data, layout, atlasBars, center])
   const pos = useMemo(() => (data ? (radar ? radar.pos : data.layouts[layout]).map(svgXY) : []), [data, radar, layout])
   const selected = center >= 0 ? atlasBars[center]! : null
   const missing = selectedId && data && center < 0 ? byIndex.get([...byIndex.values()].find((b) => b.id === selectedId)?.matrixIndex ?? -1) : null
@@ -106,6 +107,8 @@ export default function Atlas(p: Props) {
 
   const lv = data && level > 0 ? data.levels[level - 1] : null
   const colors = useMemo(() => (data && level > 0 ? territoryColors(data, level - 1) : []), [data, level])
+  const ranks = useMemo(() => (data ? overlayRanks(data, atlasBars, overlay) : []), [data, atlasBars, overlay])
+  const overlayInfo = OVERLAYS.find((o) => o.key === overlay)!
 
   // Labels at the median of each territory, biggest first, skipped where they would overlap.
   const labels = useMemo(() => {
@@ -138,10 +141,10 @@ export default function Atlas(p: Props) {
     const cls = ['atlas-node', !shown && 'hidden', mine.has(b.id) && 'mine'].filter(Boolean).join(' ')
     return (
       <g key={b.id} className={cls} data-i={i} style={{ transform: `translate(${x}px, ${y}px)` }}>
-        <circle r={5.5 / Math.sqrt(view.k)} fill={fill(b, color)} className="atlas-dot" style={{ '--d': `${entryDelay(b.matrixIndex)}ms` } as React.CSSProperties} />
+        <circle r={5.5 / Math.sqrt(view.k)} fill={TYPE_COLOR[b.venueType]} className="atlas-dot" style={{ '--d': `${entryDelay(b.matrixIndex)}ms` } as React.CSSProperties} />
       </g>
     )
-  }), [atlasBars, pos, visible, mine, color, view.k])
+  }), [atlasBars, pos, visible, mine, view.k])
 
   function toSvg(clientX: number, clientY: number) {
     const r = svg.current!.getBoundingClientRect()
@@ -233,9 +236,15 @@ export default function Atlas(p: Props) {
               <g filter="url(#atlas-land)" fill="#f8f4ec">
                 {pos.map(([x, y], i) => <circle key={i} cx={x} cy={y} r={30} />)}
               </g>
-              {lv && (
+              {overlay === 'gebiete' && lv && (
                 <g filter="url(#atlas-zones)" opacity={0.75}>
                   {pos.map(([x, y], i) => <circle key={i} cx={x} cy={y} r={20} fill={colors[lv.assign[i]]} />)}
+                </g>
+              )}
+              {overlay !== 'gebiete' && (
+                // The land coloured by the chosen value; neighbouring discs blur into a smooth surface.
+                <g filter="url(#atlas-zones)" opacity={0.9} key={overlay} className="atlas-overlay">
+                  {pos.map(([x, y], i) => <circle key={i} cx={x} cy={y} r={22} fill={overlayColor(ranks[i])} />)}
                 </g>
               )}
             </g>
@@ -318,19 +327,18 @@ export default function Atlas(p: Props) {
             onChange={(e) => setLevel(Number(e.target.value))} aria-label="Wie fein die Gebiete sind" />
           <span className="muted mono">{level === 0 ? 'aus' : data.levels[level - 1].clusters.length}</span>
         </label>
-        <div className="atlas-controls">
-          <span className="muted">Farbe</span>
-          <div className="segmented small" role="group" aria-label="Farbe">
-            {([['type', 'Typ'], ['popularity', 'Beliebtheit'], ['satisfaction', 'Zufriedenheit']] as const).map(([c, label]) => (
-              <button key={c} type="button" aria-pressed={color === c} onClick={() => onColor(c)}>{label}</button>
-            ))}
+        <label className="atlas-controls">
+          <span className="muted">Einfärben</span>
+          <select value={overlay} onChange={(e) => setOverlay(e.target.value as AtlasOverlay)} aria-label="Land einfärben nach">
+            {OVERLAYS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
+          </select>
+        </label>
+        {overlayInfo.low && (
+          <div className="atlas-gradient">
+            <span>{overlayInfo.low}</span><i style={{ background: `linear-gradient(90deg, ${[0, 0.25, 0.5, 0.75, 1].map(overlayColor).join(', ')})` }} /><span>{overlayInfo.high}</span>
           </div>
-        </div>
-        {color === 'type' ? (
-          <div>{VENUE_TYPES.map((t) => <span key={t}><i className="type-dot" style={{ background: TYPE_COLOR[t] }} /> {TYPE_SHORT[t]}</span>)}</div>
-        ) : (
-          <div><span>0 <i className="atlas-ramp" /> 100</span><span><i className="type-dot" style={{ background: ramp(undefined) }} /> unbekannt</span></div>
         )}
+        <div>{VENUE_TYPES.map((t) => <span key={t}><i className="type-dot" style={{ background: TYPE_COLOR[t] }} /> {TYPE_SHORT[t]}</span>)}</div>
         <div className="muted">
           {radar ? 'Ringe: die ähnlichsten Lokale zuerst · Klick ins Leere kehrt zurück' : 'Nah beieinander = ähnliches Profil · Klick auf ein Lokal zeigt seine Nachbarn'}
           {mine.size > 0 && <> · <i className="type-dot" style={{ background: 'none', boxShadow: `0 0 0 2px ${MINE_COLOR}` }} /> Meine Lokale</>}
@@ -397,4 +405,3 @@ function FocusCard({ bar, data, index, row }: { bar: Bar; data: AtlasData; index
   )
 }
 
-export { ramp as atlasRamp }
