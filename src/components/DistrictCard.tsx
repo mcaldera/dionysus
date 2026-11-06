@@ -1,7 +1,7 @@
 // Figures for a clicked district, in the side panel so the map stays free.
 
-import type { DistrictStats } from '../domain/districtStats'
-import { TAG_LABEL, type Tag } from '../domain/types'
+import type { DistrictStats, ScoreSummary } from '../domain/districtStats'
+import { TAG_LABEL, type Bar } from '../domain/types'
 import { TYPE_COLOR, TYPE_SHORT } from '../theme'
 import Icon, { TypeIcon } from './Icon'
 
@@ -13,8 +13,6 @@ interface Props {
   onPick: (id: string) => void
   onClose: () => void
 }
-
-const SHOWN_TAGS: Tag[] = ['essen', 'gastgarten', 'lang_offen', 'urig', 'live_musik']
 
 function pct(x: number): string {
   return `${Math.round(x * 100)} %`
@@ -44,22 +42,30 @@ export default function DistrictCard({ name, stats: s, atLabel, onPick, onClose 
           </li>
         ))}
       </ul>
-      <h4>Wege</h4>
-      <ul className="facts-list">
-        {s.medianNearestWalk !== null && (
-          <li title="Für jedes Lokal der Fußweg zum nächstgelegenen anderen; der typische Wert">
-            <Icon name="walk" size={13} /> Bis zum nächsten Lokal meist <strong>{s.medianNearestWalk} Min.</strong>
-          </li>
-        )}
-        {s.medianPairWalk !== null && (
-          <li title="Fußweg zwischen zwei beliebigen Lokalen des Bezirks; der typische Wert">
-            <Icon name="walk" size={13} /> Quer durch den Bezirk meist <strong>{s.medianPairWalk} Min.</strong>
-          </li>
-        )}
-      </ul>
+      {(s.popularity || s.satisfaction) && (
+        <>
+          <h4>Beliebtheit &amp; Bewertung</h4>
+          <div className="district-scores">
+            {s.popularity && <ScoreRow label="Beliebtheit" s={s.popularity}
+              hint="Typisches Lokal im Bezirk: wie bekannt es ist (0–100); die Mitte ist Wien" />}
+            {s.satisfaction && <ScoreRow label="Zufriedenheit" s={s.satisfaction}
+              hint="Typisches Lokal im Bezirk: wie zufrieden die Gäste sind (0–100); die Mitte ist Wien" />}
+          </div>
+          <div className="chips">
+            {s.magnets > 0 && <span className="chip">Publikumsmagnete · {s.magnets}</span>}
+            {(['top_bewertet', 'geheimtipp', 'polarisiert'] as const).filter((t) => s.scoreTagCounts[t])
+              .map((t) => <span key={t} className="chip">{TAG_LABEL[t]} · {s.scoreTagCounts[t]}</span>)}
+          </div>
+          <div className="district-tops">
+            <TopList title="Am beliebtesten" bars={s.mostPopular} onPick={onPick} />
+            <TopList title="Am besten bewertet" bars={s.bestRated} onPick={onPick} />
+            <TopList title="Geheimtipps" bars={s.gems} onPick={onPick} />
+          </div>
+        </>
+      )}
       <h4>Merkmale</h4>
       <div className="chips">
-        {SHOWN_TAGS.filter((t) => s.tagCounts[t]).map((t) => <span key={t} className="chip">{TAG_LABEL[t]} · {s.tagCounts[t]}</span>)}
+        {s.topTags.map(({ tag, count }) => <span key={tag} className="chip">{TAG_LABEL[tag]} · {count}</span>)}
         {s.unknownShare > 0 && <span className="chip muted">{pct(s.unknownShare)} ohne Öffnungszeiten</span>}
       </div>
       {s.tipped.length > 0 && (
@@ -73,5 +79,41 @@ export default function DistrictCard({ name, stats: s, atLabel, onPick, onClose 
         </>
       )}
     </section>
+  )
+}
+
+/**
+ * Diverging bar: Vienna in the middle, the lowest district median at the left end and the
+ * highest at the right, so small differences between districts (Zufriedenheit 68-77) show.
+ */
+function ScoreRow({ label, s, hint }: { label: string; s: ScoreSummary; hint: string }) {
+  const diff = Math.round(s.median - s.vienna)
+  const span = s.median >= s.vienna ? s.max - s.vienna : s.vienna - s.min
+  const half = span > 0 ? Math.min(1, Math.abs(s.median - s.vienna) / span) * 50 : 0
+  const side = s.median >= s.vienna ? 'up' : 'down'
+  return (
+    <div className="meter district-meter" title={`${hint}. Skala: schwächster Bezirk ${Math.round(s.min)} · Wien ${Math.round(s.vienna)} · stärkster ${Math.round(s.max)}`}>
+      <span className="meter-label">{label}</span>
+      <span className="meter-track diverging">
+        <span className={`meter-fill ${side}`} style={side === 'up' ? { left: '50%', width: `${half}%` } : { right: '50%', width: `${half}%` }} />
+        <i className="meter-ref" style={{ left: '50%' }} />
+      </span>
+      <span className="meter-value">
+        {Math.round(s.median)} <span className={diff > 0 ? 'up' : diff < 0 ? 'down' : 'muted'}>{diff > 0 ? '+' : diff < 0 ? '−' : '±'}{Math.abs(diff)}</span>
+        <span className="muted"> · Platz {s.rank}/{s.of}</span>
+      </span>
+    </div>
+  )
+}
+
+function TopList({ title, bars, onPick }: { title: string; bars: Bar[]; onPick: (id: string) => void }) {
+  if (!bars.length) return null
+  return (
+    <div>
+      <span className="top-title">{title}</span>
+      <ol>
+        {bars.map((b) => <li key={b.id}><button type="button" className="link" onClick={() => onPick(b.id)}>{b.name}</button></li>)}
+      </ol>
+    </div>
   )
 }

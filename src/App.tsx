@@ -20,6 +20,7 @@ import { loadSiteData, loadTransitRange, type SiteData } from './data'
 import { districtStats } from './domain/districtStats'
 import { matchesFilter, strongTips, type MapFilter } from './domain/filter'
 import { arc } from './domain/geo'
+import { download, tourGpx, tourTable, xlsx } from './domain/export'
 import { DAY, WEEKDAYS, clock } from './domain/hours'
 import { recommend, refine, type Constraints, type Preferences } from './domain/recommend'
 import { slotDelta, slotOptions, type Slot } from './domain/solver'
@@ -307,7 +308,7 @@ export default function App() {
   const focusStats = useMemo(() => {
     if (!data || focusDistrict === null) return null
     const f = data.districts.features.find((x) => Number(x.properties?.district) === focusDistrict)
-    return districtStats(focusDistrict, (f?.geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon) ?? null, data.bars, data.matrices,
+    return districtStats(focusDistrict, (f?.geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon) ?? null, data.bars,
       finder ? finderMinute : plan.weekday * DAY + plan.startMinutes)
   }, [data, focusDistrict, finder, finderMinute, plan])
 
@@ -734,6 +735,27 @@ export default function App() {
   }
 
   /** Keep pinned bars (a pinned first stop stays the start), choose everything else anew. */
+  /** The tour as Excel (one row per stop) or GPX (waypoints, route, and the paths as a track). */
+  function exportTour(kind: 'xlsx' | 'gpx') {
+    const day = WEEKDAYS[plan.weekday]
+    const stamp = `${day.toLowerCase()}-${clock(plan.startMinutes).replace(':', '')}`
+    const name = `Seidl-Tour · ${day} ab ${clock(plan.startMinutes)}`
+    if (kind === 'xlsx') {
+      const table = tourTable(slotViews, slotRoutes.map((r) => r?.lines))
+      download(xlsx(table, 'Seidl-Tour', name), `seidl-tour-${stamp}.xlsx`,
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+      return
+    }
+    // The way into each stop: the real walking path or transit route where loaded, else straight.
+    const ways = slotViews.map((v, i) => {
+      const prev = slotViews.slice(0, i).reverse().find((x) => x.stop)?.stop
+      if (!v.stop?.legIn || !prev || v.afterGap) return null
+      if (v.stop.legIn.mode === 'walk') return paths[walkKey(prev.bar, v.stop.bar)] ?? null
+      return slotRoutes[i]?.segments.flatMap((sg) => sg.coords) ?? null
+    })
+    download(tourGpx(slotViews, ways, name), `seidl-tour-${stamp}.gpx`, 'application/gpx+xml')
+  }
+
   function optimizeTour() {
     const first = slotIds[0]?.barId && pinned.has(slotIds[0].barId) ? [slotIds[0].barId] : []
     const keep = stopIds.filter((id) => pinned.has(id) && id !== first[0])
@@ -853,7 +875,7 @@ export default function App() {
                     <input type="radio" name="finder-time" checked={finderTime === null} onChange={() => setFinderTime(null)} /> Jetzt
                   </label>
                   <label className="check">
-                    <input type="radio" name="finder-time" checked={finderTime !== null} onChange={() => setFinderTime(now)} /> Anderer Zeitpunkt
+                    <input type="radio" name="finder-time" checked={finderTime !== null} onChange={() => setFinderTime(Math.ceil(now / 15) * 15)} /> Anderer Zeitpunkt
                   </label>
                   {finderTime !== null && (
                     <div className="inline-fields">
@@ -861,7 +883,7 @@ export default function App() {
                         onChange={(e) => setFinderTime(Number(e.target.value) * DAY + (finderTime % DAY))}>
                         {WEEKDAYS.map((d, i) => <option key={d} value={i}>{d}</option>)}
                       </select>
-                      <input type="time" aria-label="Uhrzeit" step={900} value={clock(finderTime)}
+                      <input type="time" aria-label="Uhrzeit" step={900} min="00:00" value={clock(finderTime)}
                         onChange={(e) => {
                           const [h, mi] = e.target.value.split(':').map(Number)
                           if (!Number.isNaN(h)) setFinderTime(finderDay * DAY + h * 60 + (mi || 0))
@@ -1066,6 +1088,7 @@ export default function App() {
               onPreview={(id) => pick(id, true)} onHover={setHighlightId} />
           )}
           {slotIds.length > 0 && <TourPanel slots={slotViews} districtCount={plan.districts.length} districtName={districtName} pinned={pinned}
+            onExport={exportTour}
             routes={slotRoutes} swap={swap} selectedId={selectedId} busy={busy}
             onSelect={(id) => pick(id, true)}
             onRemove={(i) => { setSlotIds((cur) => cur.filter((_, k) => k !== i)); setSwapIndex(null) }}

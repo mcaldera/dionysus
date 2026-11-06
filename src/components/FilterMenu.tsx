@@ -180,7 +180,7 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
                 {WEEKDAYS.map((d, i) => <option key={d} value={i}>{d}</option>)}
               </select>
               <span>um</span>
-              <input type="time" aria-label="Uhrzeit" step={900} value={clock(openAt)} disabled={filter.openAt === null}
+              <input type="time" aria-label="Uhrzeit" step={900} min="00:00" value={clock(openAt)} disabled={filter.openAt === null}
                 onChange={(e) => {
                   const [h, m] = e.target.value.split(':').map(Number)
                   if (!Number.isNaN(h)) onFilter({ ...filter, openAt: openDay * DAY + h * 60 + (m || 0) })

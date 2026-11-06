@@ -92,7 +92,7 @@ export default function PlanDialog(p: Props) {
                 </select>
               </label>
               <label>Start
-                <input type="time" value={clock(plan.startMinutes)} step={900}
+                <input type="time" value={clock(plan.startMinutes)} step={900} min="00:00"
                   onChange={(e) => {
                     const [h, m] = e.target.value.split(':').map(Number)
                     if (!Number.isNaN(h)) onPlan({ ...plan, startMinutes: h * 60 + (m || 0) })

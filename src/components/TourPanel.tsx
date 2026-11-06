@@ -31,6 +31,7 @@ interface Props {
   onFinish: () => void
   onOptimize: () => void
   onClearAll: () => void
+  onExport: (kind: 'xlsx' | 'gpx') => void
 }
 
 function minutes(d: number): string {
@@ -197,6 +198,14 @@ export default function TourPanel(p: Props) {
               )
             })}
           </ol>
+          {filled.length > 0 && (
+            <p className="tour-export">
+              <Icon name="download" size={13} /> Exportieren:{' '}
+              <button type="button" className="link" onClick={() => p.onExport('xlsx')} title="Tabelle mit Zeiten, Adressen und Wegen">Excel</button>
+              {' · '}
+              <button type="button" className="link" onClick={() => p.onExport('gpx')} title="Für Wander- und Karten-Apps (Komoot, OsmAnd, Google My Maps)">GPX</button>
+            </p>
+          )}
         </>
       )}
     </section>

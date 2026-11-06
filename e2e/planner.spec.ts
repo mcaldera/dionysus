@@ -40,6 +40,21 @@ test('adding a bar updates the tour and its district leaves the recommendations'
   await expect(page.locator('.timeline .leg a', { hasText: 'Route' })).toHaveAttribute('href', /google\.com\/maps\/dir/)
 })
 
+test('a tour exports as Excel and GPX', async ({ page }) => {
+  await pick(page, 'Blunzenstricker')
+  await page.getByRole('button', { name: 'Zur Tour hinzufügen' }).click()
+  await page.locator('.recs button').first().click()
+  await page.getByRole('button', { name: 'Zur Tour hinzufügen' }).click()
+  await expect(page.locator('.timeline li')).toHaveCount(2)
+  const exports = page.locator('.tour-export')
+  for (const [label, ext] of [['Excel', '.xlsx'], ['GPX', '.gpx']]) {
+    const [file] = await Promise.all([page.waitForEvent('download'), exports.getByRole('button', { name: label }).click()])
+    expect(file.suggestedFilename()).toMatch(new RegExp(`^seidl-tour-.*\\${ext}$`))
+    const path = await file.path()
+    expect(path).toBeTruthy()
+  }
+})
+
 test('attribution is visible', async ({ page }) => {
   await expect(page.getByText('© OpenStreetMap-Mitwirkende (ODbL)')).toBeVisible()
 })
