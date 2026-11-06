@@ -29,6 +29,8 @@ interface Props {
 /** Similar bars linked in the atlas and listed in the panel. */
 export const SIMILAR_SHOWN = 5
 const SIZE = 1000
+const MIN_ZOOM = 0.5
+const MAX_ZOOM = 12
 const PAD = 40
 const MORPH_MS = 950
 /** Rings in the radar: the n most similar bars. */
@@ -67,6 +69,27 @@ export default function Atlas(p: Props) {
   const [hoverZone, setHoverZone] = useState<{ c: number; x: number; y: number } | null>(null)
   const [morphing, setMorphing] = useState(false)
   const drag = useRef<{ x: number; y: number; vx: number; vy: number; moved: boolean } | null>(null)
+  // The drawing fills the whole area (so it can be dragged anywhere), but its home position is the
+  // part the side panel or bottom sheet leaves free.
+  const [box, setBox] = useState({ w: 1000, h: 1000 })
+  useEffect(() => {
+    const el = svg.current
+    if (!el) return
+    const ro = new ResizeObserver(([e]) => setBox({ w: e.contentRect.width, h: e.contentRect.height }))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [data])
+  const freeW = Math.max(box.w - inset.right, box.w * 0.4)
+  const freeH = Math.max(box.h - inset.bottom, box.h * 0.4)
+  const fitScale = Math.max(Math.min(freeW, freeH) / SIZE, 1e-3)
+  const fit = { scale: fitScale, ox: (freeW - SIZE * fitScale) / 2, oy: (freeH - SIZE * fitScale) / 2 }
+  const [legendOpen, setLegendOpenState] = useState(() => {
+    try { return localStorage.getItem('atlasLegend') !== 'closed' } catch { return true }
+  })
+  const setLegendOpen = (o: boolean) => {
+    setLegendOpenState(o)
+    try { localStorage.setItem('atlasLegend', o ? 'open' : 'closed') } catch { /* private mode */ }
+  }
 
   const [overlay, setOverlayState] = useState<AtlasOverlay>(loadOverlay)
   const setOverlay = (o: AtlasOverlay) => {
@@ -148,18 +171,19 @@ export default function Atlas(p: Props) {
 
   function toSvg(clientX: number, clientY: number) {
     const r = svg.current!.getBoundingClientRect()
-    const scale = Math.min(r.width, r.height) / SIZE
-    const ox = (r.width - SIZE * scale) / 2
-    const oy = (r.height - SIZE * scale) / 2
-    return { x: (clientX - r.left - ox) / scale, y: (clientY - r.top - oy) / scale, scale }
+    return { x: (clientX - r.left - fit.ox) / fit.scale, y: (clientY - r.top - fit.oy) / fit.scale, scale: fit.scale }
+  }
+
+  /** Zoom by `f` around a point in svg coordinates (default: the middle). */
+  function zoomBy(f: number, q = { x: SIZE / 2, y: SIZE / 2 }) {
+    setView((v) => {
+      const k = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, v.k * f))
+      return { k, x: q.x - ((q.x - v.x) / v.k) * k, y: q.y - ((q.y - v.y) / v.k) * k }
+    })
   }
 
   function onWheel(e: React.WheelEvent) {
-    const q = toSvg(e.clientX, e.clientY)
-    const k = Math.max(1, Math.min(12, view.k * Math.exp(-e.deltaY * 0.0015)))
-    const wx = (q.x - view.x) / view.k
-    const wy = (q.y - view.y) / view.k
-    setView({ k, x: k === 1 ? 0 : q.x - wx * k, y: k === 1 ? 0 : q.y - wy * k })
+    zoomBy(Math.exp(-e.deltaY * 0.0015), toSvg(e.clientX, e.clientY))
   }
 
   /** Zoom to a territory (click on its name). */
@@ -192,8 +216,9 @@ export default function Atlas(p: Props) {
 
   return (
     <div className={`atlas${radar ? ' radar' : ''}${morphing ? ' morphing' : ''}`}
-      style={{ paddingRight: inset.right, paddingBottom: inset.bottom }} onMouseLeave={() => setHover(null)}>
-      <svg ref={svg} viewBox={`0 0 ${SIZE} ${SIZE}`} preserveAspectRatio="xMidYMid meet" role="img"
+      onMouseLeave={() => setHover(null)}>
+      <svg ref={svg} viewBox={`${-fit.ox / fit.scale} ${-fit.oy / fit.scale} ${box.w / fit.scale} ${box.h / fit.scale}`}
+        preserveAspectRatio="xMidYMid meet" role="img"
         aria-label="Atlas: Lokale nach Ähnlichkeit angeordnet"
         onWheel={onWheel}
         onPointerDown={(e) => { drag.current = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y, moved: false } }}
@@ -204,7 +229,7 @@ export default function Atlas(p: Props) {
           const dx = (e.clientX - d.x) / scale
           const dy = (e.clientY - d.y) / scale
           if (Math.abs(dx) + Math.abs(dy) > 3) d.moved = true
-          if (d.moved && view.k > 1) setView((v) => ({ ...v, x: d.vx + dx, y: d.vy + dy }))
+          if (d.moved) setView((v) => ({ ...v, x: d.vx + dx, y: d.vy + dy }))
         }}
         onPointerUp={(e) => {
           const d = drag.current
@@ -229,7 +254,7 @@ export default function Atlas(p: Props) {
             <path d="M0 11 Q 5.5 7 11 11 T 22 11" fill="none" stroke="#c9d6d8" strokeWidth="0.8" />
           </pattern>
         </defs>
-        <rect x={-SIZE} y={-SIZE} width={SIZE * 3} height={SIZE * 3} fill="url(#atlas-sea)" opacity={0.55} />
+        <rect x={-SIZE * 4} y={-SIZE * 4} width={SIZE * 9} height={SIZE * 9} fill="url(#atlas-sea)" opacity={0.55} />
         <g transform={`translate(${view.x} ${view.y}) scale(${view.k})`}>
           {!radar && (
             <g className="atlas-terrain">
@@ -312,7 +337,12 @@ export default function Atlas(p: Props) {
       )}
       {missing && <div className="atlas-toast">Für {missing.name} gibt es noch kein Profil, deshalb fehlt es im Atlas.</div>}
 
-      <div className="map-legend atlas-legend" aria-label="Legende">
+      <div className={`map-legend atlas-legend${legendOpen ? '' : ' closed'}`} aria-label="Legende">
+        <button type="button" className="atlas-legend-toggle" aria-expanded={legendOpen} onClick={() => setLegendOpen(!legendOpen)}
+          aria-label={legendOpen ? 'Legende einklappen' : 'Legende ausklappen'}>
+          <span>Legende</span><span aria-hidden="true">{legendOpen ? '▾' : '▸'}</span>
+        </button>
+        {legendOpen && <>
         <div className="atlas-controls">
           <span className="muted">Anordnung</span>
           <div className="segmented small" role="group" aria-label="Anordnung">
@@ -343,10 +373,14 @@ export default function Atlas(p: Props) {
           {radar ? 'Ringe: die ähnlichsten Lokale zuerst · Klick ins Leere kehrt zurück' : 'Nah beieinander = ähnliches Profil · Klick auf ein Lokal zeigt seine Nachbarn'}
           {mine.size > 0 && <> · <i className="type-dot" style={{ background: 'none', boxShadow: `0 0 0 2px ${MINE_COLOR}` }} /> Meine Lokale</>}
         </div>
+        </>}
       </div>
-      {view.k > 1 && (
-        <button type="button" className="ghost atlas-reset" style={{ right: inset.right + 12 }} onClick={() => setView({ x: 0, y: 0, k: 1 })}>Ansicht zurücksetzen</button>
-      )}
+      <div className="atlas-zoom" style={{ right: inset.right + 12 }} role="group" aria-label="Ansicht">
+        <button type="button" onClick={() => zoomBy(1.4)} title="Hineinzoomen" aria-label="Hineinzoomen">+</button>
+        <button type="button" onClick={() => zoomBy(1 / 1.4)} title="Herauszoomen" aria-label="Herauszoomen">−</button>
+        <button type="button" onClick={() => setView({ x: 0, y: 0, k: 1 })} disabled={view.k === 1 && view.x === 0 && view.y === 0}
+          title="Ansicht zurücksetzen" aria-label="Ansicht zurücksetzen">⟲</button>
+      </div>
     </div>
   )
 }
