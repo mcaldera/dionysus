@@ -7,11 +7,11 @@ export default defineConfig({
   testDir: 'e2e',
   use: { viewport: { width: 1440, height: 900 } },
   projects: [
-    { name: 'dev', testIgnore: /prod\.spec\.ts/, use: { baseURL: 'http://localhost:5173' } },
-    { name: 'prod', testMatch: /prod\.spec\.ts/, use: { baseURL: 'http://localhost:4173' } },
+    { name: 'dev', testIgnore: /prod\.spec\.ts/, use: { baseURL: 'http://127.0.0.1:5173' } },
+    { name: 'prod', testMatch: /prod\.spec\.ts/, use: { baseURL: 'http://127.0.0.1:4173' } },
   ],
   webServer: [
-    { command: 'npm run dev', url: 'http://localhost:5173', reuseExistingServer: true },
-    { command: 'npm run build && npx vite preview --port 4173 --strictPort', url: 'http://localhost:4173', reuseExistingServer: true, timeout: 180_000 },
+    { command: 'npm run dev', url: 'http://127.0.0.1:5173', reuseExistingServer: true },
+    { command: 'npm run build && npx vite preview --port 4173 --strictPort', url: 'http://127.0.0.1:4173', reuseExistingServer: true, timeout: 180_000 },
   ],
 })

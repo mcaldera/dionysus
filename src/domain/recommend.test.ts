@@ -130,3 +130,14 @@ describe('taste finder', () => {
     expect(match(bar(0, 1), p)).toBe(1)
   })
 })
+
+describe('profileCosine', () => {
+  it('compares profile vectors and is null without a profile', async () => {
+    const { profileCosine } = await import('./recommend')
+    const bar = (vec?: number[]) => ({ profile: vec ? { vec, similar: [] } : undefined }) as unknown as import('./types').Bar
+    expect(profileCosine(bar([127, 0]), bar([127, 0]))).toBeCloseTo(1)
+    expect(profileCosine(bar([127, 0]), bar([0, 127]))).toBeCloseTo(0)
+    expect(profileCosine(bar([127, 0]), bar([-127, 0]))).toBeCloseTo(-1)
+    expect(profileCosine(bar([127, 0]), bar())).toBeNull()
+  })
+})

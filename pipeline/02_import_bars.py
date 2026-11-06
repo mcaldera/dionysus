@@ -149,6 +149,15 @@ def is_chain(tags: dict) -> bool:
     return brand in CHAINS or name in CHAINS or any(name.startswith(c + " ") for c in CHAINS)
 
 
+def fallback_type(tags: dict) -> str:
+    """A type for official partner bars the rules above drop (cafés, restaurants, sports venues)."""
+    if tags.get("amenity") == "cafe":
+        return "tschocherl"
+    if tags.get("amenity") == "restaurant":
+        return "beisl_wirtshaus"
+    return "pub_bar"
+
+
 def classify(tags: dict, web: str | None) -> tuple[str | None, str]:
     """(venue type, reason). Venue type None means dropped, with the reason why."""
     name = tags.get("name", "")
@@ -168,7 +177,7 @@ def classify(tags: dict, web: str | None) -> tuple[str | None, str]:
     if HEURIGER.search(name) or {"heuriger", "buschenschank"} & set(cuisines):
         return "heuriger", "Heuriger"
     if tags.get("leisure") == "bowling_alley":
-        return "special", "bowling"
+        return "pub_bar", "bowling"
     if COFFEE_NAME.search(name) and not drink_name:
         return None, "Kaffeehaus, Konditorei or bakery (name)"
     if tags.get("shop") in {"bakery", "pastry", "confectionery", "coffee", "tea", "ice_cream", "chocolate"}:
@@ -304,7 +313,7 @@ def main() -> None:
         bar_id = f"osm:{el['type']}/{el['id']}"
         vt, reason = classify(t, website_text(bar_id))
         if vt is None and bar_id in protected and t.get("name"):
-            vt, reason = "special", "official list"
+            vt, reason = fallback_type(t), "official list"
         if vt is None:
             dropped[reason] = dropped.get(reason, 0) + 1
             continue

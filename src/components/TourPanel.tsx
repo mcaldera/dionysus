@@ -3,7 +3,7 @@ import { clock, duration } from '../domain/hours'
 import type { SwapOption } from '../domain/solver'
 import type { SlotView } from '../domain/tour'
 import { googleMapsDirections, legLabel } from '../domain/travel'
-import type { TransitRoute } from '../routes'
+import { ridesBack, type TransitRoute } from '../routes'
 import { TYPE_COLOR } from '../theme'
 import Icon, { ModeIcon, TypeIcon } from './Icon'
 import { TypePill } from './BarFacts'
@@ -31,6 +31,7 @@ interface Props {
   onFinish: () => void
   onOptimize: () => void
   onClearAll: () => void
+  onExport: (kind: 'xlsx' | 'gpx') => void
 }
 
 function minutes(d: number): string {
@@ -96,9 +97,8 @@ export default function TourPanel(p: Props) {
               const swapping = p.swap?.index === i
               const isPinned = !!s && p.pinned.has(s.bar.id)
               const selected = !!s && s.bar.id === p.selectedId
-              // Real line data: the same line out of this stop as into it.
-              const back = s && rides(route).length && rides(p.routes[i + 1]).length
-                && rides(route).at(-1)!.line === rides(p.routes[i + 1])[0].line
+              // Real line data: the same line out of this stop as into it, the other way.
+              const back = s ? ridesBack(route, p.routes[i + 1]) : null
               const cls = [swapping && 'swapping', selected && 'selected', drag === i && 'dragging',
                 over === i && drag !== null && drag !== i && (drag < i ? 'drop-after' : 'drop-before'), !s && 'empty-slot']
                 .filter(Boolean).join(' ')
@@ -160,7 +160,13 @@ export default function TourPanel(p: Props) {
                       title="Platz löschen; die folgenden rücken nach" onClick={() => p.onRemove(i)}><Icon name="x" size={16} /></button>
                   </div>
                   {s?.closedOnArrival && <div className="warn small stop-note"><Icon name="warn" size={13} /> Bei Ankunft geschlossen</div>}
-                  {back ? <div className="warn small stop-note"><Icon name="undo" size={13} /> Gleiche Linie hin und zurück ({rides(route).at(-1)!.line})</div> : null}
+                  {back ? (
+                    <div className="warn small stop-note">
+                      <Icon name="undo" size={13} /> Gleiche Linie hin und zurück ({back})
+                      <button type="button" className="link small" disabled={!!p.busy} onClick={p.onOptimize}
+                        title="Die Tour neu optimieren und diese Verbindung meiden; fixierte Lokale bleiben">Umplanen</button>
+                    </div>
+                  ) : null}
                   {swapping && p.swap && (
                     <div className="swap-list">
                       <p className="hint small">{s ? `Statt ${s.bar.name}` : 'Für den offenen Platz'} im {sl.district}. Bezirk:</p>
@@ -192,6 +198,14 @@ export default function TourPanel(p: Props) {
               )
             })}
           </ol>
+          {filled.length > 0 && (
+            <p className="tour-export">
+              <Icon name="download" size={13} /> Exportieren:{' '}
+              <button type="button" className="link" onClick={() => p.onExport('xlsx')} title="Tabelle mit Zeiten, Adressen und Wegen">Excel</button>
+              {' · '}
+              <button type="button" className="link" onClick={() => p.onExport('gpx')} title="Für Wander- und Karten-Apps (Komoot, OsmAnd, Google My Maps)">GPX</button>
+            </p>
+          )}
         </>
       )}
     </section>

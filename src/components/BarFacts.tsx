@@ -3,7 +3,7 @@
 
 import { strongTips, tipLabel } from '../domain/filter'
 import { clock, isOpenAt, openUntil } from '../domain/hours'
-import { TAG_LABEL, type Bar, type Tag } from '../domain/types'
+import { SCORE_TAGS, TAG_LABEL, type Bar, type Tag } from '../domain/types'
 import { TYPE_COLOR, TYPE_SHORT } from '../theme'
 import Icon, { TypeIcon } from './Icon'
 
@@ -25,8 +25,10 @@ export function OpenStatus({ bar, at }: { bar: Bar; at: number | null }) {
 }
 
 export function TagChips({ bar, highlight, max }: { bar: Bar; highlight?: Set<Tag>; max?: number }) {
-  if (bar.tags.length === 0) return <span className="chip muted">noch nicht getaggt</span>
-  const tags = max ? bar.tags.slice(0, max) : bar.tags
+  // Score tags show as meters and badges in the panel, not as chips.
+  const own = bar.tags.filter((t) => !SCORE_TAGS.includes(t))
+  if (own.length === 0) return <span className="chip muted">noch nicht getaggt</span>
+  const tags = max ? own.slice(0, max) : own
   return (
     <>
       {tags.map((t) => (
@@ -35,7 +37,7 @@ export function TagChips({ bar, highlight, max }: { bar: Bar; highlight?: Set<Ta
           {TAG_LABEL[t]}
         </span>
       ))}
-      {max && bar.tags.length > max && <span className="chip muted">+{bar.tags.length - max}</span>}
+      {max && own.length > max && <span className="chip muted">+{own.length - max}</span>}
     </>
   )
 }

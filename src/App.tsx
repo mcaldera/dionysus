@@ -3,10 +3,11 @@ import { OpenStatus, TagChips, TipBadge, TypePill } from './components/BarFacts'
 import BarPanel from './components/BarPanel'
 import DistrictCard from './components/DistrictCard'
 import FilterMenu, { type AppMode } from './components/FilterMenu'
+import Atlas from './components/Atlas'
 import Icon, { ModeIcon } from './components/Icon'
 import { MapButtons, MapToast, NearbyList } from './components/Finder'
 import Footer from './components/Footer'
-import MapView, { type HoverInfo, type Leg, type MapBar } from './components/MapView'
+import MapView, { SIZE_FACTORS, SIZE_STEPS, type HoverInfo, type Leg, type MapBar, type SizeBy } from './components/MapView'
 import MyBars, { MineImport } from './components/MyBars'
 import Panel, { type Snap } from './components/Panel'
 import PlanDialog, { type PlanSettings } from './components/PlanDialog'
@@ -15,10 +16,12 @@ import Recommendations from './components/Recommendations'
 import TasteFinder from './components/TasteFinder'
 import TourPanel from './components/TourPanel'
 import TourStats from './components/TourStats'
-import { loadSiteData, loadTransitRange, type SiteData } from './data'
+import { loadAtlas, loadSiteData, loadTransitRange, type SiteData } from './data'
+import type { AtlasData } from './domain/atlas'
 import { districtStats } from './domain/districtStats'
 import { matchesFilter, strongTips, type MapFilter } from './domain/filter'
 import { arc } from './domain/geo'
+import { download, tourGpx, tourTable, xlsx } from './domain/export'
 import { DAY, WEEKDAYS, clock } from './domain/hours'
 import { recommend, refine, type Constraints, type Preferences } from './domain/recommend'
 import { slotDelta, slotOptions, type Slot } from './domain/solver'
@@ -28,7 +31,7 @@ import { decodeMine } from './domain/mine'
 import { nearbyFromBar, nearbyFromPoint, reachFromBar, reachFromPoint, walkEstimate, type NearbyResult } from './domain/nearby'
 import { googleMapsDirections, leg, legLabel, legMinutes } from './domain/travel'
 import { ALL_DISTRICTS, VENUE_TYPES, type Bar, type Participant } from './domain/types'
-import { transitPath, walkingPath, type TransitRoute } from './routes'
+import { ridesBack, transitPath, walkingPath, type TransitRoute } from './routes'
 import { loadJson, saveJson } from './storage'
 import { TYPE_COLOR, TYPE_SHORT } from './theme'
 import { nowMinuteOfWeek } from './time'
@@ -152,6 +155,7 @@ export default function App() {
   useEffect(() => () => { channels?.plan.dispose(); channels?.refine.dispose() }, [channels])
 
   const byId = useMemo(() => new Map(data?.bars.map((b) => [b.id, b]) ?? []), [data])
+  const byIndex = useMemo(() => new Map(data?.bars.map((b) => [b.matrixIndex, b]) ?? []), [data])
   const slots: Slot[] = useMemo(
     () => slotIds.map((s) => ({ district: s.district, bar: s.barId ? byId.get(s.barId) ?? null : null })), [slotIds, byId])
   const stops = useMemo(() => slots.flatMap((s) => (s.bar ? [s.bar] : [])), [slots])
@@ -205,16 +209,20 @@ export default function App() {
     walkToleranceMinutes: plan.walkToleranceMinutes,
   }), [plan, data, mineDistricts, mineSet])
 
+  // Legs that real routes showed to ride back on the line just used ("Gleiche Linie hin und
+  // zurück"); with "nicht hin und zurück" the solver avoids them from then on.
+  const [avoidLegs, setAvoidLegs] = useState<[string, string][]>([])
   const solveBase = useMemo(() => ({
     districts: plan.districts, filters: planConstraints, participants: preferences.participants,
     // λ: minutes of extra travel worth 1.0 of match; 5 at the slider's middle (SPEC 9).
     lambda: 10 * preferences.speedVsMatch,
     weekday: plan.weekday, startMinutes: plan.startMinutes, stopMinutes: plan.stopMinutes,
-    startDistrict: null, endDistrict: plan.endDistrict, noBacktrack: plan.noBacktrack, restarts: 3, seed: 1,
-  }), [plan, planConstraints, preferences])
+    startDistrict: null, endDistrict: plan.endDistrict, noBacktrack: plan.noBacktrack, avoidLegs, restarts: 3, seed: 1,
+  }), [plan, planConstraints, preferences, avoidLegs])
 
   // What you see on the map is also what recommendation and swap lists offer.
   const finder = mode === 'finder'
+  const atlas = mode === 'atlas'
   const finderMinute = finderTime ?? now
   // The finder shows what is open at its time (now by default); the tour uses the filter as set.
   const baseFilter = useMemo(() => (onlyMine ? { ...filter, mine: mineSet } : filter), [filter, onlyMine, mineSet])
@@ -301,7 +309,7 @@ export default function App() {
   const focusStats = useMemo(() => {
     if (!data || focusDistrict === null) return null
     const f = data.districts.features.find((x) => Number(x.properties?.district) === focusDistrict)
-    return districtStats(focusDistrict, (f?.geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon) ?? null, data.bars, data.matrices,
+    return districtStats(focusDistrict, (f?.geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon) ?? null, data.bars,
       finder ? finderMinute : plan.weekday * DAY + plan.startMinutes)
   }, [data, focusDistrict, finder, finderMinute, plan])
 
@@ -317,11 +325,24 @@ export default function App() {
     ? proposalTimelines[Math.min(activeProposal, proposalTimelines.length - 1)] : null
   const mapTl = previewTl ?? tl
 
+  // The Atlas data is only fetched once the Atlas is opened.
+  const [atlasData, setAtlasData] = useState<AtlasData | null>(null)
+  useEffect(() => {
+    if (atlas && !atlasData) loadAtlas().then((d) => d && setAtlasData(d))
+  }, [atlas, atlasData])
+  const [sizeBy, setSizeByState] = useState<SizeBy>(() => loadJson<SizeBy>('sizeBy', 'none'))
+  const setSizeBy = (s: SizeBy) => {
+    setSizeByState(s)
+    saveJson('sizeBy', s)
+  }
+  const similarOf = (bar: Bar) => (bar.profile?.similar ?? []).map((i) => byIndex.get(i)).filter((b): b is Bar => !!b)
+
   const mapBars: MapBar[] = useMemo(() => {
     if (!data) return []
     // Finder: bars in reach stand out in their type colours, unnumbered; with an origin, the rest fade.
     const ranked = finder ? nearby.map((r) => r.bar) : swap ? swap.options.map((o) => o.bar) : refinedRecs.map((r) => r.bar)
     const rank = new Map(ranked.map((b, i) => [b.id, i]))
+    const minutes = new Map(finder ? nearby.map((r) => [r.bar.id, r.minutes]) : [])
     const stopIndex = new Map<string, number>(finder ? [] : previewTl ? previewTl.map((s, i) => [s.bar.id, i])
       : slots.flatMap((s, i) => (s.bar ? [[s.bar.id, i] as const] : [])))
     const closed = new Set(mapTl.filter((s) => s.closedOnArrival).map((s) => s.bar.id))
@@ -341,7 +362,7 @@ export default function App() {
       } else if (r !== undefined || isOrigin) {
         // The tour numbers its top 5 like the list; the finder only marks what is in reach.
         const top = !finder && r! < 5
-        out.push({ bar, role: top ? 'top' : 'next', label: top ? r! + 1 : undefined, mine: m })
+        out.push({ bar, role: top ? 'top' : 'next', label: top ? r! + 1 : undefined, mine: m, minutes: minutes.get(bar.id) })
       } else {
         // Fade bars you can't pick next, and districts outside the plan.
         const blocked = finder ? !!point : swapSlot ? !inSwapDistrict : !included.has(bar.district) || (!!selected
@@ -529,6 +550,20 @@ export default function App() {
 
   const slotRoutes = useMemo(() => slotViews.map((v, i) => i > 0 && !v.afterGap && v.stop?.legIn?.mode === 'transit'
     ? transit[transitKey(slotViews[i - 1].stop!.bar, v.stop.bar, slotViews[i - 1].stop!.departure)] : undefined), [slotViews, transit])
+  // Remember each leg out of a stop that rides back the way the leg into it came.
+  useEffect(() => {
+    const found: [string, string][] = []
+    slotViews.forEach((v, i) => {
+      const next = slotViews[i + 1]
+      if (v.stop && next?.stop && ridesBack(slotRoutes[i], slotRoutes[i + 1])) found.push([v.stop.bar.id, next.stop.bar.id])
+    })
+    if (!found.length) return
+    setAvoidLegs((cur) => {
+      const have = new Set(cur.map(([a, b]) => `${a}>${b}`))
+      const add = found.filter(([a, b]) => !have.has(`${a}>${b}`))
+      return add.length ? [...cur, ...add] : cur
+    })
+  }, [slotViews, slotRoutes])
 
   const visited = useMemo(() => new Set(finder ? [] : previewTl ? previewTl.map((s) => s.bar.district) : slots.map((s) => s.district)),
     [finder, previewTl, slots])
@@ -545,8 +580,12 @@ export default function App() {
       setSlotBar(swap.index, b.id)
       return
     }
-    // Finder without an origin: the first bar becomes it. Later picks only show a bar and the way there.
-    if (finder && !point && b) setPoint({ lat: b.lat, lon: b.lon, label: b.name, barId: b.id })
+    // Placing the marker on a bar (click or search) searches from that bar, with its travel times.
+    if (finder && placing && b) {
+      setOrigin({ lat: b.lat, lon: b.lon, label: b.name, barId: b.id })
+      return
+    }
+    // Otherwise picking a bar only shows it (and the way there, if a point is set).
     setSelectedId(id)
     setHighlightId(null)
     setSwapIndex(null)
@@ -701,6 +740,27 @@ export default function App() {
   }
 
   /** Keep pinned bars (a pinned first stop stays the start), choose everything else anew. */
+  /** The tour as Excel (one row per stop) or GPX (waypoints, route, and the paths as a track). */
+  function exportTour(kind: 'xlsx' | 'gpx') {
+    const day = WEEKDAYS[plan.weekday]
+    const stamp = `${day.toLowerCase()}-${clock(plan.startMinutes).replace(':', '')}`
+    const name = `Seidl-Tour · ${day} ab ${clock(plan.startMinutes)}`
+    if (kind === 'xlsx') {
+      const table = tourTable(slotViews, slotRoutes.map((r) => r?.lines))
+      download(xlsx(table, 'Seidl-Tour', name), `seidl-tour-${stamp}.xlsx`,
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+      return
+    }
+    // The way into each stop: the real walking path or transit route where loaded, else straight.
+    const ways = slotViews.map((v, i) => {
+      const prev = slotViews.slice(0, i).reverse().find((x) => x.stop)?.stop
+      if (!v.stop?.legIn || !prev || v.afterGap) return null
+      if (v.stop.legIn.mode === 'walk') return paths[walkKey(prev.bar, v.stop.bar)] ?? null
+      return slotRoutes[i]?.segments.flatMap((sg) => sg.coords) ?? null
+    })
+    download(tourGpx(slotViews, ways, name), `seidl-tour-${stamp}.gpx`, 'application/gpx+xml')
+  }
+
   function optimizeTour() {
     const first = slotIds[0]?.barId && pinned.has(slotIds[0].barId) ? [slotIds[0].barId] : []
     const keep = stopIds.filter((id) => pinned.has(id) && id !== first[0])
@@ -781,7 +841,7 @@ export default function App() {
   // Finder: the way from the origin, as in the list.
   const hoverReach = finder && point && hovered && hovered.id !== point.barId ? reach(hovered) : null
   // Nothing picked, planned or opened: no panel; on a phone the map gets the whole screen.
-  const panelEmpty = !selected && !(phone && statsOpen) && (finder ? !point : !proposals && slotIds.length === 0)
+  const panelEmpty = !selected && !(phone && statsOpen) && (atlas || (finder ? !point : !proposals && slotIds.length === 0))
   const finderLabel = finderTime === null ? 'jetzt' : `${WEEKDAYS[Math.floor(finderTime / DAY) % 7].slice(0, 2)} ${clock(finderTime)}`
   const districtCard = focusStats && focusDistrict !== null ? (
     <DistrictCard name={districtName(focusDistrict)} stats={focusStats}
@@ -809,10 +869,10 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <FilterMenu bars={data.bars} filter={baseFilter} onFilter={setFilter} planMinuteOfWeek={plan.weekday * DAY + plan.startMinutes}
-          onPick={(id) => pick(id, true)} mode={mode} onMode={setMode} showOpenFilter={!finder}
+          onPick={(id) => pick(id, true)} mode={mode} onMode={setMode} showOpenFilter={!finder && !atlas}
           actions={<>
             {myBars}
-            {finder ? (<>
+            {atlas ? null : finder ? (<>
               <details className="popover">
                 <summary><Icon name="clock" size={14} /> {finderTime === null ? `Jetzt · ${WEEKDAYS[finderDay].slice(0, 2)} ${clock(now)}` : finderLabel}</summary>
                 <div className="popover-body">
@@ -820,7 +880,7 @@ export default function App() {
                     <input type="radio" name="finder-time" checked={finderTime === null} onChange={() => setFinderTime(null)} /> Jetzt
                   </label>
                   <label className="check">
-                    <input type="radio" name="finder-time" checked={finderTime !== null} onChange={() => setFinderTime(now)} /> Anderer Zeitpunkt
+                    <input type="radio" name="finder-time" checked={finderTime !== null} onChange={() => setFinderTime(Math.ceil(now / 15) * 15)} /> Anderer Zeitpunkt
                   </label>
                   {finderTime !== null && (
                     <div className="inline-fields">
@@ -828,7 +888,7 @@ export default function App() {
                         onChange={(e) => setFinderTime(Number(e.target.value) * DAY + (finderTime % DAY))}>
                         {WEEKDAYS.map((d, i) => <option key={d} value={i}>{d}</option>)}
                       </select>
-                      <input type="time" aria-label="Uhrzeit" step={900} value={clock(finderTime)}
+                      <input type="time" aria-label="Uhrzeit" step={900} min="00:00" value={clock(finderTime)}
                         onChange={(e) => {
                           const [h, mi] = e.target.value.split(':').map(Number)
                           if (!Number.isNaN(h)) setFinderTime(finderDay * DAY + h * 60 + (mi || 0))
@@ -846,12 +906,14 @@ export default function App() {
           </>} />
       </header>
       <main className="planner">
-        <div className="map-wrap">
+        <div className={atlas ? 'map-wrap atlas-on' : 'map-wrap'}>
           <MapView bars={mapBars} districts={data.districts} districtLabels={data.districtLabels} viennaMask={data.viennaMask} visitedDistricts={visited}
             tourLegs={tourLegs} recLines={recLines} preview={preview} ghosts={ghosts} highlightId={highlightId} focus={focus}
             focusDistrict={focusDistrict} onSelect={(id) => pick(id, false)}
             origin={finder ? point : null} routeLabel={routeLabel}
             inset={phone ? { right: 0, bottom: sheetHeight } : { right: PANEL_INSET, bottom: 0 }}
+            sizeBy={sizeBy}
+            reach={finder && point ? { key: `${point.lat},${point.lon},${finderTransit}`, minutes: maxMinutes } : null}
             onContextPoint={finder ? (at) => setOrigin({ ...at, label: 'Gewählter Punkt' }) : undefined}
             onBackgroundClick={(d, at) => {
               if (finder && placing) {
@@ -912,7 +974,12 @@ export default function App() {
               <button type="button" className="icon-btn" aria-label="Bezirksfokus beenden" onClick={() => setFocusDistrict(null)}><Icon name="x" size={16} /></button>
             </div>
           )}
-          {!phone && districtCard}
+          {!phone && !atlas && districtCard}
+          {atlas && (
+            <Atlas data={atlasData} bars={visibleBars} byIndex={byIndex} selectedId={selectedId} highlightId={highlightId} mine={mineSet}
+              inset={phone ? { right: 0, bottom: sheetHeight } : { right: PANEL_INSET, bottom: 0 }}
+              onSelect={(id) => pick(id, false)} onBackground={clearSelection} />
+          )}
           {finder && (
             <MapButtons locating={locating} located={!!point?.gps} placing={placing}
               onLocate={locate} onPlace={() => setPlacing((v) => !v)}
@@ -920,7 +987,7 @@ export default function App() {
           )}
           {finder && placing ? (
             <MapToast onClose={() => setPlacing(false)}>
-              {phone ? 'Tippt auf die Karte, um den Punkt zu setzen.' : 'Klickt auf die Karte, um den Punkt zu setzen.'}
+              {phone ? 'Tippt auf die Karte oder ein Lokal, um den Punkt zu setzen.' : 'Klickt auf die Karte oder ein Lokal, um den Punkt zu setzen.'}
             </MapToast>
           ) : finder && locateError ? (
             <MapToast warn onClose={() => setLocateError(null)}>{locateError}</MapToast>
@@ -929,10 +996,25 @@ export default function App() {
             <MineImport count={incoming.filter((id) => byId.has(id)).length} known={incoming.filter((id) => mineSet.has(id)).length}
               onAccept={() => closeIncoming(true)} onDismiss={() => closeIncoming(false)} />
           )}
-          <div className="map-legend" aria-label="Legende">
+          {!atlas && <div className="map-legend" aria-label="Legende">
             <div>
               {VENUE_TYPES.map((t) => <span key={t}><i className="type-dot" style={{ background: TYPE_COLOR[t] }} /> {TYPE_SHORT[t]}</span>)}
             </div>
+            <div className="size-row">
+              <span className="muted">Größe</span>
+              <div className="segmented small" role="group" aria-label="Punktgröße">
+                {([['none', 'gleich'], ['popularity', 'Beliebtheit'], ['satisfaction', 'Zufriedenheit']] as const).map(([k, label]) => (
+                  <button key={k} type="button" aria-pressed={sizeBy === k} onClick={() => setSizeBy(k)}>{label}</button>
+                ))}
+              </div>
+            </div>
+            {sizeBy !== 'none' && (
+              <div className="size-key">
+                {SIZE_STEPS[sizeBy].map((s, i) => (
+                  <span key={s.min}><i style={{ width: 6 * SIZE_FACTORS[i] * 1.6, height: 6 * SIZE_FACTORS[i] * 1.6 }} className={i === 3 ? 'top' : undefined} /> {s.label}</span>
+                ))}
+              </div>
+            )}
             {finder && point && (
               <div>
                 <span><i className="reach-dot in" /> in {maxMinutes} Min. erreichbar ({nearby.length})</span>
@@ -945,10 +1027,19 @@ export default function App() {
               <span><i className="lg pending" /> Öffis, lädt</span>
               <span><i className="lg gap" /> offener Bezirk</span>
             </div>}
-          </div>
+          </div>}
         </div>
         <Panel phone={phone} empty={panelEmpty} withFabs={finder} snap={snap} onSnap={setSnap} onHeight={setSheetHeight}>
-          {phone && statsOpen ? districtCard : finder ? (
+          {phone && statsOpen ? districtCard : atlas ? (
+            selected && (
+              <BarPanel bar={selected} arrival={null} blockedBy={null} inTour={false}
+                newestEdition={data.manifest.newestOfficialEdition} tourEmpty={false} busy={false} emptySlot={false}
+                onAdd={() => {}} onReplace={() => {}} onPropose={() => {}}
+                mine={mineSet.has(selected.id)} onMine={() => toggleMine(selected.id)} finder={{}}
+                similar={similarOf(selected)} onPickSimilar={(id) => pick(id, false)} onHoverSimilar={setHighlightId}
+                onClose={clearSelection} onTagChange={changeTag} />
+            )
+          ) : finder ? (
             <>
               {selected && (
                 <BarPanel bar={selected} arrival={finderMinute + (finderRoute?.minutes ?? 0)} blockedBy={null} inTour={false}
@@ -964,6 +1055,7 @@ export default function App() {
                         ? { mode: 'walk', minutes: finderRoute.minutes } : { mode: 'transit', minutes: finderRoute.minutes }),
                     } : undefined,
                   }}
+                  similar={similarOf(selected)} onPickSimilar={(id) => pick(id, true)} onHoverSimilar={setHighlightId}
                   onClose={back} onTagChange={changeTag} />
               )}
               {point && (
@@ -987,6 +1079,7 @@ export default function App() {
               onReplace={() => selected && blockedBy && setSlotBar(slotIds.findIndex((s) => s.barId === blockedBy.id), selected.id)}
               onPropose={() => propose(selected)}
               mine={mineSet.has(selected.id)} onMine={() => toggleMine(selected.id)}
+              similar={similarOf(selected)} onPickSimilar={(id) => pick(id, true)} onHoverSimilar={setHighlightId}
               onClose={clearSelection} onTagChange={changeTag} />
           )}
           {!selected && !proposals && slotIds.length > 0 && (
@@ -999,6 +1092,7 @@ export default function App() {
               onPreview={(id) => pick(id, true)} onHover={setHighlightId} />
           )}
           {slotIds.length > 0 && <TourPanel slots={slotViews} districtCount={plan.districts.length} districtName={districtName} pinned={pinned}
+            onExport={exportTour}
             routes={slotRoutes} swap={swap} selectedId={selectedId} busy={busy}
             onSelect={(id) => pick(id, true)}
             onRemove={(i) => { setSlotIds((cur) => cur.filter((_, k) => k !== i)); setSwapIndex(null) }}

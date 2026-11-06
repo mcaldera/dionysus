@@ -21,3 +21,6 @@ public/data/travel/parts/
 # Pasted forum threads: other people's text, kept local
 data/own/tips/*
 !data/own/tips/README.txt
+
+# Private Google Maps snapshot: own use only, never published (output lives in data/interim/gmaps/)
+pipeline/private/

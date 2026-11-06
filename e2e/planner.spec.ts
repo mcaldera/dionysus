@@ -40,6 +40,21 @@ test('adding a bar updates the tour and its district leaves the recommendations'
   await expect(page.locator('.timeline .leg a', { hasText: 'Route' })).toHaveAttribute('href', /google\.com\/maps\/dir/)
 })
 
+test('a tour exports as Excel and GPX', async ({ page }) => {
+  await pick(page, 'Blunzenstricker')
+  await page.getByRole('button', { name: 'Zur Tour hinzufügen' }).click()
+  await page.locator('.recs button').first().click()
+  await page.getByRole('button', { name: 'Zur Tour hinzufügen' }).click()
+  await expect(page.locator('.timeline li')).toHaveCount(2)
+  const exports = page.locator('.tour-export')
+  for (const [label, ext] of [['Excel', '.xlsx'], ['GPX', '.gpx']]) {
+    const [file] = await Promise.all([page.waitForEvent('download'), exports.getByRole('button', { name: label }).click()])
+    expect(file.suggestedFilename()).toMatch(new RegExp(`^seidl-tour-.*\\${ext}$`))
+    const path = await file.path()
+    expect(path).toBeTruthy()
+  }
+})
+
 test('attribution is visible', async ({ page }) => {
   await expect(page.getByText('© OpenStreetMap-Mitwirkende (ODbL)')).toBeVisible()
 })
@@ -50,7 +65,7 @@ test('taste quiz in the plan dialog sets preferences', async ({ page }) => {
   await plan.getByRole('button', { name: 'Geschmackstest' }).click()
   const dialog = page.getByRole('dialog', { name: 'Geschmackstest' })
   await dialog.getByRole('button', { name: /Altes Beisl/ }).click()
-  for (let i = 0; i < 6; i++) await dialog.getByRole('button', { name: 'Egal' }).click()
+  for (let i = 0; i < 7; i++) await dialog.getByRole('button', { name: 'Egal' }).click()
   await dialog.getByRole('button', { name: /Tschocherl/ }).click()
   await dialog.getByRole('button', { name: 'Weiter' }).click()
   await dialog.getByRole('button', { name: 'Übernehmen' }).click()
@@ -145,8 +160,18 @@ test.describe('Beisl-Finder', () => {
     await page.getByRole('tab', { name: /Beisl-Finder/ }).click()
   })
 
-  test('a bar shows what is reachable from it, in any district', async ({ page }) => {
+  test('picking a bar only shows it', async ({ page }) => {
+    await pick(page, 'Café Bendl')
+    await expect(page.locator('.bar-card')).toBeVisible()
+    await expect(page.locator('[aria-label="In der Nähe"]')).toHaveCount(0)
+    await pick(page, 'Blunzenstricker')
+    await expect(page.getByRole('heading', { name: 'Blunzenstricker', level: 2 })).toBeVisible()
+    await expect(page.locator('[aria-label="In der Nähe"]')).toHaveCount(0)
+  })
+
+  test('the marker put on a bar shows what is reachable from it, in any district', async ({ page }) => {
     await expect(page.locator('.panel .card')).toHaveCount(0)
+    await page.getByRole('button', { name: 'Punkt auf der Karte setzen' }).click()
     await pick(page, 'Café Bendl')
     await expect(page.getByRole('heading', { name: 'Von Café Bendl aus' })).toBeVisible()
     const items = page.locator('[aria-label="In der Nähe"] .recs li')
@@ -174,7 +199,9 @@ test.describe('Beisl-Finder', () => {
     await page.locator('.my-bars summary').click()
     await expect(page.locator('.my-bars .fav-list li')).toHaveCount(1)
     await page.getByLabel('Nur meine Lokale auf der Karte').check()
-    // Only the one bar is left to reach from anywhere.
+    // From a point on that bar, nothing else is left to reach.
+    await page.getByRole('button', { name: 'Punkt auf der Karte setzen' }).click()
+    await pick(page, 'Café Bendl')
     await expect(page.locator('[aria-label="In der Nähe"]')).toContainText('Nichts in dieser Zeit')
     await page.reload()
     await expect(page.locator('.my-bars .badge-count')).toHaveText('1')
@@ -207,5 +234,22 @@ test.describe('Beisl-Finder', () => {
     await expect(page.getByRole('heading', { name: /Gewählter Punkt/ })).toBeVisible()
     await page.keyboard.press('Escape')
     await expect(page.locator('.panel .card')).toHaveCount(0)
+  })
+})
+
+test.describe('Atlas', () => {
+  test('shows territories, switches layouts and focuses a bar', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Atlas' }).click()
+    await expect(page.locator('.atlas-node').first()).toBeVisible({ timeout: 20_000 })
+    await expect(page.locator('.atlas-label').first()).toBeVisible()
+    await page.getByRole('button', { name: 'UMAP' }).click()
+    await expect(page.getByRole('button', { name: 'UMAP' })).toHaveAttribute('aria-pressed', 'true')
+    // A click on a bar: the radar with its rings and the focus card.
+    await page.locator('.atlas-node:not(.hidden) circle').nth(5).click({ force: true })
+    await expect(page.locator('.atlas-focus')).toBeVisible()
+    await expect(page.locator('.atlas-rings')).toBeVisible()
+    // Back to the map with a click into the empty sea.
+    await page.locator('.atlas svg').click({ position: { x: 5, y: 5 } })
+    await expect(page.locator('.atlas-focus')).toHaveCount(0)
   })
 })

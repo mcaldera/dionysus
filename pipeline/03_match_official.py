@@ -341,7 +341,7 @@ def merge_with_import(out: list[dict], venues: list[Venue]) -> None:
                     bar, how = bars[i], "in import, nearby object"
                     break
         if bar is None:
-            vt = guess_type.get(slugify(v.name), "special")
+            vt = guess_type.get(slugify(v.name), "beisl_wirtshaus")
             if rec["osm_id"]:
                 bar, how = official_bar(rec, tags.get(rec["osm_id"], {}), vt), "added from OSM"
             else:

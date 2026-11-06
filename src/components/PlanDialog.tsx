@@ -2,7 +2,8 @@
 // header or the start card; also the place to start a tour.
 
 import { clock, WEEKDAYS } from '../domain/hours'
-import { ALL_DISTRICTS, TAG_LABEL, TAGS, VENUE_TYPES, type Participant, type Tag, type VenueType } from '../domain/types'
+import { ALL_DISTRICTS, CHARACTER_TAGS, SCORE_TAGS, TAG_LABEL, VENUE_TYPES, type Participant, type Tag, type VenueType } from '../domain/types'
+import { SCORE_HINT } from './FilterMenu'
 import { TYPE_COLOR, TYPE_SHORT } from '../theme'
 import Icon, { TypeIcon, type IconName } from './Icon'
 
@@ -91,7 +92,7 @@ export default function PlanDialog(p: Props) {
                 </select>
               </label>
               <label>Start
-                <input type="time" value={clock(plan.startMinutes)} step={900}
+                <input type="time" value={clock(plan.startMinutes)} step={900} min="00:00"
                   onChange={(e) => {
                     const [h, m] = e.target.value.split(':').map(Number)
                     if (!Number.isNaN(h)) onPlan({ ...plan, startMinutes: h * 60 + (m || 0) })
@@ -167,14 +168,11 @@ export default function PlanDialog(p: Props) {
             <h4>Vorlieben</h4>
             <p className="hint small">Klicken wechselt: mag → lieber nicht → egal.</p>
             <div className="chips">
-              {TAGS.map((t) => {
-                const state = group.likes.includes(t) ? 'like' : group.avoids.includes(t) ? 'avoid' : 'none'
-                return (
-                  <button key={t} type="button" className={`chip pref-${state}`} onClick={() => cycle(t)}>
-                    {state === 'like' ? <Icon name="heart" size={12} filled /> : state === 'avoid' ? <Icon name="x" size={12} /> : null} {TAG_LABEL[t]}
-                  </button>
-                )
-              })}
+              {CHARACTER_TAGS.map((t) => <PrefChip key={t} tag={t} group={group} onCycle={cycle} />)}
+            </div>
+            <p className="hint small">Beliebtheit & Bewertung:</p>
+            <div className="chips">
+              {SCORE_TAGS.map((t) => <PrefChip key={t} tag={t} group={group} onCycle={cycle} />)}
             </div>
             {group.likedTypes?.length ? (
               <p className="hint small">Aus dem Geschmackstest: {group.likedTypes.map((t) => TYPE_SHORT[t]).join(', ')}</p>
@@ -202,5 +200,14 @@ export default function PlanDialog(p: Props) {
         </div>
       </div>
     </div>
+  )
+}
+
+function PrefChip({ tag, group, onCycle }: { tag: Tag; group: Participant; onCycle: (t: Tag) => void }) {
+  const state = group.likes.includes(tag) ? 'like' : group.avoids.includes(tag) ? 'avoid' : 'none'
+  return (
+    <button type="button" className={`chip pref-${state}`} title={SCORE_HINT[tag]} onClick={() => onCycle(tag)}>
+      {state === 'like' ? <Icon name="heart" size={12} filled /> : state === 'avoid' ? <Icon name="x" size={12} /> : null} {TAG_LABEL[tag]}
+    </button>
   )
 }

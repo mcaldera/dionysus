@@ -10,7 +10,6 @@ export const TYPE_COLOR: Record<VenueType, string> = {
   tschocherl: '#7B61FF',
   beisl_wirtshaus: '#1E9E6A',
   heuriger: '#B5175E',
-  special: '#2F6FEB',
 }
 
 export const TYPE_SHORT: Record<VenueType, string> = {
@@ -18,7 +17,6 @@ export const TYPE_SHORT: Record<VenueType, string> = {
   tschocherl: 'Tschocherl',
   beisl_wirtshaus: 'Beisl & Wirtshaus',
   heuriger: 'Heuriger',
-  special: 'Besonders',
 }
 
 // The selected bar on the map: a pale beer-foam yellow, apart from every type colour, outlined in ink.
