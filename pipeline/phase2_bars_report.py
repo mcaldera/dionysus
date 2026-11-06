@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from common import INTERIM, OFFICIAL_CSVS, REPORTS  # noqa: E402
 
-TYPES = ["pub_bar", "tschocherl", "beisl_wirtshaus", "heuriger", "special"]
+TYPES = ["pub_bar", "tschocherl", "beisl_wirtshaus", "heuriger"]
 TYPE_LABEL = {"pub_bar": "Bar & Pub", "tschocherl": "Tschocherl & Café-Bar", "beisl_wirtshaus": "Beisl & Wirtshaus",
               "heuriger": "Heuriger", "special": "Besondere Orte"}
 

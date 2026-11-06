@@ -201,3 +201,29 @@ export function transitPath(
   }
   return p
 }
+
+/** Direction of a ride segment, x scaled for latitude; null if it has fewer than two points. */
+function rideDir(seg: RouteSegment): [number, number] | null {
+  const a = seg.coords[0]
+  const b = seg.coords[seg.coords.length - 1]
+  if (!a || !b) return null
+  const x = (b[0] - a[0]) * Math.cos((a[1] * Math.PI) / 180)
+  const y = b[1] - a[1]
+  const n = Math.hypot(x, y)
+  return n ? [x / n, y / n] : null
+}
+
+/**
+ * The line ridden back, if the leg out of a stop starts on the same line the leg into it ended
+ * on, heading the other way (more than about 110° apart); else null. Going on in the same
+ * direction on the same line is fine.
+ */
+export function ridesBack(into: TransitRoute | null | undefined, out: TransitRoute | null | undefined): string | null {
+  const a = into?.segments.filter((s) => s.kind === 'ride').at(-1)
+  const b = out?.segments.find((s) => s.kind === 'ride')
+  if (!a || !b || !a.line || a.line !== b.line) return null
+  const da = rideDir(a)
+  const db = rideDir(b)
+  if (!da || !db) return null
+  return da[0] * db[0] + da[1] * db[1] < -0.35 ? a.line : null
+}

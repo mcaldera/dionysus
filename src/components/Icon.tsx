@@ -43,7 +43,6 @@ const TYPE_ICON_NAME: Record<VenueType, IconName> = {
   tschocherl: 'coffee',
   beisl_wirtshaus: 'dish',
   heuriger: 'wine',
-  special: 'sparkles',
 }
 
 export function TypeIcon({ type, size = 14 }: { type: VenueType; size?: number }) {

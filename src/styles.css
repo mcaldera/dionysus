@@ -221,6 +221,41 @@ button.plan-mode:disabled { opacity: 0.55; cursor: progress; }
 .badges { display: flex; gap: 0.4rem; flex-wrap: wrap; }
 .badge { padding: 0.12rem 0.55rem; border-radius: 999px; font-size: 12px; font-weight: 500; }
 .badge.official { background: var(--ink); color: var(--paper); }
+.scores { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.35rem 0.6rem; margin: 0.55rem 0; font-size: 12.5px; }
+.scores .badges { grid-column: 1 / -1; margin-top: 0.15rem; }
+.meter { display: contents; }
+.meter-label { color: var(--muted); }
+.meter-track { height: 6px; border-radius: 999px; background: var(--line-strong); overflow: hidden; min-width: 60px; }
+.meter-fill { display: block; height: 100%; border-radius: inherit; background: var(--ink-2); }
+.meter-value { font-family: var(--mono); font-size: 12px; color: var(--ink-2); white-space: nowrap; }
+.badge.score { background: var(--accent-soft); color: var(--ink); border: 1px solid var(--line-strong); }
+.bar-description { margin: 0.6rem 0 0.4rem; font-size: 13.5px; line-height: 1.55; color: var(--ink-2); }
+.similar { margin-top: 0.9rem; border-top: 1px solid var(--line); padding-top: 0.7rem; }
+.similar h3 { margin: 0 0 0.35rem; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.similar ul { list-style: none; margin: 0; padding: 0; }
+.similar button { display: flex; align-items: center; gap: 0.5rem; width: 100%; padding: 0.35rem 0.4rem; border: 0; border-radius: 8px;
+  background: none; font: inherit; font-size: 13px; color: var(--ink); text-align: left; cursor: pointer; }
+.similar button:hover { background: var(--hover); }
+.similar-rank { width: 1.1em; font-family: var(--mono); font-size: 12px; color: var(--muted); text-align: right; }
+.similar-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.atlas { position: absolute; inset: 0; box-sizing: border-box; z-index: 1; background: var(--paper); overflow: hidden; touch-action: none; }
+.atlas svg { width: 100%; height: 100%; display: block; cursor: grab; }
+.atlas svg:active { cursor: grabbing; }
+.atlas-dot { stroke: rgba(18, 17, 16, 0.35); cursor: pointer; transform-box: fill-box; transform-origin: center;
+  transition: opacity 0.3s, fill 0.45s, transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.atlas-dot:hover { transform: scale(1.8); }
+.atlas-dot:hover { stroke: var(--ink); }
+.atlas-dot.dim { opacity: 0.18; }
+.atlas-link { stroke: var(--ink-2); opacity: 0.45; }
+.atlas-ring { fill: none; stroke: var(--ink); }
+.atlas-rank { font-family: var(--mono); font-weight: 600; fill: var(--ink); paint-order: stroke; stroke: var(--paper); stroke-width: 4px; }
+.atlas-selected { stroke: var(--ink); }
+.atlas-keywords { margin-top: 0.3rem; font-size: 12px; color: var(--ink-2); max-width: 260px; }
+.atlas-legend { display: grid; gap: 0.45rem; }
+.atlas-legend .muted { font-size: 11.5px; }
+.atlas-ramp { display: inline-block; width: 80px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, rgb(178, 214, 196), rgb(12, 84, 62)); }
+.atlas-reset { position: absolute; top: 12px; left: 12px; }
+.atlas-on .maplibregl-control-container { display: none; }
 .tips { margin: 0.55rem 0; font-size: 13px; color: var(--ink-2); line-height: 1.6; }
 .facts { display: grid; grid-template-columns: auto 1fr; gap: 0.3rem 0.9rem; margin: 0.85rem 0; font-size: 13px; }
 .facts dt { color: var(--muted); }
@@ -451,6 +486,11 @@ button.chip { cursor: pointer; }
 .map-legend > div { display: flex; flex-wrap: wrap; gap: 0.3rem 0.85rem; }
 .map-legend span { display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap; }
 .type-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+.map-legend .size-row { align-items: center; gap: 0.5rem; }
+.segmented.small button { padding: 0.15rem 0.55rem; font-size: 11.5px; }
+.size-key { align-items: center; }
+.size-key i { display: inline-block; border-radius: 50%; background: var(--muted); box-sizing: border-box; }
+.size-key i.top { border: 1.6px solid var(--ink); }
 .lg { display: inline-block; width: 20px; height: 0; border-top: 3px solid var(--ink); border-radius: 2px; }
 .lg.ride { border-top-color: #e3000f; }
 .lg.pending { border-top: 2px dashed #e5484d; }
@@ -636,4 +676,35 @@ button.chip { cursor: pointer; }
 @media (max-width: 1500px) {
   .type-toggle .count { display: none; }
   .plan-summary { display: none; }
+}
+
+/* Motion: things grow, draw and rise into place rather than snapping. Off for reduced motion. */
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+@keyframes grow-x { from { width: 0; } }
+@keyframes pop-in { from { opacity: 0; transform: scale(0.6); } }
+@keyframes atlas-in { from { opacity: 0; transform: scale(0.2); } }
+@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes pulse { 0% { transform: scale(1); opacity: 0.9; } 70% { transform: scale(1.6); opacity: 0; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: no-preference) {
+  .bar-card .card-body { animation: rise 0.32s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .meter-fill { animation: grow-x 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s backwards; }
+  .badge.score { animation: pop-in 0.35s cubic-bezier(0.3, 1.5, 0.5, 1) 0.35s backwards; }
+  .similar li { animation: rise 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+  .similar li:nth-child(2) { animation-delay: 0.05s; }
+  .similar li:nth-child(3) { animation-delay: 0.1s; }
+  .similar li:nth-child(4) { animation-delay: 0.15s; }
+  .similar li:nth-child(5) { animation-delay: 0.2s; }
+  .recs li { animation: rise 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+  .recs li:nth-child(2) { animation-delay: 0.03s; }
+  .recs li:nth-child(3) { animation-delay: 0.06s; }
+  .recs li:nth-child(4) { animation-delay: 0.09s; }
+  .recs li:nth-child(5) { animation-delay: 0.12s; }
+  .recs li:nth-child(n + 6) { animation-delay: 0.15s; }
+  .atlas-dot { animation: atlas-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) var(--d, 0ms) backwards; }
+  .atlas-link { stroke-dasharray: 1; animation: draw 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+  .atlas-ring, .atlas-rank { transform-box: fill-box; transform-origin: center; animation: pop-in 0.3s cubic-bezier(0.3, 1.5, 0.5, 1) 0.3s backwards; }
+  .atlas-pulse { transform-box: fill-box; transform-origin: center; animation: pulse 1.6s ease-out infinite; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .atlas-dot:hover { transform: none; }
 }

@@ -87,8 +87,28 @@ export function jaccard(a: Tag[], b: Tag[]): number {
   return a.filter((t) => b.includes(t)).length / union.size
 }
 
+/** Cosine of the two bars' profile vectors, -1..1; null if one has no profile. */
+export function profileCosine(u: Bar, v: Bar): number | null {
+  const a = u.profile?.vec
+  const b = v.profile?.vec
+  if (!a || !b || a.length !== b.length) return null
+  let dot = 0, na = 0, nb = 0
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i] * b[i]
+    na += a[i] * a[i]
+    nb += b[i] * b[i]
+  }
+  return na && nb ? dot / Math.sqrt(na * nb) : null
+}
+
 function similarityScore(u: Bar, v: Bar, mode: Preferences['similarity']): number {
   if (mode === 'ignore') return 0
+  // Profiles (style, audience, drinks, description) where both bars have one; else shared tags.
+  const cos = profileCosine(u, v)
+  if (cos !== null) {
+    const p = (cos + 1) / 2
+    return mode === 'similar' ? p : 1 - p
+  }
   // Untagged bars are neutral (SPEC 2).
   if (u.tags.length === 0 || v.tags.length === 0) return 0.5
   const j = jaccard(u.tags, v.tags)
@@ -128,6 +148,7 @@ export function recommend(
     const s = similarityScore(from, bar, preferences.similarity)
     const reasons = [legLabel(l)]
     for (const t of bar.tags) if (likes.has(t)) reasons.push(TAG_LABEL[t])
+    if (preferences.similarity === 'similar' && (profileCosine(from, bar) ?? 0) >= 0.6) reasons.push('ähnliches Profil')
     if (preferences.similarity === 'similar' && reasons.length === 1) {
       for (const t of bar.tags) if (from.tags.includes(t)) reasons.push(TAG_LABEL[t])
     }

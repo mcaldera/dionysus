@@ -48,11 +48,24 @@ export function googleMapsDirections(
 }
 
 /**
- * Search by name and address, centred on the bar at street zoom. The plain `api=1&query=`
- * link can't be tied to a location, so Google sometimes picked a same-named place elsewhere
- * (Süsses Eck, Espresso Jackie).
+ * With a Google place id, open exactly that place (Maps URLs API; query is the fallback label).
+ * Otherwise search by name and address, centred on the bar at street zoom. The plain
+ * `api=1&query=` link can't be tied to a location, so Google sometimes picked a same-named
+ * place elsewhere (Süsses Eck, Espresso Jackie).
  */
-export function googleMapsPlace(bar: { name: string; address?: string; district: number; lat: number; lon: number }): string {
+export function googleMapsPlace(bar: {
+  name: string
+  mapsQuery?: string
+  placeId?: string
+  address?: string
+  district: number
+  lat: number
+  lon: number
+}): string {
+  const name = bar.mapsQuery ?? bar.name
   const where = bar.address ?? `${1000 + bar.district * 10} Wien`
-  return `https://www.google.com/maps/search/${encodeURIComponent(`${bar.name}, ${where}`)}/@${bar.lat.toFixed(6)},${bar.lon.toFixed(6)},18z`
+  if (bar.placeId) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${name}, ${where}`)}&query_place_id=${encodeURIComponent(bar.placeId)}`
+  }
+  return `https://www.google.com/maps/search/${encodeURIComponent(`${name}, ${where}`)}/@${bar.lat.toFixed(6)},${bar.lon.toFixed(6)},18z`
 }

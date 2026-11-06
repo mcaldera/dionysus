@@ -207,4 +207,23 @@ describe('no backtracking', () => {
     const s = solve(bars, m, { ...o, noBacktrack: true, restarts: 3 })!
     expect(tourCost(s.stops, m, { ...o, noBacktrack: true }).cost).toBeLessThan(plain + BACKTRACK_PENALTY)
   })
+
+  it('avoids legs that real routes showed to ride back', () => {
+    // Three bars at right angles, so no reversal by geometry; real routes flagged 1 -> 2.
+    const mk = (i: number, lat: number, lon: number, d: number) => ({
+      id: `own:r${i}`, matrixIndex: i, name: `R${i}`, district: d, lat, lon, venueType: 'pub_bar' as const,
+      weeklyOpen: null, official: [], tags: [], unreviewedTags: [],
+    })
+    const bars = [mk(0, 48.2, 16.30, 1), mk(1, 48.2, 16.40, 2), mk(2, 48.3, 16.40, 3)]
+    const m: Matrices = { n: 3, walk: new Uint8Array(9).fill(60), transitP50: new Uint8Array(9).fill(10) }
+    const o = { ...options(3), noBacktrack: true }
+    const plain = tourCost(bars, m, o).cost
+    const avoidLegs: [string, string][] = [['own:r1', 'own:r2']]
+    expect(tourCost(bars, m, { ...o, avoidLegs }).cost).toBe(plain + BACKTRACK_PENALTY)
+    // Without noBacktrack the list is ignored.
+    expect(tourCost(bars, m, { ...o, noBacktrack: false, avoidLegs }).cost).toBe(tourCost(bars, m, { ...o, noBacktrack: false }).cost)
+    const s = solve(bars, m, { ...o, avoidLegs, restarts: 3 })!
+    const ids = s.stops.map((b) => b.id).join(',')
+    expect(ids).not.toContain('own:r1,own:r2')
+  })
 })

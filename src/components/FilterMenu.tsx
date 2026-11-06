@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { activeFilters, barSources, includeWeak, SOURCE_KINDS, SOURCE_LABEL, TIP_KIND_LABEL, TIP_KINDS, tipKinds, type MapFilter, type SourceKind, type TipKind } from '../domain/filter'
 import { clock, DAY, WEEKDAYS } from '../domain/hours'
-import { TAG_LABEL, TAGS, VENUE_TYPES, type Bar, type Tag, type VenueType } from '../domain/types'
+import { CHARACTER_TAGS, SCORE_TAGS, TAG_LABEL, VENUE_TYPES, type Bar, type Tag, type VenueType } from '../domain/types'
 import { TYPE_COLOR, TYPE_SHORT } from '../theme'
 import Icon, { TypeIcon } from './Icon'
 
@@ -22,7 +22,15 @@ interface Props {
   actions: React.ReactNode
 }
 
-export type AppMode = 'finder' | 'tour'
+export type AppMode = 'finder' | 'tour' | 'atlas'
+
+/** What the score tags mean, as tooltips (thresholds: 07_build_site_data.py SCORE_TAGS). */
+export const SCORE_HINT: Partial<Record<Tag, string>> = {
+  beliebt: 'Beliebtheit ab 70: bekannter als 70 % der Lokale',
+  top_bewertet: 'Zufriedenheit ab 85: die Gäste sind begeistert',
+  geheimtipp: 'Sehr gut bewertet, aber wenig bekannt',
+  polarisiert: 'Viele lieben es, einige gar nicht',
+}
 
 function norm(s: string): string {
   return s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss')
@@ -88,6 +96,7 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
       <div className="mode-tabs" role="tablist" aria-label="Modus">
         <button type="button" role="tab" aria-selected={mode === 'finder'} onClick={() => onMode('finder')}>Beisl-Finder</button>
         <button type="button" role="tab" aria-selected={mode === 'tour'} onClick={() => onMode('tour')}>Seidl-Tour</button>
+        <button type="button" role="tab" aria-selected={mode === 'atlas'} onClick={() => onMode('atlas')}>Atlas</button>
       </div>
       <details className="popover filter-menu">
         <summary><Icon name="sliders" size={15} /> Filter{active ? <span className="badge-count">{active}</span> : null} <Icon name="chevron-down" size={14} className="caret" /></summary>
@@ -107,8 +116,20 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
           <section>
             <h4>Muss haben</h4>
             <div className="chips">
-              {TAGS.map((t) => (
+              {CHARACTER_TAGS.map((t) => (
                 <button key={t} type="button" className="chip toggle" aria-pressed={filter.tags.has(t)}
+                  disabled={!counts.tags.get(t) && !filter.tags.has(t)}
+                  onClick={() => onFilter({ ...filter, tags: toggled(filter.tags, t) })}>
+                  {TAG_LABEL[t]} <span className="count">{counts.tags.get(t) ?? 0}</span>
+                </button>
+              ))}
+            </div>
+          </section>
+          <section>
+            <h4>Beliebtheit & Bewertung</h4>
+            <div className="chips">
+              {SCORE_TAGS.map((t) => (
+                <button key={t} type="button" className="chip toggle" aria-pressed={filter.tags.has(t)} title={SCORE_HINT[t]}
                   disabled={!counts.tags.get(t) && !filter.tags.has(t)}
                   onClick={() => onFilter({ ...filter, tags: toggled(filter.tags, t) })}>
                   {TAG_LABEL[t]} <span className="count">{counts.tags.get(t) ?? 0}</span>

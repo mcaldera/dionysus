@@ -13,8 +13,9 @@ import type { Bar, Participant } from './types'
 export const CLOSED_PENALTY = 90
 /** Minutes added when a transit leg heads straight back the way the previous transit leg came. */
 export const BACKTRACK_PENALTY = 30
-/** Cosine of the turn between two legs below which it counts as going back (about 135°). */
-const REVERSAL = -0.7
+/** Cosine of the turn between two legs below which it counts as going back (about 120°). The
+ *  straight lines between bars only approximate the real lines, so this errs on the strict side. */
+const REVERSAL = -0.5
 /** Minutes added per bar already used by an earlier proposal, so alternatives differ. */
 const DIVERSITY_PENALTY = 3
 
@@ -38,6 +39,9 @@ export interface SolveOptions {
   endDistrict: number | null
   /** Penalise riding out and straight back, e.g. U1 out, one bar, U1 back. */
   noBacktrack?: boolean
+  /** Legs (from bar id, to bar id) that real routes showed to ride back on the line just used;
+   *  with noBacktrack, each costs BACKTRACK_PENALTY like a detected reversal. */
+  avoidLegs?: [string, string][]
   /** Candidates per district (SPEC: default 15, maximum 30). */
   k?: number
   restarts?: number
@@ -89,8 +93,10 @@ export function tourCost(stops: Bar[], m: Matrices, o: TourCostOptions): Solutio
   let matchSum = 0
   let backtracks = 0
   let dir: [number, number] = [0, 0]
+  const avoid = o.noBacktrack && o.avoidLegs?.length ? new Set(o.avoidLegs.map(([a, b]) => `${a}>${b}`)) : null
   stops.forEach((b, i) => {
     if (i > 0) {
+      if (avoid?.has(`${stops[i - 1].id}>${b.id}`)) backtracks++
       const tol = o.filters.walkToleranceMinutes
       const l = legCost(m, stops[i - 1].matrixIndex, b.matrixIndex, tol)
       travel += l
@@ -248,6 +254,9 @@ class Model {
   private readonly startUy: Float32Array[] | null
   /** Direction of the last prefix leg if it was transit. */
   private readonly prefixDir: [number, number]
+  /** Extra cost of legs to avoid (avoidLegs), same layout as legs; null where there are none. */
+  private readonly avoidPen: (Uint8Array | null)[][]
+  private readonly startAvoidPen: (Uint8Array | null)[] | null
   private readonly backtrack: boolean
   readonly t0: number
   readonly weights: Float64Array[]
@@ -279,6 +288,18 @@ class Model {
     this.uy = this.cands.map((from) => this.cands.map((to) => dirs(from, to, 1)))
     const last = o.prefix[o.prefix.length - 1]
     this.startLegs = last ? this.cands.map((to) => Uint8Array.from(to, (q) => legCost(m, last.matrixIndex, q.matrixIndex, tol))) : null
+    const avoid = this.backtrack && o.avoidLegs?.length ? new Set(o.avoidLegs.map(([a, b]) => `${a}>${b}`)) : null
+    const avoidTable = (from: Bar[], to: Bar[]) => {
+      if (!avoid) return null
+      let any = false
+      const t = new Uint8Array(from.length * to.length)
+      from.forEach((p, i) => to.forEach((q, j) => {
+        if (avoid.has(`${p.id}>${q.id}`)) { t[i * to.length + j] = BACKTRACK_PENALTY; any = true }
+      }))
+      return any ? t : null
+    }
+    this.avoidPen = this.cands.map((from) => this.cands.map((to) => avoidTable(from, to)))
+    this.startAvoidPen = last ? this.cands.map((to) => avoidTable([last], to)) : null
     this.startUx = last ? this.cands.map((to) => dirs([last], to, 0)) : null
     this.startUy = last ? this.cands.map((to) => dirs([last], to, 1)) : null
     const beforeLast = o.prefix[o.prefix.length - 2]
@@ -318,7 +339,8 @@ class Model {
         const ux = this.startUx ? this.startUx[d][c] : 0
         const uy = this.startUy ? this.startUy[d][c] : 0
         const bt = px * ux + py * uy < REVERSAL ? BACKTRACK_PENALTY : 0
-        out.cost[c] = l + bt + w[c] + this.penalty(d, c, t)
+        const av = this.startAvoidPen?.[d]?.[c] ?? 0
+        out.cost[c] = l + bt + av + w[c] + this.penalty(d, c, t)
         out.time[c] = t
         out.dx[c] = ux
         out.dy[c] = uy
@@ -331,6 +353,7 @@ class Model {
     const uy = this.uy[pd][d]
     const Kp = this.cands[pd].length
     const bt = this.backtrack
+    const av = this.avoidPen[pd][d]
     for (let c = 0; c < K; c++) {
       let best = Infinity
       let bq = 0
@@ -338,6 +361,7 @@ class Model {
         const i = q * K + c
         let v = prev.cost[q] + table[i]
         if (bt && prev.dx[q] * ux[i] + prev.dy[q] * uy[i] < REVERSAL) v += BACKTRACK_PENALTY
+        if (av) v += av[i]
         if (v < best) { best = v; bq = q }
       }
       const i = bq * K + c

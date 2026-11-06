@@ -7,6 +7,7 @@ test('production build loads the map and its data', async ({ page }) => {
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()) })
   await page.goto('/')
   await expect(page.getByTestId('map')).toHaveAttribute('data-ready', '1', { timeout: 60_000 })
+  await page.getByRole('button', { name: 'Punkt auf der Karte setzen' }).click()
   await page.getByRole('searchbox', { name: 'Lokal suchen' }).fill('Café Bendl')
   await page.locator('.search-hits button').first().click()
   await expect(page.getByRole('heading', { name: 'Von Café Bendl aus' })).toBeVisible()

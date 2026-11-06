@@ -51,7 +51,7 @@ test('a district shows its figures only when asked', async ({ page }) => {
 test('the map button sets a point', async ({ page }) => {
   await expect(page.locator('.panel.sheet')).toHaveCount(0)
   await page.getByRole('button', { name: 'Punkt auf der Karte setzen' }).tap()
-  await expect(page.getByText('Tippt auf die Karte, um den Punkt zu setzen.')).toBeVisible()
+  await expect(page.getByText('Tippt auf die Karte oder ein Lokal, um den Punkt zu setzen.')).toBeVisible()
   await page.getByTestId('map').tap({ position: { x: 195, y: 300 } })
   await expect(page.getByRole('heading', { name: /Gewählter Punkt/ })).toBeVisible()
   await expect(page.locator('.panel.sheet')).toHaveAttribute('data-snap', 'half')

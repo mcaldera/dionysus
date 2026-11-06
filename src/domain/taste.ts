@@ -41,6 +41,12 @@ export const QUESTIONS: TasteQuestion[] = [
     ],
   },
   {
+    id: 'fame', question: 'Bekannt oder Geheimtipp?', options: [
+      { icon: 'star', label: 'Bewährte Klassiker', hint: 'Lokale, die viele kennen und gut bewerten', likes: ['beliebt', 'top_bewertet'] },
+      { icon: 'compass', label: 'Geheimtipps', hint: 'Gut bewertet, aber kaum bekannt', likes: ['geheimtipp'], avoids: ['beliebt'] },
+    ],
+  },
+  {
     id: 'food', question: 'Wollt ihr unterwegs essen?', options: [
       { icon: 'utensils', label: 'Ja, zwischendurch was Warmes', hint: 'Schnitzel, Gulasch, Würstel', likes: ['essen'] },
       { icon: 'beer', label: 'Nur trinken', hint: 'Essen spielt keine Rolle' },
@@ -70,7 +76,6 @@ export const QUESTIONS: TasteQuestion[] = [
       { icon: 'coffee', label: 'Tschocherl', hint: 'Kleines Espresso oder Stüberl ums Eck', likedTypes: ['tschocherl'] },
       { icon: 'dish', label: 'Beisl & Wirtshaus', hint: 'Wiener Küche, Bier vom Fass', likedTypes: ['beisl_wirtshaus'] },
       { icon: 'wine', label: 'Heuriger', hint: 'Wein statt Bier, eher am Stadtrand', likedTypes: ['heuriger'] },
-      { icon: 'sparkles', label: 'Besondere Orte', hint: 'Kegelbahn, Boulderhalle, Konzertlokal', likedTypes: ['special'] },
     ],
   },
 ]

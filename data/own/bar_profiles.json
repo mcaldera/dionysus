@@ -1,0 +1,1556 @@
+{
+"osm:node/6326749207": {
+"description": "Die Rote Bar ist ein Gourmetrestaurant im Hotel Sacher, das österreichische Küche auf hohem Niveau bietet. Das Ambiente ist elegant und stilvoll, mit klassischem Dekor und oft Live-Piano-Musik.",
+"keywords": [
+"Wiener Küche",
+"Gourmet",
+"Hotelbar",
+"Pianobar",
+"elegantes Ambiente",
+"österreichische Klassiker"
+],
+"profileTags": [
+"cocktails",
+"essen",
+"gehoben",
+"live_musik",
+"wein"
+],
+"similar": [
+"osm:node/956430135",
+"osm:node/1541442086",
+"osm:node/12860613734",
+"osm:node/1873911446",
+"osm:way/178145436",
+"osm:node/14265957597",
+"osm:node/672213953",
+"osm:node/10118956495",
+"osm:node/14069059990",
+"osm:node/4956300267"
+],
+"xy": [
+0.8461,
+0.0
+],
+"vec": [
+-55,
+48,
+-55,
+-25,
+-24,
+10,
+-41,
+26,
+4,
+47,
+-3,
+39,
+-6,
+-6,
+-2,
+-18
+],
+"confidence": "hoch"
+},
+"osm:node/4400167892": {
+"description": "Traditionelles Beisl mit österreichischer Küche im 21. Bezirk. Es bietet eine bodenständige Atmosphäre und ist bekannt für großzügige Portionen zu fairen Preisen.",
+"keywords": [
+"Wiener Küche",
+"Portionen",
+"Familienlokal",
+"Beisl",
+"Erdäpfelsalat",
+"Schnitzel"
+],
+"profileTags": [
+"essen",
+"gastgarten",
+"urig"
+],
+"similar": [
+"osm:node/283318282",
+"osm:node/1968846330",
+"osm:node/1744229463",
+"osm:node/930439503",
+"osm:node/1903094531",
+"osm:node/567077591",
+"osm:way/178145436",
+"osm:node/442972884",
+"osm:node/14069059990",
+"osm:node/634327154"
+],
+"xy": [
+0.7425,
+0.7425
+],
+"vec": [
+21,
+-93,
+5,
+3,
+-22,
+-6,
+6,
+-27,
+-11,
+16,
+-22,
+-34,
+-37,
+5,
+-20,
+-44
+],
+"confidence": "hoch"
+},
+"osm:node/146340019": {
+"description": "Das Highlander ist ein Brauhaus mit Gastgarten, das traditionelle Küche und eine Auswahl an selbstgebrauten Bieren bietet. Es ist ein gemütlicher Ort, um bei Speis und Trank zu verweilen, besonders im Sommer im schattigen Gastgarten.",
+"keywords": [
+"Brauerei",
+"Craft Beer",
+"Wiener Küche",
+"Gastgarten",
+"Schanigarten",
+"Vegetarisch",
+"Regionale Küche"
+],
+"profileTags": [
+"essen",
+"gastgarten"
+],
+"similar": [
+"osm:way/178145436",
+"osm:node/2000560985",
+"osm:node/930439503",
+"osm:node/10118956495",
+"osm:node/14265957597",
+"osm:node/672213953",
+"osm:node/1744229463",
+"osm:node/1873911446",
+"osm:node/14069059990",
+"osm:node/1541442086"
+],
+"xy": [
+0.5197,
+0.3614
+],
+"vec": [
+-39,
+-2,
+-26,
+80,
+40,
+-10,
+-9,
+-22,
+-15,
+-52,
+-10,
+26,
+-12,
+-23,
+28,
+-10
+],
+"confidence": "hoch"
+},
+"osm:way/178145436": {
+"description": "Traditionelles Wiener Wirtshaus mit Fokus auf regionale Küche und Wiener Schmäh. Bietet eine bodenständige Atmosphäre für Genussmomente bei gutem Essen, Wein und anregenden Gesprächen.",
+"keywords": [
+"Wiener Küche",
+"Wirtshaus",
+"Wein",
+"Schmäh",
+"Traditionell",
+"Rostbraten",
+"Schnitzel",
+"gemütlich"
+],
+"profileTags": [
+"essen",
+"urig",
+"wein"
+],
+"similar": [
+"osm:node/1744229463",
+"osm:node/930439503",
+"osm:node/1541442086",
+"osm:node/14069059990",
+"osm:node/146340019",
+"osm:node/6326749207",
+"osm:node/672213953",
+"osm:node/1873911446",
+"osm:node/956430135",
+"osm:node/283318282"
+],
+"xy": [
+0.7271,
+0.3325
+],
+"vec": [
+-78,
+-47,
+-11,
+3,
+4,
+-39,
+-40,
+11,
+-38,
+17,
+-29,
+0,
+10,
+-22,
+8,
+34
+],
+"confidence": "hoch"
+},
+"osm:node/1744229463": {
+"description": "Ein traditionelles Wiener Beisl mit einfacher Küche und freundlicher Atmosphäre. Hier trifft man sich auf ein Mittagessen oder einen gemütlichen Abend mit Freunden.",
+"keywords": [
+"Wiener Küche",
+"Stammtisch",
+"Gemütlich",
+"Traditionell",
+"Mittagstisch"
+],
+"profileTags": [
+"essen",
+"urig"
+],
+"similar": [
+"osm:way/178145436",
+"osm:node/930439503",
+"osm:node/4400167892",
+"osm:node/283318282",
+"osm:node/1968846330",
+"osm:node/13082470414",
+"osm:node/1541442086",
+"osm:node/146340019",
+"osm:node/14069059990",
+"osm:node/4956300267"
+],
+"xy": [
+0.79,
+0.4086
+],
+"vec": [
+-46,
+-67,
+38,
+7,
+18,
+-66,
+-40,
+11,
+-1,
+10,
+-4,
+-7,
+26,
+8,
+13,
+-18
+],
+"confidence": "mittel"
+},
+"osm:node/634327154": {
+"description": "Isaac's Pub ist ein Irish Pub mit Burger-Angebot im 9. Bezirk. Es bietet eine lockere Atmosphäre, besonders für Sportübertragungen, und hat einen kleinen Außenbereich.",
+"keywords": [
+"Irish Pub",
+"Burger",
+"Sports-Bar",
+"Guinness",
+"spät offen",
+"Außenbereich"
+],
+"profileTags": [
+"essen",
+"fussball",
+"gastgarten"
+],
+"similar": [
+"osm:node/567077591",
+"osm:node/4068343023",
+"osm:node/11115850115",
+"osm:node/4959779021",
+"osm:node/5773323975",
+"osm:node/442972884",
+"osm:node/10994639880",
+"osm:node/283318282",
+"osm:node/2000560985",
+"osm:node/1903094531"
+],
+"xy": [
+0.2922,
+0.8868
+],
+"vec": [
+90,
+9,
+-40,
+-20,
+12,
+-15,
+53,
+3,
+15,
+14,
+6,
+-10,
+10,
+-44,
+-12,
+-13
+],
+"confidence": "mittel"
+},
+"osm:node/10994639880": {
+"description": "Ein kleines, unkonventionelles Lokal mit Café- und Barbetrieb. Es bietet eine entspannte Atmosphäre und scheint bei einer jüngeren Zielgruppe beliebt zu sein.",
+"keywords": [
+"Tschocherl",
+"Café",
+"Bar",
+"Mango",
+"Mustard",
+"locker",
+"ungewöhnlich"
+],
+"profileTags": [
+"studenten"
+],
+"similar": [
+"osm:node/4959779021",
+"osm:node/442972884",
+"osm:node/13082470414",
+"osm:node/10118956495",
+"osm:node/634327154",
+"osm:node/2048616583",
+"osm:node/11115850115",
+"osm:node/4956300267",
+"osm:node/567077591",
+"osm:node/12860613734"
+],
+"xy": [
+0.0008,
+0.6031
+],
+"vec": [
+74,
+51,
+41,
+-13,
+-31,
+1,
+-23,
+-50,
+-19,
+19,
+-3,
+-10,
+22,
+-2,
+29,
+-12
+],
+"confidence": "mittel"
+},
+"osm:node/672213953": {
+"description": "Der Weinheuriger Falkenberg bietet saisonale Spezialitäten und Weine aus eigenem Anbau. Das Lokal liegt etwas außerhalb, mit Garten und Blick auf die Weinberge, und lädt zu einem entspannten Aufenthalt ein.",
+"keywords": [
+"Heuriger",
+"Buschenschank",
+"Wein",
+"Wiener Küche",
+"Garten",
+"Aussicht",
+"Weinberge"
+],
+"profileTags": [
+"essen",
+"gastgarten",
+"wein"
+],
+"similar": [
+"osm:node/14069059990",
+"osm:node/956430135",
+"osm:node/1541442086",
+"osm:way/178145436",
+"osm:node/930439503",
+"osm:node/146340019",
+"osm:node/2048616583",
+"osm:node/1744229463",
+"osm:node/1873911446",
+"osm:node/4956300267"
+],
+"xy": [
+0.5461,
+0.1071
+],
+"vec": [
+-73,
+-11,
+6,
+-13,
+59,
+65,
+17,
+-17,
+-6,
+2,
+13,
+3,
+42,
+15,
+5,
+0
+],
+"confidence": "mittel"
+},
+"osm:node/5773323975": {
+"description": "Ein türkisch-arabischer Imbiss mit Fokus auf Döner und Grillgerichte. Bietet auch vegetarische Optionen und Sitzplätze im Freien.",
+"keywords": [
+"Döner",
+"Kebab",
+"Fast Food",
+"Türkisch",
+"Arabisch",
+"Vegetarisch",
+"spät offen",
+"Take Away"
+],
+"profileTags": [
+"absteige",
+"essen",
+"gastgarten",
+"preiswert"
+],
+"similar": [
+"osm:node/634327154",
+"osm:node/13082470414",
+"osm:node/4959779021",
+"osm:node/567077591",
+"osm:node/10994639880",
+"osm:node/1744229463",
+"osm:node/11115850115",
+"osm:node/442972884",
+"osm:node/4956300267",
+"osm:node/12860613734"
+],
+"xy": [
+0.2699,
+1.0
+],
+"vec": [
+27,
+18,
+19,
+-52,
+56,
+-57,
+15,
+-27,
+62,
+-7,
+-17,
+-2,
+-10,
+17,
+3,
+7
+],
+"confidence": "mittel"
+},
+"osm:node/337468339": {
+"description": "Das Pezis Cafe-Eck ist eine entspannte Café-Bar mit einer wohnzimmerähnlichen Atmosphäre. Es bietet den ganzen Tag über Getränke und kleine Speisen, beliebt für Frühstück und einen gemütlichen Ausklang.",
+"keywords": [
+"Stammlokal",
+"Frühstück",
+"Kaffee",
+"Dart",
+"Gemütlich",
+"Bezirkslokal"
+],
+"profileTags": [
+"dart",
+"essen",
+"gastgarten",
+"urig"
+],
+"similar": [
+"osm:node/4956300267",
+"osm:node/10118956495",
+"osm:node/4068343023",
+"osm:node/2000560985",
+"osm:node/13082470414",
+"osm:node/4959779021",
+"osm:node/2048616583",
+"osm:node/10994639880",
+"osm:node/11115850115",
+"osm:node/146340019"
+],
+"xy": [
+0.03,
+0.404
+],
+"vec": [
+26,
+34,
+39,
+52,
+-2,
+9,
+32,
+60,
+-7,
+8,
+-60,
+-1,
+15,
+37,
+2,
+-2
+],
+"confidence": "mittel"
+},
+"osm:node/12860613734": {
+"description": "",
+"keywords": [
+"persische Küche",
+"Cocktails",
+"modern",
+"Restaurant",
+"Bar",
+"Ambiente",
+"spät offen"
+],
+"profileTags": [
+"cocktails",
+"essen",
+"modern"
+],
+"similar": [
+"osm:node/1873911446",
+"osm:node/6326749207",
+"osm:node/956430135",
+"osm:node/1541442086",
+"osm:node/10118956495",
+"osm:node/14265957597",
+"osm:node/10994639880",
+"osm:node/5773323975",
+"osm:node/146340019",
+"osm:node/4956300267"
+],
+"xy": [
+1.0,
+0.0096
+],
+"vec": [
+-16,
+91,
+-48,
+-14,
+-11,
+-19,
+-34,
+1,
+16,
+-24,
+-21,
+-29,
+31,
+-13,
+-17,
+-6
+],
+"confidence": "mittel"
+},
+"osm:node/10118956495": {
+"description": "Das Kosmos ist eine Mischung aus Café und Bar mit Fokus auf Kulturveranstaltungen. Es bietet Kaffee, Cocktails, Bio-Weine und Bier in entspannter Atmosphäre und lockt mit Konzerten, Lesungen und einem kleinen Gastgarten.",
+"keywords": [
+"Konzert",
+"Kaffee",
+"Cocktails",
+"Bio-Wein",
+"Gastgarten",
+"Kultur",
+"Tschocherl",
+"Meidling"
+],
+"profileTags": [
+"cocktails",
+"essen",
+"gastgarten",
+"live_musik",
+"spiele",
+"wein"
+],
+"similar": [
+"osm:node/2000560985",
+"osm:node/10994639880",
+"osm:node/337468339",
+"osm:node/146340019",
+"osm:node/4959779021",
+"osm:node/12860613734",
+"osm:node/4956300267",
+"osm:node/6326749207",
+"osm:node/1873911446",
+"osm:node/14265957597"
+],
+"xy": [
+0.2142,
+0.4554
+],
+"vec": [
+17,
+60,
+1,
+86,
+-17,
+25,
+-27,
+-31,
+17,
+26,
+-1,
+-9,
+-24,
+-5,
+-20,
+14
+],
+"confidence": "hoch"
+},
+"osm:node/283318282": {
+"description": "Traditionelles Beisl mit regionaler Küche im 21. Bezirk. Bietet einen gemütlichen Rahmen für einen Besuch, sowohl drinnen als auch mit Außenbereich.",
+"keywords": [
+"Wiener Küche",
+"Stammtisch",
+"Regionale Küche",
+"Außenbereich",
+"Beisl",
+"Wirtshaus"
+],
+"profileTags": [
+"essen",
+"gastgarten",
+"urig",
+"wein"
+],
+"similar": [
+"osm:node/4400167892",
+"osm:node/1968846330",
+"osm:node/567077591",
+"osm:node/1903094531",
+"osm:node/930439503",
+"osm:node/1744229463",
+"osm:way/178145436",
+"osm:node/634327154",
+"osm:node/442972884",
+"osm:node/4068343023"
+],
+"xy": [
+0.6321,
+0.7896
+],
+"vec": [
+32,
+-104,
+-16,
+8,
+-28,
+13,
+25,
+3,
+-27,
+20,
+-3,
+24,
+5,
+-4,
+-23,
+8
+],
+"confidence": "mittel"
+},
+"osm:node/14069059990": {
+"description": "Das Presshaus ist ein traditioneller Heuriger in Stammersdorf, eingebettet in eine landwirtschaftliche Umgebung. Es bietet eine Auswahl an eigenen Produkten aus dem Hofladen und Weinverkostungsmöglichkeiten in gemütlicher Atmosphäre.",
+"keywords": [
+"Heuriger",
+"Buschenschank",
+"Wein",
+"Bauernhof",
+"Gastgarten",
+"Stammersdorf",
+"Biohof",
+"Ab-Hof-Verkauf"
+],
+"profileTags": [
+"essen",
+"gastgarten",
+"urig",
+"wein"
+],
+"similar": [
+"osm:node/672213953",
+"osm:way/178145436",
+"osm:node/956430135",
+"osm:node/1541442086",
+"osm:node/930439503",
+"osm:node/1744229463",
+"osm:node/146340019",
+"osm:node/1873911446",
+"osm:node/2048616583",
+"osm:node/4400167892"
+],
+"xy": [
+0.559,
+0.1793
+],
+"vec": [
+-72,
+-23,
+9,
+-10,
+64,
+55,
+18,
+-26,
+-14,
+24,
+-7,
+-32,
+9,
+-9,
+-5,
+-4
+],
+"confidence": "hoch"
+},
+"osm:node/2000560985": {
+"description": "Das Cafe Benno ist ein entspanntes Beisl mit warmer Atmosphäre, das besonders für seine große Auswahl an Brett- und Kartenspielen bekannt ist. Es bietet solide Hausmannskost und eine vielfältige Getränkeauswahl, von Kaffee bis Bier.",
+"keywords": [
+"Brettspiele",
+"Studenten",
+"Hausmannskost",
+"Spritzer",
+"spät offen",
+"Gemütlichkeit",
+"Pub Quiz"
+],
+"profileTags": [
+"essen",
+"fussball",
+"gastgarten",
+"live_musik",
+"spiele",
+"studenten",
+"urig"
+],
+"similar": [
+"osm:node/10118956495",
+"osm:node/146340019",
+"osm:node/337468339",
+"osm:node/4068343023",
+"osm:node/634327154",
+"osm:node/11115850115",
+"osm:node/4959779021",
+"osm:node/10994639880",
+"osm:node/567077591",
+"osm:node/283318282"
+],
+"xy": [
+0.3199,
+0.4619
+],
+"vec": [
+43,
+16,
+-11,
+95,
+30,
+-14,
+-5,
+-3,
+31,
+33,
+37,
+19,
+5,
+-1,
+1,
+-8
+],
+"confidence": "hoch"
+},
+"osm:node/4959779021": {
+"description": "Das Café Einhorn ist eine Bar mit Café-Charakter im 6. Bezirk. Es bietet eine entspannte Atmosphäre mit Fokus auf 80er-Jahre-Musik und ist bis spät in die Nacht geöffnet.",
+"keywords": [
+"80er Musik",
+"Tschocherl",
+"Bar",
+"alternativ",
+"spät offen",
+"uriges Ambiente"
+],
+"profileTags": [
+"gastgarten"
+],
+"similar": [
+"osm:node/10994639880",
+"osm:node/442972884",
+"osm:node/11115850115",
+"osm:node/634327154",
+"osm:node/4068343023",
+"osm:node/10118956495",
+"osm:node/567077591",
+"osm:node/13082470414",
+"osm:node/337468339",
+"osm:node/5773323975"
+],
+"xy": [
+0.0794,
+0.6542
+],
+"vec": [
+91,
+34,
+34,
+-8,
+-11,
+17,
+-7,
+-42,
+-29,
+-10,
+1,
+2,
+-19,
+37,
+17,
+19
+],
+"confidence": "mittel"
+},
+"osm:node/4956300267": {
+"description": "Das Café Scotch ist eine Mischung aus traditionellem Kaffeehaus und Bar. Es bietet den ganzen Tag über Getränke und kleine Speisen, mit einem besonderen Fokus auf Kaffee und Kuchen. Die Atmosphäre ist entspannt und freundlich.",
+"keywords": [
+"Kaffee",
+"Kuchen",
+"Schanigarten",
+"Tschocherl",
+"spät offen",
+"freundlich"
+],
+"profileTags": [
+"essen",
+"gastgarten",
+"urig"
+],
+"similar": [
+"osm:node/13082470414",
+"osm:node/2048616583",
+"osm:node/337468339",
+"osm:node/930439503",
+"osm:node/1744229463",
+"osm:node/10994639880",
+"osm:node/672213953",
+"osm:node/10118956495",
+"osm:node/1541442086",
+"osm:node/5773323975"
+],
+"xy": [
+0.0,
+0.2839
+],
+"vec": [
+-37,
+44,
+98,
+-7,
+-30,
+0,
+14,
+18,
+28,
+3,
+-8,
+6,
+13,
+-3,
+-25,
+-3
+],
+"confidence": "mittel"
+},
+"osm:node/1873911446": {
+"description": "Das Bootshaus ist ein Lokal direkt an der Alten Donau, das moderne europäische Küche mit Fokus auf Fischgerichte bietet. Es eignet sich für einen entspannten Aufenthalt, besonders bei gutem Wetter, und wird auch für besondere Anlässe genutzt.",
+"keywords": [
+"Donau",
+"Fischküche",
+"Terrasse",
+"gehoben",
+"romantisch",
+"Brunch",
+"Cocktails",
+"Events"
+],
+"profileTags": [
+"cocktails",
+"essen",
+"gastgarten",
+"modern",
+"wein"
+],
+"similar": [
+"osm:node/1541442086",
+"osm:node/12860613734",
+"osm:node/14265957597",
+"osm:node/956430135",
+"osm:node/6326749207",
+"osm:way/178145436",
+"osm:node/146340019",
+"osm:node/672213953",
+"osm:node/14069059990",
+"osm:node/10118956495"
+],
+"xy": [
+0.9513,
+0.1107
+],
+"vec": [
+-64,
+45,
+-69,
+-4,
+-32,
+-5,
+38,
+-20,
+-9,
+-8,
+-19,
+-16,
+-6,
+-10,
+-1,
+38
+],
+"confidence": "hoch"
+},
+"osm:node/2048616583": {
+"description": "Ein traditionelles Wiener Tschocherl mit Café-Charakter im 2. Bezirk. Es bietet einen ungezwungenen Rahmen für Kaffee, Gespräche und einen Spritzer am Abend.",
+"keywords": [
+"Tschocherl",
+"Wiener Kaffee",
+"Spritzer",
+"Gespräch",
+"ungezwungen",
+"Alt-Wien"
+],
+"profileTags": [
+"gastgarten",
+"urig",
+"wein"
+],
+"similar": [
+"osm:node/13082470414",
+"osm:node/4956300267",
+"osm:node/930439503",
+"osm:node/10994639880",
+"osm:node/1744229463",
+"osm:node/337468339",
+"osm:node/672213953",
+"osm:node/1541442086",
+"osm:node/14069059990",
+"osm:node/4959779021"
+],
+"xy": [
+0.0113,
+0.1917
+],
+"vec": [
+-31,
+24,
+106,
+-22,
+-24,
+12,
+10,
+12,
+-20,
+-5,
+21,
+8,
+-12,
+-24,
+-5,
+14
+],
+"confidence": "mittel"
+},
+"osm:node/11115850115": {
+"description": "Das Bräuhaus Ten.Fifty ist eine Craft-Bier-Bar mit eigener Brauerei in einem entspannten Innenhof. Hier stehen qualitativ hochwertige, ungefilterte Biere im Fokus, die vor Ort hergestellt und direkt gezapft werden. Es bietet eine ungezwungene Atmosphäre für Bierliebhaber und Interessierte.",
+"keywords": [
+"Craft Beer",
+"Brauerei",
+"Biergarten",
+"Wiener Lokal",
+"Stammtisch",
+"Foodtruck"
+],
+"profileTags": [
+"gastgarten"
+],
+"similar": [
+"osm:node/442972884",
+"osm:node/4959779021",
+"osm:node/4068343023",
+"osm:node/634327154",
+"osm:node/567077591",
+"osm:node/10994639880",
+"osm:node/5773323975",
+"osm:node/2000560985",
+"osm:node/337468339",
+"osm:node/146340019"
+],
+"xy": [
+0.1923,
+0.7492
+],
+"vec": [
+75,
+16,
+-16,
+-4,
+48,
+3,
+-17,
+18,
+-40,
+-58,
+-7,
+15,
+-15,
+-2,
+-40,
+-8
+],
+"confidence": "hoch"
+},
+"osm:node/13082470414": {
+"description": "Ein kleines, traditionelles Wiener Tschocherl mit Café-Charakter. Es bietet einen Schanigarten und ist ein beliebter Treffpunkt für einen Kaffee oder eine kurze Pause.",
+"keywords": [
+"Schanigarten",
+"Wiener Beisel",
+"Kaffee",
+"Tschocherl",
+"zentral"
+],
+"profileTags": [
+"gastgarten"
+],
+"similar": [
+"osm:node/2048616583",
+"osm:node/4956300267",
+"osm:node/10994639880",
+"osm:node/1744229463",
+"osm:node/4959779021",
+"osm:node/337468339",
+"osm:node/5773323975",
+"osm:node/930439503",
+"osm:node/672213953",
+"osm:node/14069059990"
+],
+"xy": [
+0.1072,
+0.235
+],
+"vec": [
+-13,
+27,
+110,
+-28,
+-10,
+-7,
+19,
+3,
+-7,
+-16,
+16,
+22,
+-1,
+-24,
+8,
+-16
+],
+"confidence": "mittel"
+},
+"osm:node/930439503": {
+"description": "Traditionelles Wiener Gasthaus mit urigem Ambiente und gutbürgerlicher Küche. Bekannt für seine Innereien und täglich wechselnde Menüs zu fairen Preisen, bietet das Gasthaus Bauer ein gemütliches Lokal für Liebhaber der Wiener Hausmannskost.",
+"keywords": [
+"Wiener Küche",
+"Hausmannskost",
+"Innereien",
+"Schanigarten",
+"traditionell",
+"preiswert",
+"Stammtisch"
+],
+"profileTags": [
+"essen",
+"gastgarten",
+"urig",
+"wein"
+],
+"similar": [
+"osm:node/1744229463",
+"osm:way/178145436",
+"osm:node/283318282",
+"osm:node/4400167892",
+"osm:node/2048616583",
+"osm:node/14069059990",
+"osm:node/146340019",
+"osm:node/1541442086",
+"osm:node/672213953",
+"osm:node/4956300267"
+],
+"xy": [
+0.7002,
+0.4597
+],
+"vec": [
+-60,
+-71,
+40,
+27,
+8,
+-35,
+6,
+8,
+23,
+-5,
+32,
+-9,
+-19,
+13,
+-19,
+37
+],
+"confidence": "hoch"
+},
+"osm:node/1903094531": {
+"description": "Das Servus Du ist ein gemütliches Wiener Lokal mit Restaurantcharakter, das für seine bodenständige Küche und die entspannte Atmosphäre bekannt ist. Es ist ein beliebter Treffpunkt für Einheimische und bietet auch einen Gastgarten.",
+"keywords": [
+"Wiener Küche",
+"Stammtisch",
+"Rauchen erlaubt",
+"spät offen",
+"Gastgarten",
+"gemütlich"
+],
+"profileTags": [
+"essen",
+"gastgarten",
+"urig",
+"wein"
+],
+"similar": [
+"osm:node/1968846330",
+"osm:node/283318282",
+"osm:node/4400167892",
+"osm:node/442972884",
+"osm:node/567077591",
+"osm:node/634327154",
+"osm:node/930439503",
+"osm:node/4068343023",
+"osm:node/4959779021",
+"osm:node/11115850115"
+],
+"xy": [
+0.5048,
+0.6848
+],
+"vec": [
+34,
+-58,
+-13,
+-20,
+-29,
+63,
+-30,
+20,
+62,
+-26,
+-2,
+-14,
+-3,
+-5,
+4,
+13
+],
+"confidence": "hoch"
+},
+"osm:node/1968846330": {
+"description": "Das Zobel ist ein traditionelles Beisl mit österreichischer Küche und einem Gastgarten. Es bietet eine gemütliche Atmosphäre für Mittagspausen, Geschäftsessen oder einen entspannten Feierabend mit Fokus auf regionale Spezialitäten.",
+"keywords": [
+"Wiener Küche",
+"Gastgarten",
+"Mittagsmenü",
+"Saisonale Küche",
+"Bier",
+"Schitzel",
+"Rauchen erlaubt",
+"Feierabend"
+],
+"profileTags": [
+"essen",
+"gastgarten",
+"urig"
+],
+"similar": [
+"osm:node/1903094531",
+"osm:node/283318282",
+"osm:node/4400167892",
+"osm:node/567077591",
+"osm:node/1744229463",
+"osm:node/442972884",
+"osm:node/930439503",
+"osm:way/178145436",
+"osm:node/11115850115",
+"osm:node/146340019"
+],
+"xy": [
+0.6152,
+0.6874
+],
+"vec": [
+33,
+-89,
+-9,
+2,
+-35,
+35,
+-16,
+1,
+36,
+-31,
+-21,
+20,
+8,
+-12,
+32,
+-5
+],
+"confidence": "mittel"
+},
+"osm:node/4068343023": {
+"description": "Irish Pub mit Fokus auf Billard und Darts. Bietet eine lockere Atmosphäre, in der man Bier trinken und Sportübertragungen schauen kann. Gäste bringen oft eigenes Essen mit.",
+"keywords": [
+"Billiard",
+"Darts",
+"Sportsbar",
+"Irish Pub",
+"spät offen",
+"Gemütlichkeit",
+"Bestellen erlaubt"
+],
+"profileTags": [
+"billard",
+"dart",
+"fussball",
+"gastgarten",
+"urig"
+],
+"similar": [
+"osm:node/634327154",
+"osm:node/11115850115",
+"osm:node/442972884",
+"osm:node/567077591",
+"osm:node/4959779021",
+"osm:node/337468339",
+"osm:node/2000560985",
+"osm:node/10994639880",
+"osm:node/283318282",
+"osm:node/5773323975"
+],
+"xy": [
+0.1672,
+0.8582
+],
+"vec": [
+75,
+15,
+-28,
+-7,
+26,
+0,
+30,
+62,
+-14,
+19,
+16,
+-26,
+-26,
+-11,
+40,
+9
+],
+"confidence": "mittel"
+},
+"osm:node/956430135": {
+"description": "Weinbar und -handlung mit angeschlossenem Lokal, das zum Verweilen bei einem Glas Wein und kleinen Speisen einlädt. Familiengeführt mit herzlicher Atmosphäre und Fokus auf Weine des Weinguts Leo Hillinger.",
+"keywords": [
+"Weinbar",
+"Weine",
+"Käseplatte",
+"Schanigarten",
+"familiengeführt",
+"gemütlich"
+],
+"profileTags": [
+"essen",
+"gastgarten",
+"wein"
+],
+"similar": [
+"osm:node/6326749207",
+"osm:node/1541442086",
+"osm:node/672213953",
+"osm:node/1873911446",
+"osm:node/12860613734",
+"osm:node/14069059990",
+"osm:way/178145436",
+"osm:node/14265957597",
+"osm:node/146340019",
+"osm:node/4956300267"
+],
+"xy": [
+0.758,
+0.0652
+],
+"vec": [
+-79,
+40,
+-44,
+-43,
+18,
+25,
+-10,
+19,
+12,
+2,
+16,
+24,
+-34,
+24,
+-3,
+-16
+],
+"confidence": "hoch"
+},
+"osm:node/567077591": {
+"description": "Das St. Ribbs ist ein Lokal mit Fokus auf Barbecue-Gerichte. Es bietet Sitzplätze im Freien und scheint ein ungezwungenes Ambiente für einen Besuch zu haben.",
+"keywords": [
+"Barbecue",
+"Outdoor",
+"Beisl",
+"Wirtshaus",
+"Fleisch",
+"Grillen"
+],
+"profileTags": [
+"essen",
+"gastgarten"
+],
+"similar": [
+"osm:node/634327154",
+"osm:node/283318282",
+"osm:node/1968846330",
+"osm:node/442972884",
+"osm:node/4068343023",
+"osm:node/11115850115",
+"osm:node/4959779021",
+"osm:node/4400167892",
+"osm:node/1903094531",
+"osm:node/5773323975"
+],
+"xy": [
+0.4239,
+0.8521
+],
+"vec": [
+67,
+-30,
+-59,
+-28,
+-15,
+-20,
+37,
+-24,
+-6,
+10,
+5,
+46,
+32,
+16,
+-10,
+13
+],
+"confidence": "mittel"
+},
+"osm:node/14265957597": {
+"description": "Das Velani ist ein Restaurant mit Fokus auf österreichische Küche in veganer Variante. Es bietet eine erweiterte Speisekarte mit saisonalen Gerichten und eine Bar für Aperitifs und Drinks. Besonders beliebt sind Wiener Klassiker wie Schnitzel, Gulasch und Tafelspitz, die ohne Fleisch zubereitet werden.",
+"keywords": [
+"vegan",
+"Wiener Küche",
+"Gastgarten",
+"Aperitifs",
+"traditionell",
+"Wirtshaus",
+"Beisl"
+],
+"profileTags": [
+"cocktails",
+"essen",
+"gastgarten",
+"wein"
+],
+"similar": [
+"osm:node/1873911446",
+"osm:node/1541442086",
+"osm:node/146340019",
+"osm:node/930439503",
+"osm:node/12860613734",
+"osm:node/956430135",
+"osm:way/178145436",
+"osm:node/6326749207",
+"osm:node/1744229463",
+"osm:node/672213953"
+],
+"xy": [
+0.9752,
+0.2123
+],
+"vec": [
+-48,
+7,
+-41,
+35,
+-55,
+-15,
+26,
+13,
+-11,
+-37,
+52,
+-32,
+27,
+23,
+2,
+-19
+],
+"confidence": "hoch"
+},
+"osm:node/442972884": {
+"description": "Der Bierbaron ist eine Bar mit Fokus auf Biere, die eine gemütliche Atmosphäre bietet. Hier trifft man sich zum geselligen Beisammensein und genießt eine große Auswahl an Bieren.",
+"keywords": [
+"Bierauswahl",
+"Gemütlichkeit",
+"Beisl",
+"Stammtisch",
+"spät offen"
+],
+"profileTags": [
+"urig"
+],
+"similar": [
+"osm:node/11115850115",
+"osm:node/4959779021",
+"osm:node/4068343023",
+"osm:node/10994639880",
+"osm:node/567077591",
+"osm:node/1903094531",
+"osm:node/634327154",
+"osm:node/1968846330",
+"osm:node/4400167892",
+"osm:node/283318282"
+],
+"xy": [
+0.062,
+0.7702
+],
+"vec": [
+75,
+-12,
+-10,
+-46,
+13,
+-5,
+-74,
+17,
+-24,
+10,
+29,
+-20,
+7,
+10,
+-7,
+11
+],
+"confidence": "mittel"
+},
+"osm:node/1541442086": {
+"description": "Italienisches Restaurant mit österreichischen Einflüssen im 4. Bezirk. Bietet sowohl italienische Klassiker wie Pasta und Pizza als auch Wiener Küche, mit Fokus auf frische Zubereitung und bewusste Ernährung. Verfügt über einen Gastgarten.",
+"keywords": [
+"italienische Küche",
+"Wiener Schnitzel",
+"Pasta",
+"Gastgarten",
+"traditionell",
+"Rabattaktionen"
+],
+"profileTags": [
+"essen",
+"gastgarten",
+"wein"
+],
+"similar": [
+"osm:node/1873911446",
+"osm:node/956430135",
+"osm:way/178145436",
+"osm:node/6326749207",
+"osm:node/14265957597",
+"osm:node/14069059990",
+"osm:node/672213953",
+"osm:node/930439503",
+"osm:node/12860613734",
+"osm:node/1744229463"
+],
+"xy": [
+0.8304,
+0.1525
+],
+"vec": [
+-95,
+7,
+-37,
+-35,
+-30,
+-24,
+25,
+-18,
+-8,
+-1,
+-5,
+3,
+-36,
+11,
+17,
+-13
+],
+"confidence": "mittel"
+}
+}

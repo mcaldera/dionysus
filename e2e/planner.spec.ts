@@ -50,7 +50,7 @@ test('taste quiz in the plan dialog sets preferences', async ({ page }) => {
   await plan.getByRole('button', { name: 'Geschmackstest' }).click()
   const dialog = page.getByRole('dialog', { name: 'Geschmackstest' })
   await dialog.getByRole('button', { name: /Altes Beisl/ }).click()
-  for (let i = 0; i < 6; i++) await dialog.getByRole('button', { name: 'Egal' }).click()
+  for (let i = 0; i < 7; i++) await dialog.getByRole('button', { name: 'Egal' }).click()
   await dialog.getByRole('button', { name: /Tschocherl/ }).click()
   await dialog.getByRole('button', { name: 'Weiter' }).click()
   await dialog.getByRole('button', { name: 'Übernehmen' }).click()
@@ -145,8 +145,18 @@ test.describe('Beisl-Finder', () => {
     await page.getByRole('tab', { name: /Beisl-Finder/ }).click()
   })
 
-  test('a bar shows what is reachable from it, in any district', async ({ page }) => {
+  test('picking a bar only shows it', async ({ page }) => {
+    await pick(page, 'Café Bendl')
+    await expect(page.locator('.bar-card')).toBeVisible()
+    await expect(page.locator('[aria-label="In der Nähe"]')).toHaveCount(0)
+    await pick(page, 'Blunzenstricker')
+    await expect(page.getByRole('heading', { name: 'Blunzenstricker', level: 2 })).toBeVisible()
+    await expect(page.locator('[aria-label="In der Nähe"]')).toHaveCount(0)
+  })
+
+  test('the marker put on a bar shows what is reachable from it, in any district', async ({ page }) => {
     await expect(page.locator('.panel .card')).toHaveCount(0)
+    await page.getByRole('button', { name: 'Punkt auf der Karte setzen' }).click()
     await pick(page, 'Café Bendl')
     await expect(page.getByRole('heading', { name: 'Von Café Bendl aus' })).toBeVisible()
     const items = page.locator('[aria-label="In der Nähe"] .recs li')
@@ -174,7 +184,9 @@ test.describe('Beisl-Finder', () => {
     await page.locator('.my-bars summary').click()
     await expect(page.locator('.my-bars .fav-list li')).toHaveCount(1)
     await page.getByLabel('Nur meine Lokale auf der Karte').check()
-    // Only the one bar is left to reach from anywhere.
+    // From a point on that bar, nothing else is left to reach.
+    await page.getByRole('button', { name: 'Punkt auf der Karte setzen' }).click()
+    await pick(page, 'Café Bendl')
     await expect(page.locator('[aria-label="In der Nähe"]')).toContainText('Nichts in dieser Zeit')
     await page.reload()
     await expect(page.locator('.my-bars .badge-count')).toHaveText('1')

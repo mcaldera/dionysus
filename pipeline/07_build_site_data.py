@@ -1,12 +1,16 @@
 """Merge everything into public/data/ (SPEC 3, 6).
 
 Inputs: data/interim/bars.json, data/interim/opening_hours.json, data/own/tags.csv,
-public/data/travel/manifest.json (written by 06_travel_matrix.py).
+data/own/google_place_ids.csv, data/own/google_scores.csv and data/own/bar_profiles.json
+(optional), public/data/travel/manifest.json (written by 06_travel_matrix.py).
 Outputs: public/data/bars.json, public/data/districts.geojson, public/data/vienna_mask.geojson,
 public/data/manifest.json.
 
 Tags from OSM (essen, gastgarten, live_musik) and computed ones (lang_offen) are derived
-here; tags.csv rows (claude, manual) are applied on top, and value 0 removes a tag.
+here, and so are score tags (beliebt, top_bewertet, geheimtipp, polarisiert) from
+data/own/google_scores.csv; profile tags (data/own/bar_profiles.json, from a local LLM) are
+added as unreviewed;
+tags.csv rows (claude, manual) are applied on top, and value 0 removes a tag.
 """
 
 from __future__ import annotations
@@ -21,7 +25,15 @@ from shapely.geometry import box, mapping
 
 from common import INTERIM, OWN, PUBLIC_DATA, RAW, load_overrides, log
 
-TAGS = ["essen", "urig", "modern", "preiswert", "gehoben", "gastgarten", "lang_offen", "live_musik", "absteige"]
+VENUE_TYPES = ["pub_bar", "tschocherl", "beisl_wirtshaus", "heuriger"]
+TAGS = ["essen", "urig", "modern", "preiswert", "gehoben", "gastgarten", "lang_offen", "live_musik", "absteige",
+        "cocktails", "wein", "studenten", "fussball", "dart", "billard", "spiele", "karaoke", "tanzen",
+        "beliebt", "top_bewertet", "geheimtipp", "polarisiert"]
+# Tags from the 0-100 Google-review scores (google_scores.csv): score name and the threshold.
+# beliebt = "sehr bekannt" (top 30%), top_bewertet = about 4.7 stars and up, geheimtipp and
+# polarisiert = the badges (about the top 6% and 3%).
+SCORE_TAGS = {"beliebt": ("popularity", 70), "top_bewertet": ("satisfaction", 85),
+              "geheimtipp": ("geheimtipp", 80), "polarisiert": ("polarizing", 50)}
 TAGS_HEADER = ["bar_id", "tag", "value", "source", "evidence", "reviewed"]
 DAY = 24 * 60
 
@@ -54,6 +66,31 @@ def load_tag_rows() -> list[dict]:
         return []
     with open(path, encoding="utf-8") as f:
         return list(csv.DictReader(f))
+
+
+def load_place_ids() -> dict[str, str]:
+    # Google place ids, only for a precise "In Google Maps ansehen" link.
+    path = OWN / "google_place_ids.csv"
+    if not path.exists():
+        return {}
+    with open(path, encoding="utf-8") as f:
+        return {r["bar_id"]: r["place_id"] for r in csv.DictReader(f)}
+
+
+def load_scores() -> dict[str, dict[str, int]]:
+    # 0-100 scores derived from Google reviews (popularity, satisfaction, geheimtipp, polarizing);
+    # Google's own numbers (stars, review counts) are not published.
+    path = OWN / "google_scores.csv"
+    if not path.exists():
+        return {}
+    with open(path, encoding="utf-8") as f:
+        return {r.pop("bar_id"): {k: int(v) for k, v in r.items()} for r in csv.DictReader(f)}
+
+
+def load_profiles() -> dict[str, dict]:
+    # Description, keywords, tags, similar bars and scatterplot position per bar (pipeline/private/similarity.py).
+    path = OWN / "bar_profiles.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
 
 
 def website(url: str | None) -> str | None:
@@ -93,6 +130,9 @@ def main() -> None:
     index = {bar_id: i for i, bar_id in enumerate(travel["order"])}
 
     overrides = load_overrides()
+    place_ids = load_place_ids()
+    scores = load_scores()
+    profiles = load_profiles()
     rows = load_tag_rows()
     by_bar: dict[str, list[dict]] = {}
     for r in rows:
@@ -105,13 +145,24 @@ def main() -> None:
             continue
         if o.get("address"):
             b["address"] = o["address"]
+        if o.get("venue_type"):
+            b["venueType"] = o["venue_type"]
+        if b["venueType"] not in VENUE_TYPES:
+            raise SystemExit(f"{b['name']} ({b['id']}) has venue type {b['venueType']!r}; set venue_type in overrides.csv")
         if b["id"] not in index:
             raise SystemExit(f"{b['name']} ({b['id']}) has no matrix index; re-run 06_travel_matrix.py")
         weekly = hours.get(b["id"], {}).get("weeklyOpen")
         tags = osm_tags(b, weekly)
         unreviewed = set()
+        sc = scores.get(b["id"], {})
+        tags |= {t for t, (k, minimum) in SCORE_TAGS.items() if sc.get(k, -1) >= minimum}
+        prof = profiles.get(b["id"], {})
+        for t in prof.get("profileTags", []):
+            if t in TAGS and t not in tags:
+                tags.add(t)
+                unreviewed.add(t)
         for r in by_bar.get(b["id"], []):  # later rows win
-            if r["tag"] not in TAGS:
+            if r["tag"] not in TAGS or r["tag"] in SCORE_TAGS:
                 continue
             if r["value"] == "1":
                 tags.add(r["tag"])
@@ -133,11 +184,15 @@ def main() -> None:
             **{k: v for k, v in {
                 "address": b.get("address"),
                 "mapsQuery": overrides.get(b["id"], {}).get("maps_query"),
+                "placeId": place_ids.get(b["id"]),
                 "website": website(b.get("website")),
                 "phone": b.get("phone"),
                 "wheelchair": b.get("wheelchair"),
                 "openingHoursText": b.get("openingHoursText"),
             }.items() if v},
+            **scores.get(b["id"], {}),
+            **({k: prof[k] for k in ("description", "keywords") if prof.get(k)}),
+            **({"profile": {"xy": prof["xy"], "vec": prof["vec"], "similar": prof["similar"]}} if prof else {}),
             "weeklyOpen": weekly,
             "official": b["official"],
             # Public tip sources only; the owner's own lists stay private.
@@ -150,6 +205,10 @@ def main() -> None:
             "unreviewedTags": [t for t in TAGS if t in unreviewed],
         })
     bars.sort(key=lambda b: b["matrixIndex"])
+    published = {b["id"]: b["matrixIndex"] for b in bars}
+    for b in bars:
+        if "profile" in b:
+            b["profile"]["similar"] = [published[i] for i in b["profile"]["similar"] if i in published]
 
     PUBLIC_DATA.mkdir(parents=True, exist_ok=True)
     bars_json = json.dumps(bars, ensure_ascii=False, separators=(",", ":"))

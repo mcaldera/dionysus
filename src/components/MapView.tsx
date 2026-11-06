@@ -52,7 +52,14 @@ export interface MapBar {
   dim?: boolean
   /** In "Meine Lokale": drawn with a heart. */
   mine?: boolean
+  /** Finder: minutes from the origin, for the reveal wave. */
+  minutes?: number
 }
+
+/** What the dot size shows: nothing, Beliebtheit or Zufriedenheit. */
+export type SizeBy = 'none' | 'popularity' | 'satisfaction'
+
+const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
 export interface Leg {
   coords: [number, number][]
@@ -98,6 +105,35 @@ interface Props {
   onHoverDistrict: (h: { district: number; x: number; y: number } | null) => void
   /** Pixels covered by the panel (desktop: right) or the bottom sheet (phone), kept clear when moving the map. */
   inset: { right: number; bottom: number }
+  sizeBy: SizeBy
+  /** Finder: what is in reach; a change replays the reveal wave. key = origin and travel mode. */
+  reach?: { key: string; minutes: number } | null
+}
+
+/** Four size steps per score, the same as the labels in the panel; a smooth scale made 80 and
+ *  100 look alike. Unknown scores get the smallest step. */
+export const SIZE_STEPS: Record<Exclude<SizeBy, 'none'>, { min: number; label: string }[]> = {
+  popularity: [{ min: 0, label: 'kaum bekannt' }, { min: 40, label: 'bekannt' }, { min: 70, label: 'sehr bekannt' }, { min: 90, label: 'Publikumsmagnet' }],
+  satisfaction: [{ min: 0, label: 'gemischt' }, { min: 50, label: 'zufrieden' }, { min: 70, label: 'sehr zufrieden' }, { min: 85, label: 'begeistert' }],
+}
+export const SIZE_FACTORS = [0.55, 1, 1.6, 2.3]
+
+function scoreKey(sizeBy: Exclude<SizeBy, 'none'>) {
+  return sizeBy === 'popularity' ? 'pop' : 'sat'
+}
+
+function sizeFactor(sizeBy: SizeBy): ExpressionSpecification | number {
+  if (sizeBy === 'none') return 1
+  const steps = SIZE_STEPS[sizeBy]
+  return ['step', ['get', scoreKey(sizeBy)], SIZE_FACTORS[0],
+    steps[1].min, SIZE_FACTORS[1], steps[2].min, SIZE_FACTORS[2], steps[3].min, SIZE_FACTORS[3]] as ExpressionSpecification
+}
+
+/** Dot radius by zoom, times the size factor, and bigger while hovered. */
+function radius(z11: number, z15: number, sizeBy: SizeBy): ExpressionSpecification {
+  const f = sizeFactor(sizeBy)
+  const hover: ExpressionSpecification = ['case', ['boolean', ['feature-state', 'hover'], false], 1.6, 1]
+  return ['interpolate', ['linear'], ['zoom'], 11, ['*', z11, f, hover], 15, ['*', z15, f, hover]]
 }
 
 /** How long the mouse must stay in a district before the others are greyed out. */
@@ -119,6 +155,7 @@ function barsGeoJson(bars: MapBar[]): GeoJSON.FeatureCollection {
       properties: {
         id: m.bar.id, role: m.role, type: m.bar.venueType, district: m.bar.district, label: m.label != null ? String(m.label) : '',
         closed: m.closed ? 1 : 0, dim: m.dim ? 1 : 0, mine: m.mine ? 1 : 0,
+        pop: m.bar.popularity ?? -1, sat: m.bar.satisfaction ?? -1, minutes: m.minutes ?? 0,
       },
     })),
   }
@@ -175,6 +212,8 @@ export default function MapView(props: Props) {
   const dwelling = useRef(false)
   const routePill = useRef<maplibregl.Marker | null>(null)
   const dwellTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const hoverId = useRef<string | null>(null)
+  const anim = useRef<{ hover?: number; wave?: number }>({})
   const latest = useRef(props)
   useLayoutEffect(() => {
     latest.current = props
@@ -257,6 +296,78 @@ export default function MapView(props: Props) {
       ['step', ['zoom'], ['case', is, named, ['to-string', ['get', 'district']]], 12.6, named])
   }
 
+  function setSize(sizeBy: SizeBy) {
+    const m = map.current
+    if (!m || !ready.current) return
+    m.setPaintProperty('bars-other', 'circle-radius', radius(2.9, 6, sizeBy))
+    m.setPaintProperty('bars-next', 'circle-radius', radius(4, 8.2, sizeBy))
+    // Big dots underneath, so small ones stay visible; faded ones below all.
+    const key = sizeBy === 'none' ? null : scoreKey(sizeBy)
+    const sort: ExpressionSpecification | undefined = key
+      ? ['+', ['*', 1000, ['-', 1, ['get', 'dim']]], ['-', 100, ['get', key]]] : undefined
+    m.setLayoutProperty('bars-other', 'circle-sort-key', sort)
+    m.setLayoutProperty('bars-next', 'circle-sort-key', sort)
+    // The top step gets an ink outline, so it reads apart from the step below.
+    const top: ExpressionSpecification | false = sizeBy !== 'none' && ['>=', ['get', key!], SIZE_STEPS[sizeBy][3].min]
+    m.setPaintProperty('bars-other', 'circle-stroke-color', top ? ['case', top, '#121110', '#ffffff'] : '#ffffff')
+    m.setPaintProperty('bars-other', 'circle-stroke-width', ['case', ['==', ['get', 'dim'], 1], 0, top ? ['case', top, 1.6, 0.8] : 0.8])
+  }
+
+  /** The dot under the mouse grows (feature state) and a ring opens around it. */
+  function hoverBar(id: string | null, at: [number, number] | null) {
+    const m = map.current
+    if (!m || id === hoverId.current) return
+    if (hoverId.current) m.setFeatureState({ source: 'bars', id: hoverId.current }, { hover: false })
+    hoverId.current = id
+    if (anim.current.hover) cancelAnimationFrame(anim.current.hover)
+    const src = m.getSource('hover') as GeoJSONSource
+    if (!id || !at) {
+      src.setData(empty)
+      return
+    }
+    m.setFeatureState({ source: 'bars', id }, { hover: true })
+    src.setData({ type: 'FeatureCollection', features: [{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: at } }] })
+    if (reducedMotion()) {
+      m.setPaintProperty('bars-hover', 'circle-radius', 13)
+      return
+    }
+    const start = performance.now()
+    const step = (now: number) => {
+      const t = Math.min(1, Math.max(0, now - start) / 220)
+      const ease = 1 - Math.pow(1 - t, 3)
+      m.setPaintProperty('bars-hover', 'circle-radius', 6 + 8 * ease)
+      m.setPaintProperty('bars-hover', 'circle-stroke-opacity', 0.7 * ease)
+      if (t < 1) anim.current.hover = requestAnimationFrame(step)
+    }
+    anim.current.hover = requestAnimationFrame(step)
+  }
+
+  /** Ripple from the origin while the reachable bars appear, nearest first (about a second).
+   *  `from`: minutes already shown, so a longer time only reveals the bars it adds. */
+  function wave(from = 0) {
+    const m = map.current
+    if (!m || !ready.current) return
+    if (anim.current.wave) cancelAnimationFrame(anim.current.wave)
+    const nextOnly: ExpressionSpecification = ['==', ['get', 'role'], 'next']
+    if (reducedMotion()) {
+      m.setFilter('bars-next', nextOnly)
+      return
+    }
+    const maxMinutes = Math.max(1, ...latest.current.bars.filter((b) => b.role === 'next').map((b) => b.minutes ?? 0))
+    const start = performance.now()
+    const step = (now: number) => {
+      const t = Math.min(1, Math.max(0, now - start) / 1100)
+      const ease = 1 - Math.pow(1 - t, 2)
+      m.setFilter('bars-next', ['all', nextOnly, ['<=', ['get', 'minutes'], from + ease * (maxMinutes - from)]])
+      m.setPaintProperty('origin-wave', 'circle-radius', 10 + 230 * ease)
+      m.setPaintProperty('origin-wave', 'circle-opacity', 1 - t)
+      m.setPaintProperty('origin-wave', 'circle-stroke-opacity', 1 - t)
+      if (t < 1) anim.current.wave = requestAnimationFrame(step)
+      else m.setFilter('bars-next', nextOnly)
+    }
+    anim.current.wave = requestAnimationFrame(step)
+  }
+
   useEffect(() => {
     if (!container.current) return
     const m = new maplibregl.Map({
@@ -291,9 +402,10 @@ export default function MapView(props: Props) {
       m.addSource('tour', { type: 'geojson', data: empty })
       m.addSource('rec-lines', { type: 'geojson', data: empty })
       m.addSource('preview', { type: 'geojson', data: empty })
-      m.addSource('bars', { type: 'geojson', data: empty })
+      m.addSource('bars', { type: 'geojson', data: empty, promoteId: 'id' })
       m.addSource('ghosts', { type: 'geojson', data: empty })
       m.addSource('origin', { type: 'geojson', data: empty })
+      m.addSource('hover', { type: 'geojson', data: empty })
 
       m.addLayer({
         id: 'districts-fill', type: 'fill', source: 'districts',
@@ -402,6 +514,11 @@ export default function MapView(props: Props) {
         layout: { 'text-field': ['get', 'label'], 'text-font': FONT, 'text-size': 12, 'text-allow-overlap': true },
         paint: { 'text-color': '#827d76' },
       })
+      // A ripple from a new origin, out to the bars in reach (see wave()).
+      m.addLayer({
+        id: 'origin-wave', type: 'circle', source: 'origin',
+        paint: { 'circle-radius': 0, 'circle-color': 'rgba(37,99,235,0.10)', 'circle-stroke-color': 'rgba(37,99,235,0.5)', 'circle-stroke-width': 1.5, 'circle-opacity': 0, 'circle-stroke-opacity': 0 },
+      })
       m.addLayer({
         id: 'origin-halo', type: 'circle', source: 'origin',
         paint: { 'circle-radius': 22, 'circle-color': 'rgba(37,99,235,0.16)', 'circle-stroke-color': 'rgba(37,99,235,0.35)', 'circle-stroke-width': 1 },
@@ -414,8 +531,8 @@ export default function MapView(props: Props) {
       m.addLayer({
         id: 'bars-other', type: 'circle', source: 'bars', filter: ['==', ['get', 'role'], 'other'],
         paint: {
-          // One size for all: the data has no popularity measure worth drawing.
-          'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 2.9, 15, 6],
+          // Size: one for all, or by Beliebtheit / Zufriedenheit (setSize).
+          'circle-radius': radius(2.9, 6, 'none'),
           'circle-color': typeColor,
           'circle-opacity': ['case', ['==', ['get', 'dim'], 1], 0.28, 0.9],
           'circle-stroke-color': '#ffffff',
@@ -425,7 +542,7 @@ export default function MapView(props: Props) {
       m.addLayer({
         id: 'bars-next', type: 'circle', source: 'bars', filter: ['==', ['get', 'role'], 'next'],
         paint: {
-          'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 4, 14, 7.5], 'circle-color': hollow(typeColor),
+          'circle-radius': radius(4, 8.2, 'none'), 'circle-color': hollow(typeColor),
           'circle-stroke-color': ['case', ['==', ['get', 'closed'], 1], typeColor, '#ffffff'],
           'circle-stroke-width': ['case', ['==', ['get', 'closed'], 1], 2.5, 2],
         },
@@ -452,6 +569,11 @@ export default function MapView(props: Props) {
         id: 'bars-highlight', type: 'circle', source: 'bars', filter: ['==', ['get', 'id'], ''],
         paint: { 'circle-radius': 17, 'circle-color': SELECT_HALO, 'circle-stroke-color': '#121110', 'circle-stroke-width': 1.5 },
       })
+      // The hovered bar: a soft ring that opens up (animated in hoverBar()).
+      m.addLayer({
+        id: 'bars-hover', type: 'circle', source: 'hover',
+        paint: { 'circle-radius': 0, 'circle-color': 'rgba(255,255,255,0.35)', 'circle-stroke-color': '#121110', 'circle-stroke-width': 1.5, 'circle-stroke-opacity': 0.7 },
+      })
       m.addLayer({
         id: 'bars-selected-ring', type: 'circle', source: 'bars', filter: ['==', ['get', 'role'], 'selected'],
         paint: { 'circle-radius': 19, 'circle-color': SELECT_HALO, 'circle-stroke-color': 'rgba(18,17,16,0.55)', 'circle-stroke-width': 1 },
@@ -467,7 +589,7 @@ export default function MapView(props: Props) {
         // Ink on the white suggestion and yellow selection discs, white on the ink tour stops.
         paint: { 'text-color': ['case', ['all', ['==', ['get', 'role'], 'stop'], ['!=', ['get', 'closed'], 1]], '#ffffff', '#121110'] },
       })
-      m.addImage('heart', heartImage(), { pixelRatio: 2 })
+      if (!m.hasImage('heart')) m.addImage('heart', heartImage(), { pixelRatio: 2 })
       m.addLayer({
         id: 'bars-mine', type: 'symbol', source: 'bars', filter: ['==', ['get', 'mine'], 1],
         layout: {
@@ -494,13 +616,16 @@ export default function MapView(props: Props) {
           if (id) latest.current.onSelect(String(id))
         })
         m.on('mousemove', layer, (e: MapLayerMouseEvent) => {
-          const id = e.features?.[0]?.properties?.id
+          const f = e.features?.[0]
+          const id = f?.properties?.id
           if (!id) return
           m.getCanvas().style.cursor = 'pointer'
+          hoverBar(String(id), (f.geometry as GeoJSON.Point).coordinates as [number, number])
           latest.current.onHoverBar({ id: String(id), x: e.point.x, y: e.point.y })
         })
         m.on('mouseleave', layer, () => {
           m.getCanvas().style.cursor = ''
+          hoverBar(null, null)
           latest.current.onHoverBar(null)
         })
       }
@@ -521,14 +646,30 @@ export default function MapView(props: Props) {
       if (container.current) container.current.dataset.ready = '1'
       update()
       emphasise()
+      setSize(latest.current.sizeBy)
     })
     return () => {
       if (dwellTimer.current) clearTimeout(dwellTimer.current)
+      if (anim.current.hover) cancelAnimationFrame(anim.current.hover)
+      if (anim.current.wave) cancelAnimationFrame(anim.current.wave)
       ready.current = false
       m.remove()
       map.current = null
     }
   }, [])
+
+  useEffect(() => setSize(props.sizeBy), [props.sizeBy])
+
+  // A new origin, travel mode or time: a ripple goes out and the bars in reach appear in order of
+  // travel time. A longer time keeps what was shown and only adds the rest.
+  const lastReach = useRef<{ key: string; minutes: number } | null>(null)
+  useEffect(() => {
+    const r = props.reach
+    const prev = lastReach.current
+    lastReach.current = r ?? null
+    if (!r) return
+    wave(prev && prev.key === r.key && r.minutes > prev.minutes ? prev.minutes : 0)
+  }, [props.reach?.key, props.reach?.minutes])
 
   useEffect(update, [props.bars, props.districts, props.districtLabels, props.viennaMask, props.visitedDistricts, props.tourLegs,
     props.recLines, props.preview, props.ghosts, props.origin, props.highlightId])
