@@ -16,7 +16,8 @@ import Recommendations from './components/Recommendations'
 import TasteFinder from './components/TasteFinder'
 import TourPanel from './components/TourPanel'
 import TourStats from './components/TourStats'
-import { loadSiteData, loadTransitRange, type SiteData } from './data'
+import { loadAtlas, loadSiteData, loadTransitRange, type SiteData } from './data'
+import type { AtlasData } from './domain/atlas'
 import { districtStats } from './domain/districtStats'
 import { matchesFilter, strongTips, type MapFilter } from './domain/filter'
 import { arc } from './domain/geo'
@@ -325,6 +326,11 @@ export default function App() {
   const mapTl = previewTl ?? tl
 
   const [atlasColor, setAtlasColor] = useState<AtlasColor>('type')
+  // The Atlas data is only fetched once the Atlas is opened.
+  const [atlasData, setAtlasData] = useState<AtlasData | null>(null)
+  useEffect(() => {
+    if (atlas && !atlasData) loadAtlas().then((d) => d && setAtlasData(d))
+  }, [atlas, atlasData])
   const [sizeBy, setSizeByState] = useState<SizeBy>(() => loadJson<SizeBy>('sizeBy', 'none'))
   const setSizeBy = (s: SizeBy) => {
     setSizeByState(s)
@@ -971,7 +977,7 @@ export default function App() {
           )}
           {!phone && !atlas && districtCard}
           {atlas && (
-            <Atlas bars={visibleBars} byIndex={byIndex} selectedId={selectedId} highlightId={highlightId}
+            <Atlas data={atlasData} bars={visibleBars} byIndex={byIndex} selectedId={selectedId} highlightId={highlightId} mine={mineSet}
               color={atlasColor} onColor={setAtlasColor}
               inset={phone ? { right: 0, bottom: sheetHeight } : { right: PANEL_INSET, bottom: 0 }}
               onSelect={(id) => pick(id, false)} onBackground={clearSelection} />

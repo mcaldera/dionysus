@@ -44,3 +44,12 @@ export async function loadSiteData(): Promise<SiteData> {
 export async function loadTransitRange(): Promise<[Uint8Array, Uint8Array]> {
   return Promise.all([bin('transit_p25'), bin('transit_p75')])
 }
+
+/** The Atlas data (layouts, territories, profile facets); loaded when the Atlas opens. */
+export async function loadAtlas(): Promise<import('./domain/atlas').AtlasData | null> {
+  try {
+    return await json('atlas.json')
+  } catch {
+    return null
+  }
+}

@@ -52,9 +52,9 @@ export interface Bar {
   description?: string
   /** Short character keywords from the same profile. */
   keywords?: string[]
-  /** From the bar profile: 2D position for the "Atlas" scatterplot (0-1), a 16-number vector
-   *  (int8 scale) for comparing any two bars, and the matrix indices of the 10 most similar bars. */
-  profile?: { xy: [number, number]; vec: number[]; similar: number[] }
+  /** From the bar profile: a 16-number vector (int8 scale) for comparing any two bars, and the
+   *  matrix indices of the 10 most similar bars. The Atlas layouts are in atlas.json. */
+  profile?: { vec: number[]; similar: number[] }
 }
 
 export interface Participant {

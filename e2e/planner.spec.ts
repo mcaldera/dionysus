@@ -236,3 +236,20 @@ test.describe('Beisl-Finder', () => {
     await expect(page.locator('.panel .card')).toHaveCount(0)
   })
 })
+
+test.describe('Atlas', () => {
+  test('shows territories, switches layouts and focuses a bar', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Atlas' }).click()
+    await expect(page.locator('.atlas-node').first()).toBeVisible({ timeout: 20_000 })
+    await expect(page.locator('.atlas-label').first()).toBeVisible()
+    await page.getByRole('button', { name: 'UMAP' }).click()
+    await expect(page.getByRole('button', { name: 'UMAP' })).toHaveAttribute('aria-pressed', 'true')
+    // A click on a bar: the radar with its rings and the focus card.
+    await page.locator('.atlas-node:not(.hidden) circle').nth(5).click({ force: true })
+    await expect(page.locator('.atlas-focus')).toBeVisible()
+    await expect(page.locator('.atlas-rings')).toBeVisible()
+    // Back to the map with a click into the empty sea.
+    await page.locator('.atlas svg').click({ position: { x: 5, y: 5 } })
+    await expect(page.locator('.atlas-focus')).toHaveCount(0)
+  })
+})

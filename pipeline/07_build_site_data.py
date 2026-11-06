@@ -2,8 +2,8 @@
 
 Inputs: data/interim/bars.json, data/interim/opening_hours.json, data/own/tags.csv,
 data/own/google_place_ids.csv, data/own/google_scores.csv and data/own/bar_profiles.json
-(optional), public/data/travel/manifest.json (written by 06_travel_matrix.py).
-Outputs: public/data/bars.json, public/data/districts.geojson, public/data/vienna_mask.geojson,
+and data/own/atlas.json (optional), public/data/travel/manifest.json (written by 06_travel_matrix.py).
+Outputs: public/data/bars.json, public/data/atlas.json, public/data/districts.geojson, public/data/vienna_mask.geojson,
 public/data/manifest.json.
 
 Tags from OSM (essen, gastgarten, live_musik) and computed ones (lang_offen) are derived
@@ -91,6 +91,26 @@ def load_profiles() -> dict[str, dict]:
     # Description, keywords, tags, similar bars and scatterplot position per bar (pipeline/private/similarity.py).
     path = OWN / "bar_profiles.json"
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
+def write_atlas(published: dict[str, int]) -> None:
+    """data/own/atlas.json (pipeline/private/similarity.py) -> public/data/atlas.json, bars as matrix
+    indices and only those still published."""
+    src = OWN / "atlas.json"
+    out = PUBLIC_DATA / "atlas.json"
+    if not src.exists():
+        out.unlink(missing_ok=True)
+        return
+    a = json.loads(src.read_text(encoding="utf-8"))
+    keep = [i for i, bar_id in enumerate(a["ids"]) if bar_id in published]
+    pick = lambda xs: [xs[i] for i in keep]  # noqa: E731
+    atlas = {
+        "bars": [published[a["ids"][i]] for i in keep],
+        "layouts": {k: pick(v) for k, v in a["layouts"].items()},
+        "levels": [{**lv, "assign": pick(lv["assign"])} for lv in a["levels"]],
+        "facets": {**a["facets"], "values": pick(a["facets"]["values"])},
+    }
+    out.write_text(json.dumps(atlas, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
 
 def website(url: str | None) -> str | None:
@@ -192,7 +212,7 @@ def main() -> None:
             }.items() if v},
             **scores.get(b["id"], {}),
             **({k: prof[k] for k in ("description", "keywords") if prof.get(k)}),
-            **({"profile": {"xy": prof["xy"], "vec": prof["vec"], "similar": prof["similar"]}} if prof else {}),
+            **({"profile": {"vec": prof["vec"], "similar": prof["similar"]}} if prof else {}),
             "weeklyOpen": weekly,
             "official": b["official"],
             # Public tip sources only; the owner's own lists stay private.
@@ -209,6 +229,7 @@ def main() -> None:
     for b in bars:
         if "profile" in b:
             b["profile"]["similar"] = [published[i] for i in b["profile"]["similar"] if i in published]
+    write_atlas(published)
 
     PUBLIC_DATA.mkdir(parents=True, exist_ok=True)
     bars_json = json.dumps(bars, ensure_ascii=False, separators=(",", ":"))
