@@ -14,7 +14,7 @@
       "binding": "DB",
       "database_name": "wiener-durst",
       // From the Cloudflare dashboard: Storage & databases > D1 > wiener-durst.
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "database_id": "9f6ba7a1-04d7-4cd3-8595-bb888a175add",
       "migrations_dir": "migrations"
     }
   ],
