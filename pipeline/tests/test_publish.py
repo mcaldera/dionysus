@@ -1,4 +1,19 @@
-from common import ROOT
+from common import ROOT, SMOKING
+
+
+def test_no_smoking_mentions_published():
+    import json
+
+    import pytest
+
+    data = ROOT / "public" / "data"
+    if not (data / "atlas.json").exists():
+        pytest.skip("run 07_build_site_data.py first")
+    atlas = json.loads((data / "atlas.json").read_text(encoding="utf-8"))
+    bars = json.loads((data / "bars.json").read_text(encoding="utf-8"))
+    texts = [t for lv in atlas["levels"] for c in lv["clusters"] for t in (c["name"], c["desc"])]
+    texts += [t for b in bars for t in [b.get("description") or "", *(b.get("keywords") or [])]]
+    assert [t for t in texts if SMOKING.search(t)] == []
 
 
 def test_no_website_text_in_public():

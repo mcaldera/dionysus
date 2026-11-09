@@ -242,29 +242,39 @@ button.plan-mode:disabled { opacity: 0.55; cursor: progress; }
 .atlas { position: absolute; inset: 0; box-sizing: border-box; z-index: 1; background: #e6ecec; overflow: hidden; touch-action: none; }
 .atlas svg { width: 100%; height: 100%; display: block; cursor: grab; user-select: none; -webkit-user-select: none; }
 .atlas svg:active { cursor: grabbing; }
+/* Phone: drawn past the edges and moved as one picture during a gesture (OVERSCAN in Atlas.tsx). */
+.atlas svg.overscan { position: absolute; left: -50%; top: -50%; width: 200%; height: 200%; transform-origin: 25% 25%; will-change: transform; }
 .atlas-empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); }
 /* Dots move between layouts (and into the radar) by transition. */
 .atlas-node, .atlas-node-mark { transition: transform 0.95s cubic-bezier(0.6, 0, 0.2, 1), opacity 0.4s; }
 .atlas-node.hidden { opacity: 0; pointer-events: none; }
 .atlas-dot { stroke: rgba(18, 17, 16, 0.35); cursor: pointer; transform-box: fill-box; transform-origin: center;
   transition: fill 0.45s, transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.atlas-dot:hover { transform: scale(1.8); stroke: var(--ink); }
+@media (hover: hover) { .atlas-dot:hover { transform: scale(1.8); stroke: var(--ink); } }
 .atlas-node.mine .atlas-dot { stroke: #e5546e; stroke-width: 2.4; }
 .atlas-terrain, .atlas-label { transition: opacity 0.35s; }
 .atlas.morphing .atlas-terrain, .atlas.morphing .atlas-label, .atlas.morphing .atlas-link, .atlas.morphing .atlas-rings { opacity: 0; transition-duration: 0.12s; }
 .atlas-label { font-family: var(--serif); fill: rgba(40, 33, 24, 0.66); text-anchor: middle; dominant-baseline: middle; cursor: pointer;
   paint-order: stroke; stroke: rgba(248, 244, 236, 0.85); stroke-width: 4px; stroke-linejoin: round; }
 .atlas-label:hover { fill: var(--ink); }
+.atlas-name { font-family: var(--sans, inherit); font-weight: 500; fill: var(--ink); dominant-baseline: middle; pointer-events: none;
+  paint-order: stroke; stroke: rgba(248, 244, 236, 0.92); stroke-linejoin: round; }
+.atlas-name.chosen { font-weight: 700; }
 .atlas-label.l1 { text-transform: uppercase; letter-spacing: 0.16em; font-weight: 600; }
 .atlas-label.l2 { text-transform: uppercase; letter-spacing: 0.09em; font-weight: 600; }
 .atlas-label.l3, .atlas-label.l4 { font-style: italic; font-weight: 500; }
 .atlas-rings circle { fill: none; stroke: rgba(18, 17, 16, 0.22); stroke-width: 1; stroke-dasharray: 3 6; }
-.atlas-rings text { font-family: var(--mono); font-size: 12px; fill: var(--ink-2); text-anchor: middle;
-  paint-order: stroke; stroke: rgba(248, 244, 236, 0.92); stroke-width: 5px; stroke-linejoin: round; }
+.atlas-ring-labels { pointer-events: none; transition: opacity 0.35s; }
+.atlas.morphing .atlas-ring-labels { opacity: 0; transition-duration: 0.12s; }
+.atlas-ring-labels text { font-family: var(--serif); font-style: italic; font-weight: 500; fill: var(--ink-2); text-anchor: middle; dominant-baseline: middle;
+  paint-order: stroke; stroke: rgba(248, 244, 236, 0.95); stroke-linejoin: round; }
+/* The further from the chosen bar, the less it matters: the far zones only hint at the big picture. */
+.atlas-node.zone2 .atlas-dot { opacity: 0.65; stroke: none; }
+.atlas-node.zone3 .atlas-dot { opacity: 0.4; stroke: none; }
 .atlas.radar { background: radial-gradient(circle at 50% 50%, #f8f4ec 0%, #eef0ec 55%, #e6ecec 100%); }
 .atlas-link { stroke: var(--ink-2); opacity: 0.45; }
-.atlas-ring { fill: none; stroke: var(--ink); }
-.atlas-rank { font-family: var(--mono); font-weight: 600; fill: var(--ink); paint-order: stroke; stroke: var(--paper); stroke-width: 4px; }
+.atlas-ring { stroke: var(--ink); }
+.atlas-rank { font-family: var(--mono); font-weight: 700; fill: #fff; text-anchor: middle; dominant-baseline: central; }
 .atlas-selected { stroke: var(--ink); }
 .atlas-keywords { margin-top: 0.3rem; font-size: 12px; color: var(--ink-2); max-width: 260px; }
 .atlas-traits { margin-top: 0.3rem; font-size: 12px; color: var(--muted); font-style: italic; }
@@ -731,6 +741,13 @@ button.chip { cursor: pointer; }
   .sheet .card { box-shadow: none; backdrop-filter: none; background: var(--solid); }
   .sheet .district-float { position: static; width: auto; max-height: none; animation: none; }
   .sheet .footer { background: none; border: 0; padding: 0.4rem 0.3rem 0.2rem; }
+  /* The details of an Atlas pick live in the sheet; on the map, the legend clears the zoom buttons. */
+  .sheet .atlas-focus { position: static; width: auto; background: var(--solid); backdrop-filter: none; box-shadow: none; animation: none; }
+  .sheet .atlas-focus h3 { display: none; }
+  .atlas-legend { right: 60px; }
+  .atlas-legend.closed { right: auto; }
+  .atlas-zoom { top: 8px; }
+  .atlas-zoom button { width: 40px; height: 40px; font-size: 20px; }
   .bar-name { font-size: 1.5rem; }
   /* Bigger targets for fingers. */
   .rec { padding: 0.75rem 0.35rem; }

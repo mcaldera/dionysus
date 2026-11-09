@@ -1,12 +1,14 @@
 // "Atlas": every bar as a dot, placed by its profile, drawn like a map. The dots lie on a
 // landmass; territories (nested clusters, named by a local LLM) tint it, with a slider from a
 // few broad regions to many small ones. Layouts (t-SNE, UMAP, PCA) morph into each other, and
-// a click on a bar morphs everything into a radar around it: the most similar bars closest.
+// a click on a bar morphs everything into a radar around it: zones of similarity, with most of
+// the space for the closest bars, and the rest of the city as a faint rim.
 // Data: public/data/atlas.json (pipeline/private/similarity.py).
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { barTraits, LAYOUT_LABEL, OVERLAYS, overlayColor, overlayRanks, radarLayout, STYLE_SCALES, territoryColors,
-  type AtlasData, type AtlasLayout, type AtlasOverlay } from '../domain/atlas'
+import { applyTransform, barTraits, LAYOUT_LABEL, nearestIndex, NO_TRANSFORM, OVERLAYS, overlayColor, overlayRanks, pinchTransform, placeBoxes,
+  radarLayout, STYLE_SCALES, territoryColors, touchAnchor,
+  type AtlasData, type AtlasLayout, type AtlasOverlay, type AtlasView, type Box, type ScreenTransform, type TouchAnchor } from '../domain/atlas'
 import { VENUE_TYPES, type Bar } from '../domain/types'
 import { MINE_COLOR, SELECT_COLOR, TYPE_COLOR, TYPE_SHORT } from '../theme'
 
@@ -22,6 +24,8 @@ interface Props {
   mine: Set<string>
   /** Space taken by the panel, in pixels. */
   inset: { right: number; bottom: number }
+  /** Touch screen layout: pinch to zoom, names on the dots, details in the sheet. */
+  phone: boolean
   onSelect: (id: string) => void
   onBackground: () => void
 }
@@ -33,9 +37,26 @@ const MIN_ZOOM = 0.5
 const MAX_ZOOM = 12
 const PAD = 40
 const MORPH_MS = 950
-/** Rings in the radar: the n most similar bars. */
-const RINGS = [10, 50, 200]
+/** Radar: the dot's size per zone, and how many of the closest bars always show their name. */
+const RADAR_DOT = [7.5, 5.5, 4, 3]
+const NEAR_NAMED = 10
+/** Radar: the zone's name just inside its ring, the outermost one's above the rim. */
+const ringTextY = (r: number, outermost: boolean, scale: number) =>
+  SIZE / 2 - r * (SIZE - 2 * PAD) + (outermost ? -9 : 14) / scale
 const LABEL_SIZE = [22, 17, 13.5, 11]
+/** Phone: while a gesture runs the finished picture is only moved, as redrawing the blurred land
+ * on every frame is too slow there. It is drawn this far (a share of the screen) past each edge,
+ * so that dragging doesn't uncover nothing. Must match .atlas svg.overscan. */
+const OVERSCAN = 0.5
+/** Phone: how far (px) a tap may be from a dot and still hit it, and how far fingers may stray in a tap. */
+const TAP_REACH = 24
+const TAP_SLOP = 8
+/** Phone: from this zoom on, the dots get names (most popular first, where they fit). */
+const NAME_ZOOM = 2
+const MAX_NAMES = 45
+const NAME_PX = 11
+const RING_PX = 11
+const NAME_MAX_CHARS = 24
 
 /** A stable pseudo-random delay per bar, so the dots fade in like a cloud forming (0-500 ms). */
 const entryDelay = (i: number) => (i * 7919) % 500
@@ -60,20 +81,28 @@ function loadOverlay(): AtlasOverlay {
 }
 
 export default function Atlas(p: Props) {
-  const { data, bars, byIndex, selectedId, highlightId, mine, inset, onSelect, onBackground } = p
+  const { data, bars, byIndex, selectedId, highlightId, mine, inset, phone, onSelect, onBackground } = p
   const svg = useRef<SVGSVGElement>(null)
-  const [view, setView] = useState({ x: 0, y: 0, k: 1 })
+  const [view, setView] = useState<AtlasView>({ x: 0, y: 0, k: 1 })
   const [layout, setLayoutState] = useState<AtlasLayout>(loadLayout)
   const [level, setLevel] = useState(2)
   const [hover, setHover] = useState<{ bar: Bar; x: number; y: number } | null>(null)
   const [hoverZone, setHoverZone] = useState<{ c: number; x: number; y: number } | null>(null)
   const [morphing, setMorphing] = useState(false)
-  const drag = useRef<{ x: number; y: number; vx: number; vy: number; moved: boolean } | null>(null)
+  const gesture = useRef<{
+    view: AtlasView
+    points: Map<number, { x: number; y: number }>
+    /** The gesture up to the last change in the number of fingers, and including the current move. */
+    base: ScreenTransform
+    now: ScreenTransform
+    from: TouchAnchor
+    moved: boolean
+  } | null>(null)
   // The drawing fills the whole area (so it can be dragged anywhere), but its home position is the
   // part the side panel or bottom sheet leaves free.
   const [box, setBox] = useState({ w: 1000, h: 1000 })
   useEffect(() => {
-    const el = svg.current
+    const el = svg.current?.parentElement
     if (!el) return
     const ro = new ResizeObserver(([e]) => setBox({ w: e.contentRect.width, h: e.contentRect.height }))
     ro.observe(el)
@@ -82,9 +111,13 @@ export default function Atlas(p: Props) {
   const freeW = Math.max(box.w - inset.right, box.w * 0.4)
   const freeH = Math.max(box.h - inset.bottom, box.h * 0.4)
   const fitScale = Math.max(Math.min(freeW, freeH) / SIZE, 1e-3)
-  const fit = { scale: fitScale, ox: (freeW - SIZE * fitScale) / 2, oy: (freeH - SIZE * fitScale) / 2 }
+  const fit = useMemo(() => ({ scale: fitScale, ox: (freeW - SIZE * fitScale) / 2, oy: (freeH - SIZE * fitScale) / 2 }), [fitScale, freeW, freeH])
   const [legendOpen, setLegendOpenState] = useState(() => {
-    try { return localStorage.getItem('atlasLegend') !== 'closed' } catch { return true }
+    // On a phone it would cover the map, so it starts folded there.
+    try {
+      const v = localStorage.getItem('atlasLegend')
+      return phone ? v === 'open' : v !== 'closed'
+    } catch { return !phone }
   })
   const setLegendOpen = (o: boolean) => {
     setLegendOpenState(o)
@@ -156,22 +189,68 @@ export default function Atlas(p: Props) {
     return out
   }, [lv, radar, pos, level])
 
+  // Phone, zoomed in: names on the dots. The chosen bar and its neighbours always get theirs.
+  const names = useMemo(() => {
+    if ((!phone && !radar) || morphing) return []
+    const s = fit.scale * view.k
+    const screen = (x: number, y: number) => [s * x + fit.scale * view.x + fit.ox, s * y + fit.scale * view.y + fit.oy]
+    const blocked: Box[] = labels.map(({ c, x, y, size }) => {
+      const font = size * Math.sqrt(view.k) * fit.scale
+      const w = lv!.clusters[c].name.length * font * (level <= 2 ? 0.78 : 0.55)
+      const [sx, sy] = screen(x, y)
+      return { x: sx - w / 2, y: sy - font * 0.65, w, h: font * 1.3 }
+    })
+    radar?.rings.forEach((ring, k) => {
+      const [sx, sy] = screen(SIZE / 2, ringTextY(ring.r, k === radar.rings.length - 1, s))
+      const w = ring.label.length * RING_PX * 0.62
+      blocked.push({ x: sx - w / 2, y: sy - 8, w, h: 16 })
+    })
+    // Desktop: not under the focus card in the top left corner.
+    if (radar && !phone) blocked.push({ x: 0, y: 0, w: 340, h: 320 })
+    const isNear = (i: number) => !!radar && radar.rank[i] <= NEAR_NAMED
+    const order = (i: number) => (i === center ? Infinity : isNear(i) ? 1000 - radar!.rank[i] : atlasBars[i]?.popularity ?? -1)
+    const candidates = atlasBars.flatMap((b, i) => {
+      const always = i === center || isNear(i)
+      if (!b || !visible.has(b.id) || (!always && (!phone || view.k < NAME_ZOOM))) return []
+      const [sx, sy] = screen(pos[i][0], pos[i][1])
+      // Past the number of a ranked neighbour, otherwise just past the dot.
+      const gap = similar.includes(i) ? 13 : 8
+      // In the radar the names point away from the middle, which leaves room for more of them.
+      const left = !!radar && i !== center && pos[i][0] < SIZE / 2
+      const label = b.name.length > NAME_MAX_CHARS ? `${b.name.slice(0, NAME_MAX_CHARS - 1)}…` : b.name
+      const w = label.length * NAME_PX * 0.56
+      const x = left ? sx - gap - w : sx + gap
+      if (x < 0 || sy < 0 || x + w > box.w || sy > freeH) return []
+      return [{ i, label, gap, left, x, y: sy - 8, w, h: 16, order: order(i) }]
+    }).sort((a, b) => b.order - a.order)
+    return placeBoxes(candidates, blocked, MAX_NAMES)
+  }, [phone, radar, morphing, fit, view, labels, lv, level, center, similar, atlasBars, visible, pos, box.w, freeH])
+
   // The dots; memoised so hovering doesn't re-render all of them.
   const nodes = useMemo(() => atlasBars.map((b, i) => {
     if (!b) return null
     const [x, y] = pos[i]
     const shown = visible.has(b.id)
-    const cls = ['atlas-node', !shown && 'hidden', mine.has(b.id) && 'mine'].filter(Boolean).join(' ')
+    const zone = radar ? radar.zone[i] : -1
+    const cls = ['atlas-node', !shown && 'hidden', mine.has(b.id) && 'mine', zone >= 0 && `zone${zone}`].filter(Boolean).join(' ')
+    // The closest bars stay a good size on a small screen.
+    const size = zone < 0 ? 5.5 : zone === 0 && i !== center ? Math.max(RADAR_DOT[0], 5 / fit.scale) : RADAR_DOT[zone]
     return (
       <g key={b.id} className={cls} data-i={i} style={{ transform: `translate(${x}px, ${y}px)` }}>
-        <circle r={5.5 / Math.sqrt(view.k)} fill={TYPE_COLOR[b.venueType]} className="atlas-dot" style={{ '--d': `${entryDelay(b.matrixIndex)}ms` } as React.CSSProperties} />
+        <circle r={size / Math.sqrt(view.k)} fill={TYPE_COLOR[b.venueType]} className="atlas-dot" style={{ '--d': `${entryDelay(b.matrixIndex)}ms` } as React.CSSProperties} />
       </g>
     )
-  }), [atlasBars, pos, visible, mine, view.k])
+  }), [atlasBars, pos, visible, mine, view.k, radar, center, fit.scale])
 
-  function toSvg(clientX: number, clientY: number) {
-    const r = svg.current!.getBoundingClientRect()
-    return { x: (clientX - r.left - fit.ox) / fit.scale, y: (clientY - r.top - fit.oy) / fit.scale, scale: fit.scale }
+  /** Pixels within the Atlas area (the svg itself may be larger, or moved by a running gesture). */
+  function toLocal(e: { clientX: number; clientY: number }) {
+    const r = svg.current!.parentElement!.getBoundingClientRect()
+    return { x: e.clientX - r.left, y: e.clientY - r.top }
+  }
+
+  function toSvg(e: { clientX: number; clientY: number }) {
+    const { x, y } = toLocal(e)
+    return { x: (x - fit.ox) / fit.scale, y: (y - fit.oy) / fit.scale }
   }
 
   /** Zoom by `f` around a point in svg coordinates (default: the middle). */
@@ -183,7 +262,7 @@ export default function Atlas(p: Props) {
   }
 
   function onWheel(e: React.WheelEvent) {
-    zoomBy(Math.exp(-e.deltaY * 0.0015), toSvg(e.clientX, e.clientY))
+    zoomBy(Math.exp(-e.deltaY * 0.0015), toSvg(e))
   }
 
   /** Zoom to a territory (click on its name). */
@@ -202,6 +281,64 @@ export default function Atlas(p: Props) {
     return el ? atlasBars[Number(el.getAttribute('data-i'))] ?? null : null
   }
 
+  function onPointerDown(e: React.PointerEvent) {
+    const p = toLocal(e)
+    // A mouse released outside the map never ended its drag.
+    const g = (e.pointerType === 'mouse' ? null : gesture.current)
+      ?? { view, points: new Map(), base: NO_TRANSFORM, now: NO_TRANSFORM, from: touchAnchor([p]), moved: false }
+    g.points.set(e.pointerId, p)
+    g.base = g.now
+    g.from = touchAnchor([...g.points.values()])
+    if (g.points.size > 1) g.moved = true
+    gesture.current = g
+  }
+
+  function onPointerMove(e: React.PointerEvent) {
+    const g = gesture.current
+    if (!g?.points.has(e.pointerId)) return
+    g.points.set(e.pointerId, toLocal(e))
+    const to = touchAnchor([...g.points.values()])
+    if (!g.moved && Math.hypot(to.x - g.from.x, to.y - g.from.y) < (e.pointerType === 'mouse' ? 3 : TAP_SLOP)) return
+    g.moved = true
+    g.now = pinchTransform(g.base, g.from, to, MIN_ZOOM / g.view.k, MAX_ZOOM / g.view.k)
+    if (phone) svg.current!.style.transform = `translate(${g.now.tx}px, ${g.now.ty}px) scale(${g.now.s})`
+    else setView(applyTransform(g.view, g.now, fit))
+  }
+
+  function onPointerEnd(e: React.PointerEvent) {
+    const g = gesture.current
+    if (!g?.points.delete(e.pointerId)) return
+    if (g.points.size > 0) {
+      g.base = g.now
+      g.from = touchAnchor([...g.points.values()])
+      return
+    }
+    gesture.current = null
+    if (g.moved) {
+      setView(applyTransform(g.view, g.now, fit))
+      svg.current!.style.transform = ''
+    } else if (e.type === 'pointerup') {
+      onTap(e)
+    }
+  }
+
+  function onTap(e: React.PointerEvent) {
+    const label = (e.target as Element).closest?.('.atlas-label')
+    if (label) return zoomTo(Number(label.getAttribute('data-c')))
+    let bar = barAt(e.target)
+    if (e.pointerType !== 'mouse') {
+      const q = toSvg(e)
+      const reach = TAP_REACH / (fit.scale * view.k)
+      const i = nearestIndex(pos, (q.x - view.x) / view.k, (q.y - view.y) / view.k, reach, (n) => {
+        const b = atlasBars[n]
+        return !!b && visible.has(b.id)
+      })
+      bar = i >= 0 ? atlasBars[i]! : null
+    }
+    if (bar && visible.has(bar.id)) onSelect(bar.id)
+    else onBackground()
+  }
+
   if (!data) {
     return (
       <div className="atlas" style={{ paddingRight: inset.right, paddingBottom: inset.bottom }}>
@@ -212,33 +349,17 @@ export default function Atlas(p: Props) {
 
   const sel = center >= 0 ? pos[center] : null
   const hi = highlightId ? atlasBars.findIndex((b) => b?.id === highlightId) : -1
-  const facetsRow = center >= 0 ? data.facets.values[center] : null
+  const over = phone ? OVERSCAN : 0
 
   return (
     <div className={`atlas${radar ? ' radar' : ''}${morphing ? ' morphing' : ''}`}
       onMouseLeave={() => setHover(null)}>
-      <svg ref={svg} viewBox={`${-fit.ox / fit.scale} ${-fit.oy / fit.scale} ${box.w / fit.scale} ${box.h / fit.scale}`}
+      <svg ref={svg} className={phone ? 'overscan' : undefined}
+        viewBox={`${(-fit.ox - over * box.w) / fit.scale} ${(-fit.oy - over * box.h) / fit.scale} ${(box.w * (1 + 2 * over)) / fit.scale} ${(box.h * (1 + 2 * over)) / fit.scale}`}
         preserveAspectRatio="xMidYMid meet" role="img"
         aria-label="Atlas: Lokale nach Ähnlichkeit angeordnet"
         onWheel={onWheel}
-        onPointerDown={(e) => { drag.current = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y, moved: false } }}
-        onPointerMove={(e) => {
-          const d = drag.current
-          if (!d) return
-          const { scale } = toSvg(e.clientX, e.clientY)
-          const dx = (e.clientX - d.x) / scale
-          const dy = (e.clientY - d.y) / scale
-          if (Math.abs(dx) + Math.abs(dy) > 3) d.moved = true
-          if (d.moved) setView((v) => ({ ...v, x: d.vx + dx, y: d.vy + dy }))
-        }}
-        onPointerUp={(e) => {
-          const d = drag.current
-          drag.current = null
-          if (!d || d.moved) return
-          const b = barAt(e.target)
-          if (b && visible.has(b.id)) onSelect(b.id)
-          else if (!(e.target as Element).closest?.('.atlas-label')) onBackground()
-        }}>
+        onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerEnd} onPointerCancel={onPointerEnd}>
         <defs>
           {/* Metaballs: blur the dots' discs together, then cut the blur at a threshold. */}
           <filter id="atlas-land" filterUnits="userSpaceOnUse" x={-200} y={-200} width={SIZE + 400} height={SIZE + 400}>
@@ -276,15 +397,7 @@ export default function Atlas(p: Props) {
           )}
           {radar && (
             <g className="atlas-rings">
-              {RINGS.filter((n) => n < atlasBars.length).map((n) => {
-                const r = radar.ringAt(n) * (SIZE - 2 * PAD)
-                return (
-                  <g key={n}>
-                    <circle cx={SIZE / 2} cy={SIZE / 2} r={r} />
-                    <text x={SIZE / 2} y={SIZE / 2 - r - 6}>{n} ähnlichste</text>
-                  </g>
-                )
-              })}
+              {radar.rings.slice(0, -1).map((ring) => <circle key={ring.label} cx={SIZE / 2} cy={SIZE / 2} r={ring.r * (SIZE - 2 * PAD)} />)}
             </g>
           )}
           {sel && similar.map((i) => (
@@ -293,7 +406,7 @@ export default function Atlas(p: Props) {
           ))}
           <g className="atlas-nodes" style={{ '--k': view.k } as React.CSSProperties}
             onPointerOver={(e) => {
-              const b = barAt(e.target)
+              const b = e.pointerType === 'mouse' ? barAt(e.target) : null
               if (b && visible.has(b.id)) setHover({ bar: b, x: e.clientX, y: e.clientY })
             }}
             onPointerOut={(e) => { if (barAt(e.target)) setHover(null) }}>
@@ -301,8 +414,8 @@ export default function Atlas(p: Props) {
           </g>
           {similar.map((i, k) => (
             <g key={`${center}-${i}`} pointerEvents="none" className="atlas-node-mark" style={{ transform: `translate(${pos[i][0]}px, ${pos[i][1]}px)` }}>
-              <circle r={8.5} className="atlas-ring" strokeWidth={2 / view.k} />
-              <text x={12} y={5} className="atlas-rank" fontSize={20 / Math.sqrt(view.k)}>{k + 1}</text>
+              <circle r={9 / (fit.scale * view.k)} fill={TYPE_COLOR[atlasBars[i]!.venueType]} className="atlas-ring" strokeWidth={1.5 / (fit.scale * view.k)} />
+              <text className="atlas-rank" fontSize={11 / (fit.scale * view.k)}>{k + 1}</text>
             </g>
           ))}
           {[center, hi].map((i, k) => (i < 0 ? null : (
@@ -312,13 +425,27 @@ export default function Atlas(p: Props) {
             </g>
           )))}
           {labels.map(({ c, x, y, size }) => (
-            <text key={`${level}-${c}`} x={x} y={y} className={`atlas-label l${level}`} fontSize={size / Math.sqrt(view.k)}
-              onPointerEnter={(e) => setHoverZone({ c, x: e.clientX, y: e.clientY })}
-              onPointerLeave={() => setHoverZone(null)}
-              onClick={() => zoomTo(c)}>
+            <text key={`${level}-${c}`} x={x} y={y} data-c={c} className={`atlas-label l${level}`} fontSize={size / Math.sqrt(view.k)}
+              onPointerEnter={(e) => { if (e.pointerType === 'mouse') setHoverZone({ c, x: e.clientX, y: e.clientY }) }}
+              onPointerLeave={() => setHoverZone(null)}>
               {lv!.clusters[c].name}
             </text>
           ))}
+          {radar && (
+            <g className="atlas-ring-labels">
+              {radar.rings.map((ring, k) => (
+                <text key={ring.label} x={SIZE / 2} y={ringTextY(ring.r, k === radar.rings.length - 1, fit.scale * view.k)}
+                  style={{ fontSize: RING_PX / (fit.scale * view.k), strokeWidth: 4 / (fit.scale * view.k) }}>{ring.label}</text>
+              ))}
+            </g>
+          )}
+          {names.map(({ i, label, gap, left }) => {
+            const s = fit.scale * view.k
+            return (
+              <text key={i} x={pos[i][0] + (left ? -gap : gap) / s} y={pos[i][1]} textAnchor={left ? 'end' : 'start'}
+                className={`atlas-name${i === center ? ' chosen' : ''}`} fontSize={NAME_PX / s} strokeWidth={3 / s}>{label}</text>
+            )
+          })}
         </g>
       </svg>
 
@@ -332,9 +459,7 @@ export default function Atlas(p: Props) {
         </div>
       )}
 
-      {selected && facetsRow && (
-        <FocusCard bar={selected} data={data} index={center} row={facetsRow} />
-      )}
+      {selected && !phone && <AtlasFocus bar={selected} data={data} />}
       {missing && <div className="atlas-toast">Für {missing.name} gibt es noch kein Profil, deshalb fehlt es im Atlas.</div>}
 
       <div className={`map-legend atlas-legend${legendOpen ? '' : ' closed'}`} aria-label="Legende">
@@ -370,7 +495,7 @@ export default function Atlas(p: Props) {
         )}
         <div>{VENUE_TYPES.map((t) => <span key={t}><i className="type-dot" style={{ background: TYPE_COLOR[t] }} /> {TYPE_SHORT[t]}</span>)}</div>
         <div className="muted">
-          {radar ? 'Ringe: die ähnlichsten Lokale zuerst · Klick ins Leere kehrt zurück' : 'Nah beieinander = ähnliches Profil · Klick auf ein Lokal zeigt seine Nachbarn'}
+          {radar ? 'Je näher, desto ähnlicher · Klick ins Leere kehrt zurück' : 'Nah beieinander = ähnliches Profil · Klick auf ein Lokal zeigt seine Nachbarn'}
           {mine.size > 0 && <> · <i className="type-dot" style={{ background: 'none', boxShadow: `0 0 0 2px ${MINE_COLOR}` }} /> Meine Lokale</>}
         </div>
         </>}
@@ -404,8 +529,11 @@ function HoverCard({ bar, x, y, right, zone }: { bar: Bar; x: number; y: number;
 }
 
 /** Where the chosen bar lies: its territory at each level, its style against the average, what stands out. */
-function FocusCard({ bar, data, index, row }: { bar: Bar; data: AtlasData; index: number; row: (number | null)[] }) {
+export function AtlasFocus({ bar, data }: { bar: Bar; data: AtlasData }) {
+  const index = data.bars.indexOf(bar.matrixIndex)
+  if (index < 0) return null
   const f = data.facets
+  const row = f.values[index]
   const path = data.levels.map((lv) => lv.clusters[lv.assign[index]].name)
     .filter((n, i, all) => all.indexOf(n) === i)
   const traits = barTraits(f, row)

@@ -2543,7 +2543,6 @@
 "Live-Musik",
 "Bier",
 "Snacks",
-"Nichtraucherbereich",
 "Stammtisch"
 ],
 "profileTags": [
@@ -3695,8 +3694,7 @@
 "Studenten",
 "Bier",
 "Spät offen",
-"Traditionell",
-"Rauchen erlaubt"
+"Traditionell"
 ],
 "profileTags": [
 "essen",
@@ -4054,7 +4052,6 @@
 "Metal",
 "Konzerte",
 "Live-Musik",
-"Raucherbereich",
 "spät offen",
 "DJ"
 ],
@@ -7257,8 +7254,7 @@
 "Kaffee",
 "Gastgarten",
 "Grätzl",
-"Wiener Charme",
-"nichtraucher"
+"Wiener Charme"
 ],
 "profileTags": [
 "gastgarten",
@@ -8427,12 +8423,11 @@
 "confidence": "hoch"
 },
 "osm:node/382371488": {
-"description": "Die Downstairs Bar bietet eine breite Cocktailauswahl und die Möglichkeit, Billard und Dart zu spielen. Das Lokal ist beliebt, besonders am Wochenende, und verfügt über Bereiche für Raucher und Nichtraucher.",
+"description": "Die Downstairs Bar bietet eine breite Cocktailauswahl und die Möglichkeit, Billard und Dart zu spielen.",
 "keywords": [
 "Cocktails",
 "Billard",
 "Dart",
-"Rauchen erlaubt",
 "spät offen",
 "Bar",
 "Pub"
@@ -10615,8 +10610,7 @@
 "Billiards",
 "Kaffee",
 "Kuchen",
-"traditionell",
-"Rauchen erlaubt"
+"traditionell"
 ],
 "profileTags": [
 "billard",
@@ -10819,7 +10813,6 @@
 "Wiener Küche",
 "Gastgarten",
 "Wein",
-"Nichtraucherbereich",
 "traditionell",
 "modern"
 ],
@@ -12577,8 +12570,7 @@
 "Stammtisch",
 "Gulasch",
 "Live-Musik",
-"Gastgarten",
-"Rauchen erlaubt"
+"Gastgarten"
 ],
 "profileTags": [
 "essen",
@@ -12727,7 +12719,6 @@
 "osm:node/451617621": {
 "description": "Ein traditionelles Wiener Café mit Bar-Charakter, das durch seine lange Öffnungszeit und die Möglichkeit, draußen zu sitzen, besticht. Es bietet eine Mischung aus Kaffeehaus-Atmosphäre und einer ungezwungenen, urigen Stimmung.",
 "keywords": [
-"Rauchen erlaubt",
 "spät offen",
 "Kaffee",
 "Getränke",
@@ -13036,7 +13027,7 @@
 "confidence": "hoch"
 },
 "osm:node/469485014": {
-"description": "Traditionelles Gasthaus mit Wiener und böhmischer Küche. Es bietet saisonale Spezialitäten und eine Auswahl an österreichischen Weinen und Bieren. Das Lokal verfügt über einen Gastgarten und separate Bereiche für Raucher und Nichtraucher.",
+"description": "Traditionelles Gasthaus mit Wiener und böhmischer Küche. Es bietet saisonale Spezialitäten und eine Auswahl an österreichischen Weinen und Bieren.",
 "keywords": [
 "Wiener Küche",
 "böhmische Küche",
@@ -14606,8 +14597,7 @@
 "Beisl",
 "Stammtisch",
 "Wiener Küche",
-"spät offen",
-"Rauchen erlaubt"
+"spät offen"
 ],
 "profileTags": [
 "essen",
@@ -17102,8 +17092,7 @@
 "Tschocherl",
 "Bar",
 "Café",
-"spät offen",
-"Rauchen erlaubt"
+"spät offen"
 ],
 "profileTags": [],
 "similar": [
@@ -17955,7 +17944,6 @@
 "Bar",
 "Wein",
 "Bier",
-"Rauchen erlaubt",
 "gemütlich",
 "zentral"
 ],
@@ -18764,7 +18752,6 @@
 "Bar",
 "Pub",
 "Musik",
-"Rauchen erlaubt",
 "spät offen",
 "abwechslungsreiches Publikum"
 ],
@@ -21059,8 +21046,7 @@
 "70er Jahre",
 "80er Jahre",
 "Stammgäste",
-"Aussenbereich",
-"Zigarren erlaubt"
+"Aussenbereich"
 ],
 "profileTags": [
 "cocktails",
@@ -24609,7 +24595,6 @@
 "Asiatische Küche",
 "Weinauswahl",
 "Schanigarten",
-"Rauchen erlaubt",
 "modern",
 "zentral"
 ],
@@ -25123,7 +25108,6 @@
 "Wiener Beisl",
 "Kellerlokal",
 "Gastgarten",
-"Raucherlokal",
 "gemütlich",
 "traditionell"
 ],
@@ -25443,7 +25427,6 @@
 "Kneipe",
 "Bier",
 "Jukebox",
-"Rauchen erlaubt",
 "Stammtisch",
 "gemütlich"
 ],
@@ -26216,7 +26199,6 @@
 "Bar",
 "Toast",
 "Cocktails",
-"Rauchen erlaubt",
 "Schanigarten",
 "Retro",
 "Afterwork"
@@ -27240,8 +27222,7 @@
 "Fußball",
 "Snacks",
 "Tschocherl",
-"Gemütlich",
-"Rauchen erlaubt"
+"Gemütlich"
 ],
 "profileTags": [
 "billard",
@@ -30564,9 +30545,8 @@
 "confidence": "hoch"
 },
 "osm:node/1756230554": {
-"description": "Die Kaunitz Lounge ist eine Bar, die bis spät in die Nacht geöffnet hat. Sie bietet einen entspannten Rahmen für Getränke und lockere Treffen, ist aber vor allem als Raucherlokal bekannt.",
+"description": "Die Kaunitz Lounge ist eine Bar, die bis spät in die Nacht geöffnet hat.",
 "keywords": [
-"Raucherlokal",
 "Lounge",
 "spät offen",
 "Getränke",
@@ -32116,7 +32096,6 @@
 "keywords": [
 "Wiener Küche",
 "Stammtisch",
-"Rauchen erlaubt",
 "spät offen",
 "Gastgarten",
 "Sturm"
@@ -33341,7 +33320,6 @@
 "Gastgarten",
 "Schnitzel",
 "Mittagsmenü",
-"Rauchen erlaubt",
 "Feierabend"
 ],
 "profileTags": [
@@ -39710,7 +39688,6 @@
 "Café-Bar",
 "Live-DJ",
 "Frühschoppen",
-"Raucherbereich",
 "spät offen"
 ],
 "profileTags": [
@@ -40019,7 +39996,7 @@
 "confidence": "mittel"
 },
 "osm:node/2617117223": {
-"description": "Das Duzi's ist eine Bar mit Shisha-Angebot, die sowohl drinnen als auch mit Außenplätzen besucht werden kann. Es ist abends ein beliebter Treffpunkt, kann aber auch stark frequentiert und rauchig sein.",
+"description": "Das Duzi's ist eine Bar mit Shisha-Angebot, die sowohl drinnen als auch mit Außenplätzen besucht werden kann.",
 "keywords": [
 "Shisha",
 "Cocktails",
@@ -41364,7 +41341,6 @@
 "türkische Küche",
 "Meze",
 "Bar",
-"rauchfrei",
 "entspannt"
 ],
 "profileTags": [
@@ -45641,7 +45617,6 @@
 "Kaffee",
 "Bier",
 "Gesprächsstoff",
-"Raucherlokal",
 "Beiseln"
 ],
 "profileTags": [
@@ -47879,8 +47854,7 @@
 "alternativ",
 "ungezwungen",
 "Whisky",
-"spät offen",
-"Rauchen erlaubt"
+"spät offen"
 ],
 "profileTags": [
 "cocktails"
@@ -50076,7 +50050,6 @@
 "Livemusik",
 "Balkan",
 "Kneipe",
-"verraucht",
 "spät offen"
 ],
 "profileTags": [
@@ -50378,7 +50351,6 @@
 "Kaffee",
 "Kuchen",
 "Burger",
-"Rauchen erlaubt",
 "Wiener Atmosphäre",
 "Frühstück"
 ],
@@ -51715,7 +51687,6 @@
 "Live-Musik",
 "Fußball",
 "britisch",
-"Nichtraucher",
 "gemütlich"
 ],
 "profileTags": [
@@ -52236,7 +52207,6 @@
 "keywords": [
 "Beisl",
 "Murauer Bier",
-"Rauchen erlaubt",
 "Stammtisch",
 "Donaufeld"
 ],
@@ -52432,7 +52402,6 @@
 "keywords": [
 "Café",
 "Tschocherl",
-"Raucherbereich",
 "Frühstück",
 "Kaffee",
 "spät offen"
@@ -56229,9 +56198,8 @@
 "confidence": "mittel"
 },
 "osm:node/5150132301": {
-"description": "Eine Bar mit Raucherclub-Charakter im 18. Bezirk. Bekannt für eine lockere Atmosphäre und lange Öffnungszeiten, zieht das 'Einfach So' ein gemischtes Publikum an.",
+"description": "Bekannt für eine lockere Atmosphäre und lange Öffnungszeiten, zieht das 'Einfach So' ein gemischtes Publikum an.",
 "keywords": [
-"Raucherclub",
 "Stammtisch",
 "spät offen",
 "ungewöhnlich",
@@ -57050,7 +57018,6 @@
 "Pub",
 "Gastgarten",
 "Radler",
-"Nichtraucherbereich",
 "alternativ"
 ],
 "profileTags": [
@@ -57199,7 +57166,6 @@
 "Beisl",
 "Bier",
 "Stammtisch",
-"verraucht",
 "Wienerisch",
 "einfach"
 ],
@@ -60064,7 +60030,6 @@
 "Wiener Küche",
 "Weinverkostung",
 "Backhendl",
-"Rauchen erlaubt",
 "spät offen"
 ],
 "profileTags": [
@@ -61188,7 +61153,6 @@
 "Wiener Schmäh",
 "Live-Musik",
 "Snacks",
-"Rauchen erlaubt",
 "Stammtisch"
 ],
 "profileTags": [
@@ -65123,10 +65087,9 @@
 "confidence": "mittel"
 },
 "osm:node/7903921637": {
-"description": "Das Gösserstüberl ist ein kleines, traditionelles Beisl im 11. Bezirk. Es bietet eine ungezwungene Atmosphäre und ist bekannt für seine günstigen Preise und die Möglichkeit, drinnen zu rauchen.",
+"description": "Das Gösserstüberl ist ein kleines, traditionelles Beisl im 11. Bezirk.",
 "keywords": [
 "Beisl",
-"Rauchen erlaubt",
 "kleine Preise",
 "Stammtisch"
 ],
@@ -67682,8 +67645,7 @@
 "Mittagsmenü",
 "günstig",
 "Stammtisch",
-"bürgerlich",
-"Rauchen erlaubt"
+"bürgerlich"
 ],
 "profileTags": [
 "essen",
@@ -68678,8 +68640,7 @@
 "Spritzer",
 "Italienisch",
 "Gemütlich",
-"Mittagsmenü",
-"Rauchen erlaubt"
+"Mittagsmenü"
 ],
 "profileTags": [
 "cocktails",
@@ -69333,7 +69294,6 @@
 "keywords": [
 "Tschocherl",
 "Gastgarten",
-"Raucherlokal",
 "Stammgäste",
 "gemütlich",
 "Oktoberfest"
@@ -71948,8 +71908,7 @@
 "Kaffee",
 "Getränke",
 "Gemütlich",
-"alternativ",
-"Rauchen erlaubt"
+"alternativ"
 ],
 "profileTags": [
 "absteige"
@@ -72351,7 +72310,6 @@
 "Wiener Küche",
 "Schitzel",
 "Bürgerlich",
-"Rauchen erlaubt",
 "Familienfreundlich",
 "Takeaway"
 ],
@@ -77679,7 +77637,6 @@
 "Yppenplatz",
 "Katzen",
 "Adria-Touch",
-"Rauchen erlaubt",
 "gemütlich"
 ],
 "profileTags": [
@@ -78833,7 +78790,6 @@
 "Kaffee",
 "Toast",
 "Barzahlung",
-"Raucherlokal",
 "Bezirkslokal"
 ],
 "profileTags": [
@@ -80331,7 +80287,6 @@
 "keywords": [
 "Bar",
 "Wein",
-"Rauchen erlaubt",
 "gemütlich",
 "Musik"
 ],
@@ -81297,11 +81252,10 @@
 "confidence": "mittel"
 },
 "osm:node/13342613389": {
-"description": "Das Damani ist eine Mischung aus Café und Bar mit Kunstausstellungen. Es bietet eine entspannte Atmosphäre, in der man Kaffee genießen, Schach spielen oder eine Zigarette rauchen kann.",
+"description": "Das Damani ist eine Mischung aus Café und Bar mit Kunstausstellungen.",
 "keywords": [
 "Kunst",
 "Chai Latte",
-"Rauchen erlaubt",
 "Schach",
 "gemütlich",
 "Abseits"
@@ -85454,13 +85408,12 @@
 "confidence": "mittel"
 },
 "osm:node/14279479223": {
-"description": "Das Bellagio ist eine Bar mit Café-Charakter in Ottakring. Es bietet eine getrennte Raucherzone und einen Schanigarten, wird aber als eher dunkel beschrieben. Getränke werden in großzügigen Portionen serviert.",
+"description": "Das Bellagio ist eine Bar mit Café-Charakter in Ottakring. Getränke werden in großzügigen Portionen serviert.",
 "keywords": [
 "Bar",
 "Schanigarten",
 "Fußball",
 "Aperol Spritz",
-"Raucherbereich",
 "Getrennte Bereiche"
 ],
 "profileTags": [
