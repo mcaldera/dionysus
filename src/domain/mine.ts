@@ -1,5 +1,5 @@
-// "Meine Lokale": each visitor's own list of bars, kept in the browser. A link carries the
-// list to another device or friend (#meine=…); nothing is sent anywhere.
+// Share links for "Meine Lokale": a link carries a copy of the list to another device or friend
+// (#meine=…), with or without a profile.
 
 const PREFIX: [string, string][] = [['osm:node/', 'n'], ['osm:way/', 'w'], ['osm:relation/', 'r']]
 

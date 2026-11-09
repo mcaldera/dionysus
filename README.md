@@ -2,7 +2,7 @@
 
 A website for planning a Vienna **"Seidl" tour**: one small beer in every district (all 23, or a subset you choose), travelling on foot and by public transport. You pick a starting point, the tool suggests bars that are close, well connected and to your group's taste, or builds a complete route you can then adjust.
 
-The interface is in German. It is a static site: no backend, no accounts, no live data.
+The interface is in German. The planner is a static site with no live data; a small optional API adds friends' ratings, comments and lists (see [Friends' features](#friends-features)).
 
 > Not an official offering of the Ottakringer Brauerei. Tags are subjective opinions.
 
@@ -60,6 +60,8 @@ pipeline/   Python (+ one Node step) data pipeline: fetch, import bars, match
             official lists, opening hours, travel-time matrices, build site data
 data/own/   hand-maintained inputs (official lists, tags, extra bars, overrides)
 src/        React + TypeScript app; src/domain holds the scoring and solver logic
+api/        Cloudflare Worker for friends' ratings, comments and lists
+migrations/ D1 database schema
 public/data generated data the site loads (bars, districts, travel matrices)
 reports/    check reports from the pipeline stages
 SPEC.md     detailed design and decisions
@@ -70,12 +72,21 @@ SPEC.md     detailed design and decisions
 ```bash
 npm install
 npm run dev        # development server
+npm run dev:api    # friends' API with a local database (second terminal; invite code: lokaler-testcode)
 npm run build      # production build
 npm test           # unit tests
 npm run test:e2e   # Playwright tests
 ```
 
 Regenerating the data needs the Python environment in `environment.yml` (including a JDK 21+ for r5py) and the scripts in `pipeline/`, run in numeric order. The large raw downloads are not part of the repository.
+
+## Friends' features
+
+Friends join with a shared invite code, a name and a simple password; a random token in the browser is their profile, and a personal link or name and password bring it to another device. They can rate bars (1 to 5 stars), comment, keep public or private lists, filter the map by all of it, and get recommendations from friends' ratings and the bar profiles. The heart ("Meine Lokale") is each person's main list: in the browser without a profile, on the server with one.
+
+Anyone with the site's address can read this, except private lists; writing needs a profile. Only `/api/*` runs the Worker ([api/app.ts](api/app.ts)), with its data in Cloudflare D1. If the API can't be reached, as in branch previews, which don't inherit the database, the site hides these features and works as before.
+
+Production needs a D1 database with `migrations/` applied, its ID in `wrangler.jsonc`, and a secret `INVITE_CODE` of at least 12 characters.
 
 ## Data licences
 

@@ -94,6 +94,8 @@ export interface MapFilter {
   includeUnknownHours: boolean
   /** Only these bars ("Meine Lokale"); absent or null = no filter. Set apart from the filter menu. */
   mine?: Set<string> | null
+  /** Only these bars (what friends rated, commented on or listed); absent or null = no filter. */
+  friends?: Set<string> | null
 }
 
 /** Single mentions count only while "Foren" is chosen as source. */
@@ -104,6 +106,7 @@ export function includeWeak(f: MapFilter): boolean {
 export function matchesFilter(bar: Bar, f: MapFilter): boolean {
   if (!f.venueTypes.has(bar.venueType)) return false
   if (f.mine && !f.mine.has(bar.id)) return false
+  if (f.friends && !f.friends.has(bar.id)) return false
   const weak = includeWeak(f)
   for (const t of f.tags) if (!bar.tags.includes(t)) return false
   if (f.sources.size) {

@@ -1,5 +1,5 @@
-// "Meine Lokale": the visitor's own list, in the header in both modes. Saved in this browser
-// only; a link moves it to another device or shares it.
+// "Meine Lokale": the list behind the heart, in the header in all modes. With a profile it lives
+// on the server and can be shown to friends; without one it stays in this browser.
 
 import { useState } from 'react'
 import { encodeMine } from '../domain/mine'
@@ -12,13 +12,15 @@ interface Props {
   onOnlyMine: (v: boolean) => void
   onPick: (id: string) => void
   onRemove: (id: string) => void
+  /** With a profile: whether friends can see this list. */
+  visibility?: { isPublic: boolean; onChange: (isPublic: boolean) => void }
 }
 
 function shareLink(ids: string[]): string {
   return `${location.origin}${location.pathname}#${encodeMine(ids)}`
 }
 
-export default function MyBars({ bars, onlyMine, onOnlyMine, onPick, onRemove }: Props) {
+export default function MyBars({ bars, onlyMine, onOnlyMine, onPick, onRemove, visibility }: Props) {
   const [copied, setCopied] = useState(false)
 
   async function copy() {
@@ -41,6 +43,12 @@ export default function MyBars({ bars, onlyMine, onOnlyMine, onPick, onRemove }:
         {bars.length > 0 && <span className="badge-count">{bars.length}</span>}
       </summary>
       <div className="popover-body wide">
+        {visibility && (
+          <label className="check">
+            <input type="checkbox" checked={visibility.isPublic} onChange={(e) => visibility.onChange(e.target.checked)} />
+            Für Freunde sichtbar
+          </label>
+        )}
         {bars.length === 0 ? (
           <p className="hint">Noch keine Lokale gemerkt. Im Lokal auf <Icon name="heart" size={12} /> Merken.</p>
         ) : (

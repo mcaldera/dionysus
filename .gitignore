@@ -3,6 +3,8 @@ dist
 *.local
 *.log
 .DS_Store
+.wrangler/
+.dev.vars*
 .vscode/*
 !.vscode/extensions.json
 

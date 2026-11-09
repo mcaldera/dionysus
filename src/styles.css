@@ -699,7 +699,8 @@ button.chip { cursor: pointer; }
   .top-actions { display: contents; }
   .top-actions > * { order: 7; }
   .top-actions > .my-bars { order: 3; margin-left: auto; }
-  .my-bars .label { display: none; }
+  .my-bars .label, .friends-btn .label { display: none; }
+  .top-actions > .friends-btn { order: 3; padding: 0.38rem 0.6rem; }
   .filter-menu { order: 5; }
   .search { order: 6; flex: 1 1 0; min-width: 0; position: static; }
   .search-icon { display: none; }
@@ -794,4 +795,69 @@ button.chip { cursor: pointer; }
 }
 @media (prefers-reduced-motion: reduce) {
   .atlas-dot:hover { transform: none; }
+}
+
+/* ---------- Friends: ratings, comments, lists ---------- */
+.friends-btn { white-space: nowrap; }
+textarea { font: inherit; color: inherit; letter-spacing: inherit; }
+.bar-social { margin-top: 0.9rem; border-top: 1px solid var(--line); padding-top: 0.7rem; display: grid; gap: 0.5rem; }
+.bar-social h3, .friends-body h3 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.social-avg { margin-left: 0.5rem; font-family: var(--mono); letter-spacing: 0; color: var(--ink); text-transform: none; }
+.social-avg .icon, .bar-row-right .icon { color: #d99a00; }
+.rated-by { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0; }
+.star-picker { display: flex; gap: 0.1rem; }
+.star-picker button { display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--faint); cursor: pointer; }
+.star-picker button:hover { background: var(--hover); color: #d99a00; }
+.star-picker button.on { color: #d99a00; }
+.list-toggles { margin: 0; }
+.comments { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; }
+.comments p { margin: 0.1rem 0 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.comment-head { display: flex; align-items: center; gap: 0.4rem; }
+.comment-head .icon-btn { width: 22px; height: 22px; margin-left: auto; }
+.comment-form { display: grid; gap: 0.35rem; justify-items: start; }
+.comment-form textarea, .list-create input, .friends-select select {
+  width: 100%; padding: 0.5rem 0.65rem; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--solid); resize: vertical;
+}
+.comment-form textarea:focus, .list-create input:focus { outline: none; border-color: var(--ink); }
+.form-error { margin: 0.3rem 0 0; color: var(--warn); font-size: 13px; }
+
+.modal.friends-modal { width: min(38rem, 100%); max-height: 88vh; display: flex; flex-direction: column; }
+.friends-tabs { display: flex; gap: 0.2rem; margin-top: 0.7rem; overflow-x: auto; border-bottom: 1px solid var(--line); flex: none; }
+.friends-tabs button { padding: 0.4rem 0.7rem; border: 0; border-bottom: 2px solid transparent; background: none; cursor: pointer; color: var(--muted); white-space: nowrap; }
+.friends-tabs button[aria-selected='true'] { color: var(--ink); border-bottom-color: var(--ink); font-weight: 600; }
+.friends-body { display: grid; gap: 0.9rem; align-content: start; padding-top: 0.8rem; overflow-y: auto; min-height: 16rem; }
+.friends-body section { display: grid; gap: 0.4rem; min-width: 0; }
+.friends-selects { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin-top: 0.4rem; }
+.friends-selects select { width: 100%; min-width: 0; padding: 0.4rem 0.5rem; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--solid); }
+.auth-modes { display: flex; gap: 0.3rem; }
+.auth-modes button { padding: 0.3rem 0.8rem; border: 1px solid var(--line-strong); border-radius: 999px; background: var(--solid); cursor: pointer; }
+.auth-modes button[aria-pressed='true'] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.password-form { display: flex; gap: 0.4rem; align-items: center; }
+.password-form input { flex: 1; min-width: 0; padding: 0.42rem 0.65rem; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--solid); }
+.password-form input:focus { outline: none; border-color: var(--ink); }
+.bar-row > .icon { flex: none; color: var(--muted); }
+.friends-empty { display: grid; gap: 0.6rem; justify-items: start; }
+.friends-select { display: flex; align-items: center; gap: 0.5rem; color: var(--muted); font-size: 13px; }
+.friends-select select { width: auto; }
+.bar-rows { list-style: none; margin: 0; padding: 0; display: grid; min-width: 0; }
+.bar-rows li { display: flex; align-items: center; min-width: 0; }
+.bar-rows .icon-btn { width: 26px; height: 26px; flex: none; }
+.bar-row { display: flex; align-items: center; gap: 0.55rem; flex: 1; min-width: 0; padding: 0.42rem 0.4rem; border: 0; border-radius: 8px; background: none; cursor: pointer; text-align: left; }
+.bar-row:hover { background: var(--hover); }
+.bar-row-text { display: grid; flex: 1; min-width: 0; }
+.bar-row-name, .bar-row-sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-row-name { font-weight: 500; }
+.bar-row-right { display: inline-flex; align-items: center; gap: 0.2rem; flex: none; font-family: var(--mono); font-size: 12px; }
+.list-create { display: grid; gap: 0.45rem; justify-items: start; }
+.list-title { font-family: var(--serif); font-size: 1.35rem !important; font-weight: 500 !important; letter-spacing: -0.01em !important; text-transform: none !important; color: var(--ink) !important; margin-top: 0.4rem !important; }
+.list-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.4rem; }
+.profile p { margin: 0; }
+.profile h3 { margin-top: 0.5rem; }
+.profile .ghost { justify-self: start; }
+
+/* The first header row needs the logo's room once the heart shows its count. */
+@media (max-width: 430px) {
+  .brand { display: none; }
+  .mode-tabs button { padding: 0.3rem 0.55rem; }
+  .my-bars summary { padding: 0.38rem 0.55rem; }
 }

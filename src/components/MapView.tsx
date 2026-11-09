@@ -54,10 +54,12 @@ export interface MapBar {
   mine?: boolean
   /** Finder: minutes from the origin, for the reveal wave. */
   minutes?: number
+  /** Friends' average rating. */
+  friends?: number
 }
 
-/** What the dot size shows: nothing, Beliebtheit or Zufriedenheit. */
-export type SizeBy = 'none' | 'popularity' | 'satisfaction'
+/** What the dot size shows: nothing, Beliebtheit, Zufriedenheit or what friends rated. */
+export type SizeBy = 'none' | 'popularity' | 'satisfaction' | 'friends'
 
 const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
@@ -115,11 +117,12 @@ interface Props {
 export const SIZE_STEPS: Record<Exclude<SizeBy, 'none'>, { min: number; label: string }[]> = {
   popularity: [{ min: 0, label: 'kaum bekannt' }, { min: 40, label: 'bekannt' }, { min: 70, label: 'sehr bekannt' }, { min: 90, label: 'Publikumsmagnet' }],
   satisfaction: [{ min: 0, label: 'gemischt' }, { min: 50, label: 'zufrieden' }, { min: 70, label: 'sehr zufrieden' }, { min: 85, label: 'begeistert' }],
+  friends: [{ min: 0, label: 'unbewertet' }, { min: 3, label: 'ab 3 ★' }, { min: 4, label: 'ab 4 ★' }, { min: 4.5, label: 'ab 4,5 ★' }],
 }
 export const SIZE_FACTORS = [0.55, 1, 1.6, 2.3]
 
 function scoreKey(sizeBy: Exclude<SizeBy, 'none'>) {
-  return sizeBy === 'popularity' ? 'pop' : 'sat'
+  return sizeBy === 'popularity' ? 'pop' : sizeBy === 'satisfaction' ? 'sat' : 'fr'
 }
 
 function sizeFactor(sizeBy: SizeBy): ExpressionSpecification | number {
@@ -155,7 +158,7 @@ function barsGeoJson(bars: MapBar[]): GeoJSON.FeatureCollection {
       properties: {
         id: m.bar.id, role: m.role, type: m.bar.venueType, district: m.bar.district, label: m.label != null ? String(m.label) : '',
         closed: m.closed ? 1 : 0, dim: m.dim ? 1 : 0, mine: m.mine ? 1 : 0,
-        pop: m.bar.popularity ?? -1, sat: m.bar.satisfaction ?? -1, minutes: m.minutes ?? 0,
+        pop: m.bar.popularity ?? -1, sat: m.bar.satisfaction ?? -1, fr: m.friends ?? -1, minutes: m.minutes ?? 0,
       },
     })),
   }

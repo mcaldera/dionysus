@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { activeFilters, barSources, includeWeak, SOURCE_KINDS, SOURCE_LABEL, TIP_KIND_LABEL, TIP_KINDS, tipKinds, type MapFilter, type SourceKind, type TipKind } from '../domain/filter'
 import { clock, DAY, WEEKDAYS } from '../domain/hours'
+import { friendFilterCount, listLabel, NO_FRIEND_FILTER, type FriendFilter, type SocialState } from '../domain/social'
 import { CHARACTER_TAGS, SCORE_TAGS, TAG_LABEL, VENUE_TYPES, type Bar, type Tag, type VenueType } from '../domain/types'
 import { TYPE_COLOR, TYPE_SHORT } from '../theme'
 import Icon, { TypeIcon } from './Icon'
@@ -20,7 +21,11 @@ interface Props {
   onMode: (m: AppMode) => void
   /** Mode-specific controls on the right. */
   actions: React.ReactNode
+  /** Absent while the friends' features can't be reached. */
+  friends?: { state: SocialState; filter: FriendFilter; onFilter: (f: FriendFilter) => void; rated: number; commented: number }
 }
+
+const MIN_RATINGS: [number, string][] = [[0, 'Bewertet'], [3, 'ab 3 ★'], [4, 'ab 4 ★'], [4.5, 'ab 4,5 ★']]
 
 export type AppMode = 'finder' | 'tour' | 'atlas'
 
@@ -43,7 +48,7 @@ function toggled<T>(set: Set<T>, x: T): Set<T> {
   return next
 }
 
-export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, onPick, mode, onMode, showOpenFilter, actions }: Props) {
+export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, onPick, mode, onMode, showOpenFilter, actions, friends }: Props) {
   const [query, setQuery] = useState('')
   const root = useRef<HTMLDivElement>(null)
 
@@ -83,7 +88,7 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
     if (q.length < 2) return []
     return bars.filter((b) => norm(b.name).includes(q)).slice(0, 8)
   }, [bars, query])
-  const active = activeFilters(filter, VENUE_TYPES.length)
+  const active = activeFilters(filter, VENUE_TYPES.length) + (friends ? friendFilterCount(friends.filter) : 0)
   const openAt = filter.openAt ?? planMinuteOfWeek
   const openDay = Math.floor(openAt / DAY) % 7
 
@@ -101,6 +106,43 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
       <details className="popover filter-menu">
         <summary><Icon name="sliders" size={15} /> Filter{active ? <span className="badge-count">{active}</span> : null} <Icon name="chevron-down" size={14} className="caret" /></summary>
         <div className="popover-body filter-body">
+          {friends && (
+            <section>
+              <h4>Freunde</h4>
+              <div className="chips">
+                {MIN_RATINGS.map(([min, label]) => (
+                  <button key={min} type="button" className="chip toggle" aria-pressed={friends.filter.minRating === min}
+                    disabled={!friends.rated && friends.filter.minRating !== min}
+                    onClick={() => friends.onFilter({ ...friends.filter, minRating: friends.filter.minRating === min ? null : min })}>
+                    {label}{min === 0 && <span className="count"> {friends.rated}</span>}
+                  </button>
+                ))}
+                <button type="button" className="chip toggle" aria-pressed={friends.filter.commented}
+                  disabled={!friends.commented && !friends.filter.commented}
+                  onClick={() => friends.onFilter({ ...friends.filter, commented: !friends.filter.commented })}>
+                  Mit Kommentaren <span className="count">{friends.commented}</span>
+                </button>
+                {friends.state.me && (
+                  <button type="button" className="chip toggle" aria-pressed={friends.filter.unratedByMe}
+                    onClick={() => friends.onFilter({ ...friends.filter, unratedByMe: !friends.filter.unratedByMe })}>
+                    Von mir noch nicht bewertet
+                  </button>
+                )}
+              </div>
+              <div className="friends-selects">
+                <select aria-label="Bewertet von" value={friends.filter.ratedBy ?? ''}
+                  onChange={(e) => friends.onFilter({ ...friends.filter, ratedBy: e.target.value || null })}>
+                  <option value="">Bewertet von: alle</option>
+                  {friends.state.members.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+                </select>
+                <select aria-label="Auf Liste" value={friends.filter.listId ?? ''}
+                  onChange={(e) => friends.onFilter({ ...friends.filter, listId: e.target.value || null })}>
+                  <option value="">Liste: alle</option>
+                  {friends.state.lists.map((l) => <option key={l.id} value={l.id}>{listLabel(l, friends.state)}</option>)}
+                </select>
+              </div>
+            </section>
+          )}
           <section>
             <h4>Lokaltypen</h4>
             <div className="chips">
@@ -193,7 +235,10 @@ export default function FilterMenu({ bars, filter, onFilter, planMinuteOfWeek, o
             </label>
           </section>}
           <button type="button" className="ghost small" disabled={!active}
-            onClick={() => onFilter({ venueTypes: new Set(VENUE_TYPES), tags: new Set(), sources: new Set(), tipKinds: new Set(), weakTips: false, openAt: null, includeUnknownHours: true })}>
+            onClick={() => {
+              onFilter({ venueTypes: new Set(VENUE_TYPES), tags: new Set(), sources: new Set(), tipKinds: new Set(), weakTips: false, openAt: null, includeUnknownHours: true })
+              friends?.onFilter(NO_FRIEND_FILTER)
+            }}>
             Filter zurücksetzen
           </button>
         </div>

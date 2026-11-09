@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { OpenStatus, TagChips, TipBadge, TypePill } from './components/BarFacts'
 import BarPanel from './components/BarPanel'
+import BarSocial from './components/BarSocial'
 import DistrictCard from './components/DistrictCard'
 import FilterMenu, { type AppMode } from './components/FilterMenu'
 import Atlas, { AtlasFocus } from './components/Atlas'
 import Icon, { ModeIcon } from './components/Icon'
 import { MapButtons, MapToast, NearbyList } from './components/Finder'
 import Footer from './components/Footer'
+import FriendsDialog, { type FriendsView } from './components/FriendsDialog'
 import MapView, { SIZE_FACTORS, SIZE_STEPS, type HoverInfo, type Leg, type MapBar, type SizeBy } from './components/MapView'
 import MyBars, { MineImport } from './components/MyBars'
 import Panel, { type Snap } from './components/Panel'
@@ -28,6 +30,7 @@ import { slotDelta, slotOptions, type Slot } from './domain/solver'
 import { applyTagRows, type TagRow } from './domain/tagRows'
 import { slotTimeline, timeline, type TimelineStop } from './domain/tour'
 import { decodeMine } from './domain/mine'
+import { formatStars, friendFilterSet, indexByBar, mainListOf, NO_FRIEND_FILTER, statsOf, type FriendFilter } from './domain/social'
 import { nearbyFromBar, nearbyFromPoint, reachFromBar, reachFromPoint, walkEstimate, type NearbyResult } from './domain/nearby'
 import { googleMapsDirections, leg, legLabel, legMinutes } from './domain/travel'
 import { ALL_DISTRICTS, VENUE_TYPES, type Bar, type Participant } from './domain/types'
@@ -36,6 +39,7 @@ import { loadJson, saveJson } from './storage'
 import { TYPE_COLOR, TYPE_SHORT } from './theme'
 import { nowMinuteOfWeek } from './time'
 import { PHONE, useMedia } from './useMedia'
+import { useSocial } from './useSocial'
 import { CancelledError, SolverChannel } from './worker/client'
 import type { SolveRequest, TourResult } from './worker/protocol'
 import './styles.css'
@@ -54,6 +58,9 @@ type Pair = { a: Bar; b: Bar; mode: 'walk' | 'transit'; departure: number }
 const FINDER_TOLERANCE = 2
 /** Desktop: map pixels behind the floating panel (its width plus margins). */
 const PANEL_INSET = 434
+/** Which profile this browser's copy of "Meine Lokale" belongs to. */
+const MINE_OWNER_KEY = 'merkliste-owner'
+const warnMine = (e: unknown) => console.warn('„Meine Lokale“ nicht gespeichert:', e)
 /**
  * Finder: where bars are searched from. A free point (location, marker) or a bar; it stays
  * while you look at other bars, until you clear it.
@@ -102,11 +109,20 @@ export default function App() {
   const [placing, setPlacing] = useState(false)
   const [locating, setLocating] = useState(false)
   const [locateError, setLocateError] = useState<string | null>(null)
-  // "Meine Lokale"; the storage key is the older Merkliste's, so lists saved before carry over.
-  const [mine, setMine] = useState<string[]>(() => loadJson<string[]>('merkliste', []))
+  // "Meine Lokale" without a profile, and the last known list with one (shown until the server
+  // answers). The storage key is the older Merkliste's, so lists saved before carry over.
+  const [localMine, setLocalMine] = useState<string[]>(() => loadJson<string[]>('merkliste', []))
   const [onlyMine, setOnlyMine] = useState(false)
   /** A list opened from a share link, waiting to be taken over or dismissed. */
   const [incoming, setIncoming] = useState<string[] | null>(() => decodeMine(location.hash))
+  const social = useSocial()
+  const socialIndex = useMemo(() => indexByBar(social.state), [social.state])
+  const socialReady = social.status === 'ready' && !!social.state
+  // One list behind the heart: with a profile it's your main list on the server.
+  const mainList = mainListOf(social.state)
+  const mine = mainList?.barIds ?? localMine
+  const [friendFilter, setFriendFilter] = useState<FriendFilter>(NO_FRIEND_FILTER)
+  const [friendsView, setFriendsView] = useState<FriendsView | null>(null)
   const phone = useMedia(PHONE)
   const [snap, setSnap] = useState<Snap>('half')
   /** Phone: the focused district's figures fill the sheet only when asked for. */
@@ -117,12 +133,47 @@ export default function App() {
     const t = setInterval(() => setNow(nowMinuteOfWeek()), 30_000)
     return () => clearInterval(t)
   }, [])
-  useEffect(() => saveJson('merkliste', mine), [mine])
+  useEffect(() => saveJson('merkliste', localMine), [localMine])
+  // Keeps this browser's copy in step with the profile. Hearts set before signing in join the
+  // profile once; signing out takes the profile's hearts off this device.
+  useEffect(() => {
+    if (!social.state) return
+    const owner = loadJson<string | null>(MINE_OWNER_KEY, null)
+    if (!mainList) {
+      if (owner) {
+        saveJson(MINE_OWNER_KEY, null)
+        setLocalMine([])
+      }
+      return
+    }
+    const id = mainList.ownerId
+    if (owner === id) {
+      setLocalMine(mainList.barIds)
+      return
+    }
+    saveJson(MINE_OWNER_KEY, id)
+    const fresh = owner === null ? localMine.filter((b) => !mainList.barIds.includes(b)) : []
+    if (fresh.length) social.addBars(mainList.id, fresh).catch(warnMine)
+    // Runs on what the server says; localMine and social change along with it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [social.state])
   // A list link pasted into a tab that already shows the site only changes the hash.
   useEffect(() => {
     const onHash = () => setIncoming(decodeMine(location.hash))
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
+  }, [])
+  // A link to a friend's list (#liste=…) opens it.
+  useEffect(() => {
+    const open = () => {
+      const m = /(?:^#?|&)liste=([\w-]+)/.exec(location.hash)
+      if (!m) return
+      setFriendsView({ tab: 'lists', listId: m[1] })
+      history.replaceState(null, '', location.pathname + location.search)
+    }
+    open()
+    window.addEventListener('hashchange', open)
+    return () => window.removeEventListener('hashchange', open)
   }, [])
   const [fit, setFit] = useState<{ key: string; extras: Map<string, number>; done: boolean } | null>(null)
 
@@ -225,7 +276,8 @@ export default function App() {
   const atlas = mode === 'atlas'
   const finderMinute = finderTime ?? now
   // The finder shows what is open at its time (now by default); the tour uses the filter as set.
-  const baseFilter = useMemo(() => (onlyMine ? { ...filter, mine: mineSet } : filter), [filter, onlyMine, mineSet])
+  const friendBars = useMemo(() => friendFilterSet(data?.bars ?? [], social.state, socialIndex, friendFilter), [data, social.state, socialIndex, friendFilter])
+  const baseFilter = useMemo(() => ({ ...filter, mine: onlyMine ? mineSet : null, friends: friendBars }), [filter, onlyMine, mineSet, friendBars])
   const shownFilter = useMemo(() => (finder && onlyOpen
     ? { ...baseFilter, openAt: finderMinute, includeUnknownHours: openMode === 'open' } : baseFilter), [finder, onlyOpen, openMode, baseFilter, finderMinute])
   const visibleBars = useMemo(() => data?.bars.filter((b) => matchesFilter(b, shownFilter)) ?? [], [data, shownFilter])
@@ -370,8 +422,9 @@ export default function App() {
         out.push({ bar, role: 'other', dim: blocked, mine: m })
       }
     }
+    for (const m of out) m.friends = socialIndex.get(m.bar.id)?.avg ?? undefined
     return out
-  }, [data, finder, nearby, point, refinedRecs, swap, swapSlot, mapTl, previewTl, slots, selected, stops, shownFilter, included, mineSet])
+  }, [data, finder, nearby, point, refinedRecs, swap, swapSlot, mapTl, previewTl, slots, selected, stops, shownFilter, included, mineSet, socialIndex])
 
   const highlighted = highlightId ? byId.get(highlightId) ?? null : null
   // The bar a highlighted recommendation or swap option is reached from; the finder previews from its origin.
@@ -659,11 +712,19 @@ export default function App() {
   }
 
   function toggleMine(id: string) {
-    setMine((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]))
+    if (mainList) social.setListBar(mainList.id, id, !mineSet.has(id)).catch(warnMine)
+    else setLocalMine((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]))
+  }
+
+  function addMine(ids: string[]) {
+    const fresh = ids.filter((id) => !mineSet.has(id))
+    if (!fresh.length) return
+    if (mainList) social.addBars(mainList.id, fresh).catch(warnMine)
+    else setLocalMine((cur) => [...cur, ...fresh])
   }
 
   function closeIncoming(accept: boolean) {
-    if (accept && incoming) setMine((cur) => [...cur, ...incoming.filter((id) => !cur.includes(id) && byId.has(id))])
+    if (accept && incoming) addMine(incoming.filter((id) => byId.has(id)))
     setIncoming(null)
     history.replaceState(null, '', location.pathname + location.search)
   }
@@ -810,13 +871,13 @@ export default function App() {
   useEffect(() => { escRef.current = back })
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape' || tasteOpen || planOpen) return
+      if (e.key !== 'Escape' || tasteOpen || planOpen || friendsView) return
       escRef.current()
       setFocusDistrict(null)
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [tasteOpen, planOpen])
+  }, [tasteOpen, planOpen, friendsView])
 
   // Phone: the sheet makes room for the map while placing a point, and opens for what you pick.
   useEffect(() => { if (placing) setSnap('peek') }, [placing])
@@ -868,17 +929,34 @@ export default function App() {
   )
   const myBars = (
     <MyBars bars={mineBars} onlyMine={onlyMine} onOnlyMine={setOnlyMine} onPick={(id) => pick(id, true)}
-      onRemove={(id) => setMine((cur) => cur.filter((x) => x !== id))} />
+      onRemove={toggleMine}
+      visibility={mainList ? { isPublic: mainList.isPublic, onChange: (isPublic) => { social.updateList(mainList.id, { isPublic }).catch(warnMine) } } : undefined} />
   )
+  const friendsButton = socialReady && (
+    <button type="button" className="ghost friends-btn" aria-label="Freunde" onClick={() => setFriendsView({ tab: social.state?.me ? 'foryou' : 'profile' })}>
+      <Icon name="users" size={15} /> <span className="label">Freunde</span>
+    </button>
+  )
+  const barSocial = socialReady && selected ? (
+    <BarSocial bar={selected} social={social} stats={statsOf(socialIndex, selected.id)} onJoin={() => setFriendsView({ tab: 'profile' })} />
+  ) : null
+  // Friends' ratings size the dots only while they can be fetched.
+  const sizeShown: SizeBy = sizeBy === 'friends' && !socialReady ? 'none' : sizeBy
+  const hoverStats = hovered ? statsOf(socialIndex, hovered.id) : null
   const planSummary = `${WEEKDAYS[plan.weekday].slice(0, 2)} ${clock(plan.startMinutes)} · ${plan.districts.length} Bezirke`
 
   return (
     <div className="app">
       <header className="topbar">
-        <FilterMenu bars={data.bars} filter={baseFilter} onFilter={setFilter} planMinuteOfWeek={plan.weekday * DAY + plan.startMinutes}
+        <FilterMenu bars={data.bars} filter={filter} onFilter={setFilter} planMinuteOfWeek={plan.weekday * DAY + plan.startMinutes}
           onPick={(id) => pick(id, true)} mode={mode} onMode={setMode} showOpenFilter={!finder && !atlas}
+          friends={socialReady ? {
+            state: social.state!, filter: friendFilter, onFilter: setFriendFilter,
+            rated: new Set(social.state!.ratings.map((r) => r.barId)).size, commented: Object.keys(social.state!.commentCounts).length,
+          } : undefined}
           actions={<>
             {myBars}
+            {friendsButton}
             {atlas ? null : finder ? (<>
               <details className="popover">
                 <summary><Icon name="clock" size={14} /> {finderTime === null ? `Jetzt · ${WEEKDAYS[finderDay].slice(0, 2)} ${clock(now)}` : finderLabel}</summary>
@@ -919,7 +997,7 @@ export default function App() {
             focusDistrict={focusDistrict} onSelect={(id) => pick(id, false)}
             origin={finder ? point : null} routeLabel={routeLabel}
             inset={phone ? { right: 0, bottom: sheetHeight } : { right: PANEL_INSET, bottom: 0 }}
-            sizeBy={sizeBy}
+            sizeBy={sizeShown}
             reach={finder && point ? { key: `${point.lat},${point.lon},${finderTransit}`, minutes: maxMinutes } : null}
             onContextPoint={finder ? (at) => setOrigin({ ...at, label: 'Gewählter Punkt' }) : undefined}
             onBackgroundClick={(d, at) => {
@@ -957,6 +1035,13 @@ export default function App() {
                 </div>
               ) : hoverLeg && (
                 <div className="hover-leg"><ModeIcon mode={hoverLeg.mode} /> {legLabel(hoverLeg)} von {hoverFrom?.name}</div>
+              )}
+              {hoverStats && (hoverStats.avg !== null || hoverStats.comments > 0) && (
+                <div className="hover-leg">
+                  <Icon name="users" size={13} />{hoverStats.avg !== null && ` ${formatStars(hoverStats.avg)} ★ (${hoverStats.ratings.length})`}
+                  {hoverStats.avg !== null && hoverStats.comments > 0 && ' ·'}
+                  {hoverStats.comments > 0 && ` ${hoverStats.comments} ${hoverStats.comments === 1 ? 'Kommentar' : 'Kommentare'}`}
+                </div>
               )}
               <div className="chips"><TagChips bar={hovered} max={4} /> <OpenStatus bar={hovered} at={hoverReach ? finderMinute + hoverReach.minutes : hoverArrival} /></div>
             </div>
@@ -1010,14 +1095,14 @@ export default function App() {
             <div className="size-row">
               <span className="muted">Größe</span>
               <div className="segmented small" role="group" aria-label="Punktgröße">
-                {([['none', 'gleich'], ['popularity', 'Beliebtheit'], ['satisfaction', 'Zufriedenheit']] as const).map(([k, label]) => (
-                  <button key={k} type="button" aria-pressed={sizeBy === k} onClick={() => setSizeBy(k)}>{label}</button>
+                {([['none', 'gleich'], ['popularity', 'Beliebtheit'], ['satisfaction', 'Zufriedenheit'], ...(socialReady ? [['friends', 'Freunde']] : [])] as [SizeBy, string][]).map(([k, label]) => (
+                  <button key={k} type="button" aria-pressed={sizeShown === k} onClick={() => setSizeBy(k)}>{label}</button>
                 ))}
               </div>
             </div>
-            {sizeBy !== 'none' && (
+            {sizeShown !== 'none' && (
               <div className="size-key">
-                {SIZE_STEPS[sizeBy].map((s, i) => (
+                {SIZE_STEPS[sizeShown].map((s, i) => (
                   <span key={s.min}><i style={{ width: 6 * SIZE_FACTORS[i] * 1.6, height: 6 * SIZE_FACTORS[i] * 1.6 }} className={i === 3 ? 'top' : undefined} /> {s.label}</span>
                 ))}
               </div>
@@ -1044,7 +1129,7 @@ export default function App() {
                 onAdd={() => {}} onReplace={() => {}} onPropose={() => {}}
                 mine={mineSet.has(selected.id)} onMine={() => toggleMine(selected.id)} finder={{}}
                 similar={similarOf(selected)} onPickSimilar={(id) => pick(id, false)} onHoverSimilar={setHighlightId}
-                onClose={clearSelection} onTagChange={changeTag} />
+                onClose={clearSelection} onTagChange={changeTag} social={barSocial} />
               {phone && atlasData && <AtlasFocus bar={selected} data={atlasData} />}
             </>)
           ) : finder ? (
@@ -1064,7 +1149,7 @@ export default function App() {
                     } : undefined,
                   }}
                   similar={similarOf(selected)} onPickSimilar={(id) => pick(id, true)} onHoverSimilar={setHighlightId}
-                  onClose={back} onTagChange={changeTag} />
+                  onClose={back} onTagChange={changeTag} social={barSocial} />
               )}
               {point && (
                 <NearbyList title={originBar ? `Von ${originBar.name} aus` : point.label} results={nearby} maxMinutes={maxMinutes}
@@ -1088,7 +1173,7 @@ export default function App() {
               onPropose={() => propose(selected)}
               mine={mineSet.has(selected.id)} onMine={() => toggleMine(selected.id)}
               similar={similarOf(selected)} onPickSimilar={(id) => pick(id, true)} onHoverSimilar={setHighlightId}
-              onClose={clearSelection} onTagChange={changeTag} />
+              onClose={clearSelection} onTagChange={changeTag} social={barSocial} />
           )}
           {!selected && !proposals && slotIds.length > 0 && (
             <TourStats slots={slotViews} routes={slotRoutes} stopMinutes={plan.stopMinutes} />
@@ -1135,6 +1220,13 @@ export default function App() {
           tourEmpty={slotIds.length === 0} busy={!!busy || !!proposals?.running}
           onTaste={() => setTasteOpen(true)} onPropose={() => propose(null)} onTemplate={makeTemplate}
           onClose={() => setPlanOpen(false)} />
+      )}
+      {friendsView && socialReady && (
+        <FriendsDialog social={social} state={social.state!} bars={data.bars} byId={byId} index={socialIndex} mine={mine} initial={friendsView}
+          onClose={() => setFriendsView(null)}
+          onPick={(id) => { setFriendsView(null); pick(id, true) }}
+          onShowList={(listId) => { setFriendFilter({ ...NO_FRIEND_FILTER, listId }); setFriendsView(null) }}
+          onAdopt={addMine} />
       )}
       {tasteOpen && (
         <TasteFinder onClose={() => setTasteOpen(false)}
