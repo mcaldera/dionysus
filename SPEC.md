@@ -22,7 +22,7 @@ Clicking a bar shows its details and highlights recommended next bars on the map
 
 - Live transit data, delays or disruptions
 - ~~Mobile layout~~ *Added by the owner on 2026-11-05: up to 900 px wide, a full-screen map with a bottom sheet (`Panel.tsx`, `PHONE` in `useMedia.ts`).*
-- Accounts, a backend or a database
+- ~~Accounts, a backend or a database~~ *Added by the owner on 2026-11-09 for a group of friends: invite-code profiles, ratings, comments and lists through a Cloudflare Worker and D1 (`api/`). The planner itself stays static and works without it.*
 - Bike, taxi or car routing
 - Paid placement of any kind
 - A general "where next?" bar guide (see section 8.4: keep it possible, don't build it)
@@ -34,7 +34,7 @@ Clicking a bar shows its details and highlights recommended next bars on the map
 | Area | Decision |
 |---|---|
 | Audience | The owner and friends, but the site is open to anyone who finds it, with no password |
-| Website | Desktop first, German interface, React + TypeScript, static, no backend |
+| Website | Desktop first, German interface, React + TypeScript, static, with a small optional API for friends' features |
 | Planning modes | Chosen on the start screen: stop by stop, or a proposed full tour to adjust |
 | Tour scope | One bar per district; all 23 by default, or a chosen subset |
 | Days | One by default; optionally split into N days, each with its own start time and movable stops |
@@ -61,7 +61,7 @@ Clicking a bar shows its details and highlights recommended next bars on the map
 - **Untagged bars:** selectable, neutral on tags, shown as "noch nicht getaggt".
 - **Manual tags:** a local-only edit mode that saves to the tag file. Friends' suggestions go through the owner.
 - **Too many bars:** if the import is far above 1,000, narrow restaurants and cafés first.
-- **Hosting:** free static host, such as Cloudflare Pages or GitHub Pages.
+- **Hosting:** Cloudflare Workers free plan: static assets, plus a Worker and D1 for `/api/*` only.
 - **Plan defaults:** Saturday, start 11:00, walking speed 4.8 km/h.
 
 ---

@@ -39,6 +39,8 @@ interface Props {
   onHoverSimilar?: (id: string | null) => void
   onClose: () => void
   onTagChange?: (bar: Bar, tag: string, value: 0 | 1) => void
+  /** Friends' ratings and comments for this bar. */
+  social?: React.ReactNode
 }
 
 function editionLabel(e: string): string {
@@ -47,7 +49,7 @@ function editionLabel(e: string): string {
 }
 
 export default function BarPanel(props: Props) {
-  const { bar, arrival, blockedBy, inTour, newestEdition, tourEmpty, busy, onAdd, onReplace, onPropose, emptySlot, mine, onMine, finder, similar, onPickSimilar, onHoverSimilar, onClose, onTagChange } = props
+  const { bar, arrival, blockedBy, inTour, newestEdition, tourEmpty, busy, onAdd, onReplace, onPropose, emptySlot, mine, onMine, finder, similar, onPickSimilar, onHoverSimilar, onClose, onTagChange, social } = props
   const open = arrival === null ? null : isOpenAt(bar.weeklyOpen, arrival)
   return (
     <section className="card bar-card" aria-label="Ausgewähltes Lokal">
@@ -118,6 +120,7 @@ export default function BarPanel(props: Props) {
           {bar.website && <a className="ghost" href={bar.website} target="_blank" rel="noreferrer">Website</a>}
           <a className="ghost" href={googleMapsPlace(bar)} target="_blank" rel="noreferrer">In Google Maps ansehen</a>
         </div>
+        {social}
         {similar && similar.length > 0 && onPickSimilar && (
           <div className="similar">
             <h3 title="Nach dem ganzen Profil: Stil, Publikum, Getränke, Merkmale und Beschreibung. Der Atlas zeigt dieselben Unterschiede auf zwei Dimensionen verkürzt, deshalb liegt dort nicht jedes ähnliche Lokal auch nah.">

@@ -1,10 +1,25 @@
-// Cloudflare Workers deployment: a static site, served from the Vite build output.
+// Cloudflare Workers deployment: the static site from the Vite build output, and a small API
+// for friends' ratings, comments and lists. Only /api/* runs the Worker; everything else is
+// served as a static asset and doesn't count against the free plan's Worker requests.
 {
   "name": "wiener-durst",
+  "main": "api/index.ts",
   "compatibility_date": "2026-11-01",
   "assets": {
-    "directory": "./dist"
+    "directory": "./dist",
+    "run_worker_first": ["/api/*"]
   },
-  // Branch builds run `wrangler preview`, which needs this block; it may stay empty.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "wiener-durst",
+      // From the Cloudflare dashboard: Storage & databases > D1 > wiener-durst.
+      "database_id": "9f6ba7a1-04d7-4cd3-8595-bb888a175add",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // Branch builds run `wrangler preview`, which needs this block; it may stay empty. Previews
+  // don't inherit the database above, so they can't touch real data: the API answers 503 there
+  // and the site hides the friends' features.
   "previews": {}
 }
