@@ -81,7 +81,8 @@ export default function Panel({ phone, empty, withFabs, snap, onSnap, onHeight, 
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSnap(NEXT[snap]) } }}>
         <span />
       </div>
-      <div className="sheet-body">{children}</div>
+      {/* A tap on the peek opens it, the whole strip being an easier target than the handle. */}
+      <div className="sheet-body" onClick={(e) => { if (snap === 'peek' && !(e.target as Element).closest('button, a')) onSnap('half') }}>{children}</div>
     </aside>
   )
 }

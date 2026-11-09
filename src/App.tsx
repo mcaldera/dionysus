@@ -3,7 +3,7 @@ import { OpenStatus, TagChips, TipBadge, TypePill } from './components/BarFacts'
 import BarPanel from './components/BarPanel'
 import DistrictCard from './components/DistrictCard'
 import FilterMenu, { type AppMode } from './components/FilterMenu'
-import Atlas from './components/Atlas'
+import Atlas, { AtlasFocus } from './components/Atlas'
 import Icon, { ModeIcon } from './components/Icon'
 import { MapButtons, MapToast, NearbyList } from './components/Finder'
 import Footer from './components/Footer'
@@ -820,7 +820,14 @@ export default function App() {
 
   // Phone: the sheet makes room for the map while placing a point, and opens for what you pick.
   useEffect(() => { if (placing) setSnap('peek') }, [placing])
-  useEffect(() => { setSnap((s) => (s === 'peek' ? 'half' : s)) }, [finder, point, selectedId, proposals])
+  useEffect(() => {
+    // In the Atlas a pick only shows its name at first: the map is what you came for.
+    if (atlas && phone) {
+      if (!selectedId) setSnap('peek')
+      return
+    }
+    setSnap((s) => (s === 'peek' ? 'half' : s))
+  }, [finder, point, selectedId, proposals, atlas, phone])
   useEffect(() => setStatsOpen(false), [focusDistrict])
 
   if (error) return <main className="loading">Daten konnten nicht geladen werden: {error}</main>
@@ -977,7 +984,7 @@ export default function App() {
           {!phone && !atlas && districtCard}
           {atlas && (
             <Atlas data={atlasData} bars={visibleBars} byIndex={byIndex} selectedId={selectedId} highlightId={highlightId} mine={mineSet}
-              inset={phone ? { right: 0, bottom: sheetHeight } : { right: PANEL_INSET, bottom: 0 }}
+              inset={phone ? { right: 0, bottom: sheetHeight } : { right: PANEL_INSET, bottom: 0 }} phone={phone}
               onSelect={(id) => pick(id, false)} onBackground={clearSelection} />
           )}
           {finder && (
@@ -1031,14 +1038,15 @@ export default function App() {
         </div>
         <Panel phone={phone} empty={panelEmpty} withFabs={finder} snap={snap} onSnap={setSnap} onHeight={setSheetHeight}>
           {phone && statsOpen ? districtCard : atlas ? (
-            selected && (
+            selected && (<>
               <BarPanel bar={selected} arrival={null} blockedBy={null} inTour={false}
                 newestEdition={data.manifest.newestOfficialEdition} tourEmpty={false} busy={false} emptySlot={false}
                 onAdd={() => {}} onReplace={() => {}} onPropose={() => {}}
                 mine={mineSet.has(selected.id)} onMine={() => toggleMine(selected.id)} finder={{}}
                 similar={similarOf(selected)} onPickSimilar={(id) => pick(id, false)} onHoverSimilar={setHighlightId}
                 onClose={clearSelection} onTagChange={changeTag} />
-            )
+              {phone && atlasData && <AtlasFocus bar={selected} data={atlasData} />}
+            </>)
           ) : finder ? (
             <>
               {selected && (

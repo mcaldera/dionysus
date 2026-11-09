@@ -42,15 +42,31 @@ export const LAYOUT_LABEL: Record<AtlasLayout, { label: string; hint: string }> 
 export const STYLE_SCALES = ['rau_schick', 'ruhig_laut', 'traditionell_modern', 'gemuetlichkeit', 'preisniveau']
 
 /**
- * Radar layout around one bar: it sits in the middle, every other bar at a radius by its
- * similarity rank (area-even, so rings read as "the n most similar"), in the direction it has
- * in the base layout so neighbourhoods keep their side. Returns positions 0-1.
+ * The zones of the radar, by the similarity of the compact profile vectors (cosine). Over all
+ * bars the median bar has about 13 others above 0.75, 140 above 0.5, 530 above 0.2 and a good
+ * half of the city below 0. The zones sit at the same radii for every bar, so one with few
+ * look-alikes has a nearly empty middle. The close zones get most of the radius.
+ */
+export const RADAR_ZONES = [
+  { min: 0.75, label: 'sehr ähnlich', outer: 0.24 },
+  { min: 0.5, label: 'ähnlich', outer: 0.36 },
+  { min: 0.2, label: 'etwas gemeinsam', outer: 0.43 },
+  { min: -Infinity, label: 'ganz anders', outer: 0.48 },
+]
+const RADAR_INNER = 0.07
+
+/**
+ * Radar layout around one bar: it sits in the middle, every other bar in the zone of its
+ * similarity, closer the higher its rank, and in the direction it has in the base layout so
+ * neighbourhoods keep their side. Returns positions 0-1.
  */
 export function radarLayout(base: [number, number][], bars: (Bar | undefined)[], center: number, top: number[] = []): {
   pos: [number, number][]
-  /** Radius (0-1 units) at which the n most similar end, for ring labels. */
-  ringAt: (n: number) => number
+  /** Per zone: its outer radius (0-1 units), its name and how many bars are in it. */
+  rings: { r: number; label: string; n: number }[]
   rank: number[]
+  /** Index into RADAR_ZONES per bar. */
+  zone: number[]
 } {
   const c = bars[center]
   const sims = bars.map((b, i) => (i === center || !b || !c ? -Infinity : profileCosine(c, b) ?? -1))
@@ -61,29 +77,48 @@ export function radarLayout(base: [number, number][], bars: (Bar | undefined)[],
     .sort((a, b) => (first.get(a[1]) ?? Infinity) - (first.get(b[1]) ?? Infinity) || b[0] - a[0])
   const rank = new Array<number>(bars.length).fill(0)
   order.forEach(([, i], k) => { rank[i] = k + 1 })
-  const n = Math.max(1, order.length)
-  const R = 0.47
-  const ringAt = (k: number) => R * Math.sqrt(Math.min(k, n) / n)
+
+  // Each zone takes the next bars in the ranking, as many as reach its similarity.
+  const others = order.map(([, i]) => i)
+  let done = 0
+  const groups = RADAR_ZONES.map((z) => {
+    const n = Math.max(done, order.filter(([s]) => s >= z.min).length)
+    const group = others.slice(done, n)
+    done = n
+    return group
+  })
+  const zone = new Array<number>(bars.length).fill(0)
+  const radius = new Array<number>(bars.length).fill(0)
+  groups.forEach((group, z) => {
+    const inner = z === 0 ? RADAR_INNER : RADAR_ZONES[z - 1].outer
+    const outer = RADAR_ZONES[z].outer
+    group.forEach((i, j) => {
+      const t = (j + 0.5) / group.length
+      zone[i] = z
+      // The first zone by distance, so that its few bars spread out; the others evenly by area.
+      radius[i] = z === 0 ? inner + (outer - inner) * t : Math.sqrt(inner ** 2 + (outer ** 2 - inner ** 2) * t)
+    })
+  })
+
   const [cx, cy] = base[center]
   // Direction from the chosen bar in the base layout. A bar at the edge of the map would see all
-  // others on one side (a cone, not a radar), so the directions are spread evenly around the
-  // circle, keeping their order, then turned back to the original overall orientation.
+  // others on one side (a cone, not a radar), so within each zone the directions are spread
+  // evenly around the circle, keeping their order, then turned back to the zone's orientation.
   const raw = base.map(([x, y], i) => (x === cx && y === cy ? (i * 2.399) % (2 * Math.PI) - Math.PI : Math.atan2(y - cy, x - cx)))
-  const others = raw.map((a, i) => [a, i] as const).filter(([, i]) => i !== center).sort((a, b) => a[0] - b[0])
-  const even = new Array<number>(base.length).fill(0)
-  let sx = 0, sy = 0
-  others.forEach(([a, i], k) => {
-    even[i] = -Math.PI + (2 * Math.PI * (k + 0.5)) / others.length
-    sx += Math.cos(a - even[i])
-    sy += Math.sin(a - even[i])
-  })
-  const turn = Math.atan2(sy, sx)
-  const pos = base.map((_, i): [number, number] => {
-    if (i === center) return [0.5, 0.5]
-    const r = ringAt(rank[i] - 0.5)
-    return [0.5 + r * Math.cos(even[i] + turn), 0.5 + r * Math.sin(even[i] + turn)]
-  })
-  return { pos, ringAt, rank }
+  const angle = new Array<number>(base.length).fill(0)
+  for (const group of groups) {
+    const sorted = [...group].sort((a, b) => raw[a] - raw[b])
+    const even = sorted.map((_, k) => -Math.PI + (2 * Math.PI * (k + 0.5)) / sorted.length)
+    const sx = sorted.reduce((sum, i, k) => sum + Math.cos(raw[i] - even[k]), 0)
+    const sy = sorted.reduce((sum, i, k) => sum + Math.sin(raw[i] - even[k]), 0)
+    const turn = Math.atan2(sy, sx)
+    sorted.forEach((i, k) => { angle[i] = even[k] + turn })
+  }
+  const pos = base.map((_, i): [number, number] => (i === center
+    ? [0.5, 0.5]
+    : [0.5 + radius[i] * Math.cos(angle[i]), 0.5 + radius[i] * Math.sin(angle[i])]))
+  const rings = RADAR_ZONES.map((z, k) => ({ r: z.outer, label: z.label, n: groups[k].length }))
+  return { pos, rings, rank, zone }
 }
 
 /** What sets one bar apart from the average, as words (non-style facets with a clear excess). */
@@ -167,4 +202,57 @@ export function overlayColor(t: number | null): string {
   if (t == null) return `rgb(${mid.join(',')})`
   const [a, b, u] = t < 0.5 ? [lo, mid, t * 2] : [mid, hi, (t - 0.5) * 2]
   return `rgb(${a.map((x, i) => Math.round(x + (b[i] - x) * u)).join(',')})`
+}
+
+/** What a touch gesture has done so far, in pixels of the Atlas area: scale, then shift. */
+export interface ScreenTransform { s: number; tx: number; ty: number }
+export const NO_TRANSFORM: ScreenTransform = { s: 1, tx: 0, ty: 0 }
+
+/** Where the fingers are: their middle and, for two, the distance between them (0 for one). */
+export interface TouchAnchor { x: number; y: number; d: number }
+
+export function touchAnchor(points: { x: number; y: number }[]): TouchAnchor {
+  const [a, b] = points
+  return b ? { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, d: Math.hypot(a.x - b.x, a.y - b.y) } : { x: a.x, y: a.y, d: 0 }
+}
+
+/** `base` extended by the fingers moving `from` -> `to`: the point under them stays under them. */
+export function pinchTransform(base: ScreenTransform, from: TouchAnchor, to: TouchAnchor, minS: number, maxS: number): ScreenTransform {
+  const f = Math.max(minS / base.s, Math.min(maxS / base.s, from.d > 0 && to.d > 0 ? to.d / from.d : 1))
+  return { s: base.s * f, tx: to.x + f * (base.tx - from.x), ty: to.y + f * (base.ty - from.y) }
+}
+
+export interface AtlasView { x: number; y: number; k: number }
+
+/** The map view that looks like `view` with the finished gesture applied on top. */
+export function applyTransform(view: AtlasView, t: ScreenTransform, fit: { scale: number; ox: number; oy: number }): AtlasView {
+  return {
+    k: view.k * t.s,
+    x: t.s * view.x + ((t.s - 1) * fit.ox + t.tx) / fit.scale,
+    y: t.s * view.y + ((t.s - 1) * fit.oy + t.ty) / fit.scale,
+  }
+}
+
+/** Index of the allowed point nearest to (x, y) within `radius`, or -1: dots are smaller than fingers. */
+export function nearestIndex(pos: [number, number][], x: number, y: number, radius: number, allowed: (i: number) => boolean): number {
+  let best = -1
+  let bestD = radius * radius
+  pos.forEach(([px, py], i) => {
+    const d = (px - x) ** 2 + (py - y) ** 2
+    if (d <= bestD && allowed(i)) { best = i; bestD = d }
+  })
+  return best
+}
+
+export interface Box { x: number; y: number; w: number; h: number }
+
+/** The candidates (best first) that fit without touching each other or anything `blocked`, at most `max`. */
+export function placeBoxes<T extends Box>(candidates: T[], blocked: Box[], max: number): T[] {
+  const hits = (a: Box, b: Box) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h
+  const out: T[] = []
+  for (const c of candidates) {
+    if (out.length === max) break
+    if (!blocked.some((b) => hits(c, b)) && !out.some((b) => hits(c, b))) out.push(c)
+  }
+  return out
 }

@@ -19,6 +19,10 @@ INTERIM = ROOT / "data" / "interim"
 REPORTS = ROOT / "reports"
 PUBLIC_DATA = ROOT / "public" / "data"
 
+# Smoking in Austrian gastronomy is banned since 2019, so what old reviews say about it must not
+# reach the site. Not matched: Shisha, cigars on offer, and Rauchfang, Rauchbier and other food.
+SMOKING = re.compile(r"\b(?:nicht-?|ver)?rauch(?!fang|bier|fleisch|wurst|speck|lachs)\w*|zigarette\w*|zigarren erlaubt|\bqualm\w*|nikotin\w*|\btschick\w*", re.I)
+
 # Vienna plus a margin (SPEC 5.1); some official bars sit just outside the city.
 BBOX = (16.15, 48.09, 16.61, 48.35)  # min_lon, min_lat, max_lon, max_lat
 
