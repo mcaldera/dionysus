@@ -4,9 +4,8 @@
 
 [Try the live app](https://wiener-durst.mcaldera.workers.dev/) · [Design and data notes](SPEC.md)
 
-![The Atlas arranges Vienna venues into clusters by profile similarity](docs/atlas-preview.png)
-
-<sub>The Atlas can switch between t-SNE, UMAP, and PCA layouts.</sub>
+<img width="1500" height="833" alt="image" src="https://github.com/user-attachments/assets/466f8b9e-08eb-4e0e-b410-8d47de9866ac" />
+<sub>Example tour planned using the optimal route calculations</sub>
 
 One Seidl per district; the interesting challenge is making a route across all 23 that works for the group and the opening hours. The interface is in German.
 
