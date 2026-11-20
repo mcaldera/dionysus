@@ -6,7 +6,8 @@
 
 <img width="1500" height="833" alt="image" src="https://github.com/user-attachments/assets/466f8b9e-08eb-4e0e-b410-8d47de9866ac" />
 <sub>Example tour planned using the optimal route calculations</sub>
-
+<br>
+<br>
 One Seidl per district; the interesting challenge is making a route across all 23 that works for the group and the opening hours. The interface is in German.
 
 ## What it does
@@ -32,6 +33,10 @@ An offline pipeline combines venue and street data with public-transport schedul
 ### A map of venue similarity
 
 Venue profiles become compact vectors used for similarity and recommendations. The Atlas lays them out with **t-SNE, UMAP, or PCA**, then lets you explore clusters at different levels and inspect venues near a selected bar. These are different views of profile similarity, not geographic positions.
+
+<img width="1510" height="826" alt="image" src="https://github.com/user-attachments/assets/86b95a7a-97cc-4715-8cd8-fd2d9d60484d" />
+<sub>Each dot is a venue positioned by proximity in type and genre to others</sub>
+
 
 ## Data, limits, and attribution
 
