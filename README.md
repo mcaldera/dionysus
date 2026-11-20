@@ -1,93 +1,78 @@
-# Dionysus – Seidl-Tour-Planer
+# Wiener Durst (Dionysus)
 
-A website for planning a Vienna **"Seidl" tour**: one small beer in every district (all 23, or a subset you choose), travelling on foot and by public transport. You pick a starting point, the tool suggests bars that are close, well connected and to your group's taste, or builds a complete route you can then adjust.
+**A route planner for Vienna's Seidlwandertage, built around open geodata, public-transport schedules, and route optimisation.**
 
-The interface is in German. The planner is a static site with no live data; a small optional API adds friends' ratings, comments and lists (see [Friends' features](#friends-features)).
+[Try the live app](https://wiener-durst.mcaldera.workers.dev/) · [Design and data notes](SPEC.md)
 
-> Not an official offering of the Ottakringer Brauerei. Tags are subjective opinions.
+![The Atlas arranges Vienna venues into clusters by profile similarity](docs/atlas-preview.png)
+
+<sub>The Atlas can switch between t-SNE, UMAP, and PCA layouts.</sub>
+
+One Seidl per district; the interesting challenge is making a route across all 23 that works for the group and the opening hours. The interface is in German.
 
 ## What it does
 
-Three questions it tries to answer better than a normal maps app:
+- Explore Vienna venues by district, type, tags, and opening hours.
+- Get next-stop suggestions that balance journey time, the remaining tour, and the group's preferences.
+- Build a tour with one venue per selected district, adjust individual stops, and split long tours across days.
+- Explore the **Atlas**, where similar venue profiles sit near each other and form interactive, labelled clusters.
+- Optionally share ratings, comments, and lists with a group; the planner itself remains usable without the API.
 
-1. **Where should we start**, and which bar there leads to a good tour?
-2. **From this bar, which next bars** are close, well connected and to our taste?
-3. **What does a complete, feasible tour look like?**
+## Technical highlights
 
-Two ways to plan:
+### Schedule-aware route optimisation
 
-- **Step by step:** click a bar on the map, see its details and the best next bars highlighted, then add it to the tour.
-- **Propose a full tour:** get a whole route straight away and swap individual bars.
+The full-tour planner is a generalized travelling-salesperson problem: choose one venue per district, then find a good order while accounting for journey time, opening hours, and group match. A dynamic programme chooses venues for a fixed district order; a seeded multi-start local search (2-opt and Or-opt moves) improves the order. The solver runs in a Web Worker so the map stays responsive.
 
-Other features: filter by venue type, tags (e.g. *Urig*, *Gastgarten*, *Live-Musik*) and opening time. Enter each participant's likes and dislikes (a dislike ranks a bar lower, it never hides it). Split a tour over several days. Plans are saved in your browser and can be shared as a link.
+This is a fast heuristic, not a claim of a mathematically guaranteed shortest tour. It considers the whole remaining route instead of greedily picking the nearest next stop.
 
-## Where the information comes from
+### From geodata to travel times
 
-Everything is prepared **offline** by a pipeline and shipped to the site as plain data files.
+An offline pipeline combines venue and street data with public-transport schedules and builds travel-time matrices between venues. The planner uses those estimates for recommendations and tour optimisation. Walking is preferred when it is close in time to transit; otherwise the itinerary uses transit.
 
-| What | Source |
-|---|---|
-| **Bars and pubs** (names, locations, opening hours, websites) | [OpenStreetMap](https://www.openstreetmap.org/) (Geofabrik Austria extract). Venues are sorted into types: Bar & Pub, Tschocherl & Café-Bar, Beisl & Wirtshaus, Heuriger, and special venues. Coffee houses, confectioners and non-Austrian restaurants are left out |
-| **"Official" partner bars** | The Ottakringer Seidlwandertage booklets, matched to the OSM bars. Facts only, no copied descriptions |
-| **Districts** | City of Vienna open data boundaries; each bar is assigned to a district by its coordinates |
-| **Travel times** | Computed from timetables: street network from OSM plus public-transport schedules (Wiener Linien, and ÖBB for S-Bahn) using [r5py](https://r5py.readthedocs.io/). Times are the median over a Saturday daytime window, so waiting is included. Walking and transit matrices for every pair of bars |
-| **Walk or transit?** | A leg is walked if that's at most ~5 minutes slower than transit; otherwise transit is used and the usual range is shown |
-| **Tags** | Computed where possible (e.g. *Lang offen* from opening hours), otherwise derived from OSM tags and the bars' own websites, plus hand-made tips. Untagged bars stay selectable and are marked as such |
-| **Drawn routes** (display only) | Walking: [FOSSGIS OSRM](https://routing.openstreetmap.de/); transit lines: [Transitous](https://transitous.org/) |
-| **Map** | [MapLibre](https://maplibre.org/) with [OpenFreeMap](https://openfreemap.org/) tiles |
+### A map of venue similarity
 
-Google's APIs are deliberately not used; each leg and bar just links out to Google Maps.
+Venue profiles become compact vectors used for similarity and recommendations. The Atlas lays them out with **t-SNE, UMAP, or PCA**, then lets you explore clusters at different levels and inspect venues near a selected bar. These are different views of profile similarity, not geographic positions.
 
-## How the recommendations work
+## Data, limits, and attribution
 
-When you click a bar, every other candidate gets a score from four parts:
+- Venue and street data: [OpenStreetMap](https://www.openstreetmap.org/) (ODbL).
+- District boundaries: City of Vienna open data.
+- Official partner venues: published Seidlwandertage lists; facts only, not copied descriptions.
+- Travel times: precomputed from street-network data and Wiener Linien / ÖBB schedules. They use a Saturday daytime window and include expected waiting time.
+- Displayed walking and transit paths: [FOSSGIS OSRM](https://routing.openstreetmap.de/) and [Transitous](https://transitous.org/). These draw a route for display; the planner's estimated journey times come from its matrices.
+- Map tiles: [OpenFreeMap](https://openfreemap.org/) / OpenMapTiles.
 
-- **Closeness:** travel time from the selected bar
-- **Tour fit:** how much the detour costs the remaining tour
-- **Match:** how well its tags fit the group's likes and dislikes
-- **Similarity:** similar or deliberately different to the current bar
+Source terms differ. The repository excludes large raw downloads and fetched website text; it contains processed site data and curated build inputs. See [SPEC.md](SPEC.md) for source notes and attribution, and check the relevant terms before reusing generated data. Google Maps, where linked, is an external venue link rather than the routing engine.
 
-A slider trades speed against taste. The top five appear numbered on the map, each with a short reason such as "6 Min. zu Fuß · Urig".
+This is an independent project, not an official offering of Ottakringer or any listed venue. Tags and recommendations are subjective.
 
-## How a full tour is built
+## Built with
 
-Choosing one bar per district in a good order is a travelling-salesman-style problem. The solver picks a shortlist of bars per district, searches for a good district order (local search), and chooses the best bar per district for that order, taking opening hours into account. Bars that are closed on arrival are penalised rather than forbidden, so a tour always exists, with a warning where needed. It runs in a Web Worker in your browser.
+- **Frontend:** React, TypeScript, Vite, MapLibre
+- **Data pipeline:** Python and Node.js; geospatial and timetable processing
+- **Route solver:** TypeScript in a Web Worker
+- **Optional group features:** Cloudflare Worker and D1
 
 ## Repository layout
 
 ```text
-pipeline/   Python (+ one Node step) data pipeline: fetch, import bars, match
-            official lists, opening hours, travel-time matrices, build site data
-data/own/   hand-maintained inputs (official lists, tags, extra bars, overrides)
-src/        React + TypeScript app; src/domain holds the scoring and solver logic
-api/        Cloudflare Worker for friends' ratings, comments and lists
-migrations/ D1 database schema
-public/data generated data the site loads (bars, districts, travel matrices)
-reports/    check reports from the pipeline stages
-SPEC.md     detailed design and decisions
+pipeline/   data ingestion, travel-time matrices, and site-data generation
+src/        React app, recommendations, Atlas, and route solver
+api/        optional Cloudflare Worker for group features
+public/data generated venue, map, and travel-time data
+data/own/   curated inputs used by the build
+SPEC.md     design decisions, pipeline details, and source notes
 ```
 
-## Running it
+## Run locally
 
 ```bash
 npm install
-npm run dev        # development server
-npm run dev:api    # friends' API with a local database (second terminal; invite code: lokaler-testcode)
-npm run build      # production build
-npm test           # unit tests
-npm run test:e2e   # Playwright tests
+npm run dev
+npm run build
+npm test
+npm run test:e2e
 ```
 
-Regenerating the data needs the Python environment in `environment.yml` (including a JDK 21+ for r5py) and the scripts in `pipeline/`, run in numeric order. The large raw downloads are not part of the repository.
-
-## Friends' features
-
-Friends join with a shared invite code, a name and a simple password; a random token in the browser is their profile, and a personal link or name and password bring it to another device. They can rate bars (1 to 5 stars), comment, keep public or private lists, filter the map by all of it, and get recommendations from friends' ratings and the bar profiles. The heart ("Meine Lokale") is each person's main list: in the browser without a profile, on the server with one.
-
-Anyone with the site's address can read this, except private lists; writing needs a profile. Only `/api/*` runs the Worker ([api/app.ts](api/app.ts)), with its data in Cloudflare D1. If the API can't be reached, as in branch previews, which don't inherit the database, the site hides these features and works as before.
-
-Production needs a D1 database with `migrations/` applied, its ID in `wrangler.jsonc`, and a secret `INVITE_CODE` of at least 12 characters.
-
-## Data licences
-
-Bar data is derived from OpenStreetMap (© OpenStreetMap contributors, ODbL). Timetables: Wiener Linien (CC BY), ÖBB. Map tiles: OpenFreeMap / OpenMapTiles. See `SPEC.md` for details.
+Regenerating the datasets requires the Python environment in `environment.yml` and a JDK 21+ for r5py. Pipeline steps are documented in `SPEC.md`.
